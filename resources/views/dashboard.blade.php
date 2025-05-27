@@ -1,4 +1,4 @@
-<x-admin-layout :current_user="$current_user" :profile_url="$profile_url">
+<x-admin-layout>
     <div class="my-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
