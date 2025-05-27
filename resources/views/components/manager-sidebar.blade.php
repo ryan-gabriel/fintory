@@ -42,13 +42,17 @@
                 <ul id="penjualan-dropdown" class="hidden py-2 space-y-2 transition-all duration-1000">
                     <li>
                         <a href="#"
-                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
-                            <i class="fa-solid fa-money-bill-transfer mr-2 text-lg text-gray-700 dark:text-gray-200"></i>Transaksi Penjualan</a>
+                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 menu-link">
+                            <i
+                                class="fa-solid fa-money-bill-transfer mr-2 text-lg text-gray-700 dark:text-gray-200"></i>Transaksi
+                            Penjualan</a>
                     </li>
                     <li>
                         <a href="#"
-                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
-                            <i class="fa-solid fa-clock-rotate-left mr-2 text-lg text-gray-700 dark:text-gray-200"></i>Riwayat Penjualan</a>
+                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 menu-link">
+                            <i
+                                class="fa-solid fa-clock-rotate-left mr-2 text-lg text-gray-700 dark:text-gray-200"></i>Riwayat
+                            Penjualan</a>
                     </li>
                 </ul>
             </li>
@@ -68,18 +72,21 @@
                 <ul id="produk-stok-dropdown" class="hidden py-2 space-y-2">
                     <li>
                         <a href="#"
-                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
-                            <i class="fa-solid fa-clipboard-list mr-2 text-lg text-gray-700 dark:text-gray-200"></i> Daftar Produk</a>
+                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 menu-link">
+                            <i class="fa-solid fa-clipboard-list mr-2 text-lg text-gray-700 dark:text-gray-200"></i>
+                            Daftar Produk</a>
                     </li>
                     <li>
                         <a href="#"
-                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
-                            <i class="fa-solid fa-list-check mr-2 text-lg text-gray-700 dark:text-gray-200"></i> Manajemen Barang</a>
+                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 menu-link">
+                            <i class="fa-solid fa-list-check mr-2 text-lg text-gray-700 dark:text-gray-200"></i>
+                            Manajemen Barang</a>
                     </li>
                     <li>
                         <a href="#"
-                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
-                            <i class="fa-solid fa-truck-moving mr-2 text-lg text-gray-700 dark:text-gray-200"></i> Mutasi Stok</a>
+                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 menu-link">
+                            <i class="fa-solid fa-truck-moving mr-2 text-lg text-gray-700 dark:text-gray-200"></i>
+                            Mutasi Stok</a>
                     </li>
                 </ul>
             </li>
@@ -98,18 +105,21 @@
                 <ul id="keuangan-dropdown" class="hidden py-2 space-y-2">
                     <li>
                         <a href="/dashboard/keuangan/kas-ledger"
-                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
-                            <i class="fa-solid fa-money-bills mr-2 text-lg text-gray-700 dark:text-gray-200"></i>Kas & Ledger</a>
+                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 menu-link">
+                            <i class="fa-solid fa-money-bills mr-2 text-lg text-gray-700 dark:text-gray-200"></i>Kas &
+                            Ledger</a>
                     </li>
                     <li>
                         <a href="#"
-                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
-                            <i class="fa-solid fa-sack-xmark mr-2 text-lg text-gray-700 dark:text-gray-200"></i> Hutang</a>
+                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 menu-link">
+                            <i class="fa-solid fa-sack-xmark mr-2 text-lg text-gray-700 dark:text-gray-200"></i>
+                            Hutang</a>
                     </li>
                     <li>
                         <a href="#"
-                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
-                            <i class="fa-solid fa-sack-dollar mr-2 text-lg text-gray-700 dark:text-gray-200"></i> Cicilan</a>
+                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 menu-link">
+                            <i class="fa-solid fa-sack-dollar mr-2 text-lg text-gray-700 dark:text-gray-200"></i>
+                            Cicilan</a>
                     </li>
                 </ul>
             </li>
@@ -129,17 +139,21 @@
                 <ul id="outlet-karyawan-dropdown" class="hidden py-2 space-y-2">
                     <li>
                         <a href="#"
-                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
-                            <i class="fa-solid fa-store mr-2 text-lg text-gray-700 dark:text-gray-200"></i> Daftar Outlet</a>
+                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 menu-link">
+                            <i class="fa-solid fa-store mr-2 text-lg text-gray-700 dark:text-gray-200"></i> Daftar
+                            Outlet</a>
                     </li>
                     <li>
                         <a href="#"
-                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
-                            <i class="fa-solid fa-scale-balanced mr-2 text-lg text-gray-700 dark:text-gray-200"></i> Saldo Outlet</a>
+                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 menu-link">
+                            <i class="fa-solid fa-scale-balanced mr-2 text-lg text-gray-700 dark:text-gray-200"></i>
+                            Saldo Outlet</a>
                     </li>
                     <li>
                         <a href="#"
-                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"> <i class="fa-solid fa-users-line mr-2 text-lg text-gray-700 dark:text-gray-200"></i> Karyawan</a>
+                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 menu-link">
+                            <i class="fa-solid fa-users-line mr-2 text-lg text-gray-700 dark:text-gray-200"></i>
+                            Karyawan</a>
                     </li>
                 </ul>
             </li>
@@ -158,17 +172,23 @@
                 <ul id="laporan-dropdown" class="hidden py-2 space-y-2">
                     <li>
                         <a href="#"
-                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"> <i class="fa-solid fa-square-poll-vertical mr-2 text-lg text-gray-700 dark:text-gray-200"></i> Laporan Penjualan</a>
+                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 menu-link">
+                            <i
+                                class="fa-solid fa-square-poll-vertical mr-2 text-lg text-gray-700 dark:text-gray-200"></i>
+                            Laporan Penjualan</a>
                     </li>
                     <li>
                         <a href="#"
-                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
-                            <i class="fa-solid fa-cubes-stacked mr-2 text-lg text-gray-700 dark:text-gray-200"></i> Laporan Stok</a>
+                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 menu-link">
+                            <i class="fa-solid fa-cubes-stacked mr-2 text-lg text-gray-700 dark:text-gray-200"></i>
+                            Laporan Stok</a>
                     </li>
                     <li>
                         <a href="#"
-                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
-                            <i class="fa-solid fa-magnifying-glass-dollar mr-2 text-lg text-gray-700 dark:text-gray-200"></i> Laporan Keuangan</a>
+                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 menu-link">
+                            <i
+                                class="fa-solid fa-magnifying-glass-dollar mr-2 text-lg text-gray-700 dark:text-gray-200"></i>
+                            Laporan Keuangan</a>
                     </li>
                 </ul>
             </li>
@@ -187,12 +207,16 @@
                 <ul id="pengaturan-dropdown" class="hidden py-2 space-y-2">
                     <li>
                         <a href="#"
-                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"> <i class="fa-solid fa-users-gear mr-2 text-lg text-gray-700 dark:text-gray-200"></i>Manajemen User & Role</a>
+                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 menu-link">
+                            <i
+                                class="fa-solid fa-users-gear mr-2 text-lg text-gray-700 dark:text-gray-200"></i>Manajemen
+                            User & Role</a>
                     </li>
                     <li>
                         <a href="#"
-                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700">
-                            <i class="fa-solid fa-table mr-2 text-lg text-gray-700 dark:text-gray-200"></i> Kategori Produk</a>
+                            class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 menu-link">
+                            <i class="fa-solid fa-table mr-2 text-lg text-gray-700 dark:text-gray-200"></i> Kategori
+                            Produk</a>
                     </li>
                 </ul>
             </li>
