@@ -100,7 +100,7 @@
 
             <div class="md:ml-[17rem] py-24">
                 <p id="loader">loading...</p>
-                <main id="main-content" class="hidden"> 
+                <main id="main-content" class="hidden">
                     {!! $slot !!}
                 </main>
             </div>
@@ -108,7 +108,6 @@
         <script src="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3"></script>
         <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
         <script>
-            
             const PageInits = {
                 'kas-ledger': function() {
                     if (document.getElementById("pagination-table") && typeof simpleDatatables !== 'undefined') {
@@ -119,13 +118,39 @@
                             sortable: true
                         });
                     }
-                },
+                }
             };
 
             function runPageInit(url) {
                 if (url.includes('kas-ledger')) {
                     PageInits['kas-ledger']();
                 }
+            }
+
+            // Helper function to check if URL is just a hash change
+            function isHashOnlyChange(newUrl, currentUrl) {
+                const newUrlObj = new URL(newUrl);
+                const currentUrlObj = new URL(currentUrl || window.location.href);
+
+                // Remove hash from both URLs and compare
+                newUrlObj.hash = '';
+                currentUrlObj.hash = '';
+
+                return newUrlObj.href === currentUrlObj.href;
+            }
+
+            // Helper function to handle hash navigation
+            function handleHashNavigation(url) {
+                const hash = new URL(url).hash;
+                if (hash) {
+                    const targetElement = document.querySelector(hash);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+                history.pushState({}, '', url);
             }
 
             document.body.addEventListener('click', function(e) {
@@ -135,6 +160,13 @@
                 e.preventDefault();
                 const url = link.href;
 
+                // Check if this is just a hash change on the same page
+                if (isHashOnlyChange(url, window.location.href)) {
+                    handleHashNavigation(url);
+                    return;
+                }
+
+                // Proceed with normal fetch for different pages
                 fetch(url, {
                         headers: {
                             'X-Requested-With': 'XMLHttpRequest'
@@ -146,6 +178,19 @@
                         container.innerHTML = html;
 
                         runPageInit(url);
+
+                        // Handle hash after content is loaded
+                        const hash = new URL(url).hash;
+                        if (hash) {
+                            setTimeout(() => {
+                                const targetElement = document.querySelector(hash);
+                                if (targetElement) {
+                                    targetElement.scrollIntoView({
+                                        behavior: 'smooth'
+                                    });
+                                }
+                            }, 100); // Small delay to ensure content is rendered
+                        }
 
                         history.pushState({}, '', url);
                     })
@@ -156,6 +201,23 @@
 
             window.addEventListener('popstate', function() {
                 const url = location.href;
+                const previousUrl = document.referrer || '';
+
+                // Check if this is just a hash change
+                if (isHashOnlyChange(url, previousUrl)) {
+                    const hash = new URL(url).hash;
+                    if (hash) {
+                        const targetElement = document.querySelector(hash);
+                        if (targetElement) {
+                            targetElement.scrollIntoView({
+                                behavior: 'smooth'
+                            });
+                        }
+                    }
+                    return;
+                }
+
+                // Proceed with fetch for different pages
                 fetch(url, {
                         headers: {
                             'X-Requested-With': 'XMLHttpRequest'
@@ -167,6 +229,19 @@
                         container.innerHTML = html;
 
                         runPageInit(url);
+
+                        // Handle hash after content is loaded
+                        const hash = new URL(url).hash;
+                        if (hash) {
+                            setTimeout(() => {
+                                const targetElement = document.querySelector(hash);
+                                if (targetElement) {
+                                    targetElement.scrollIntoView({
+                                        behavior: 'smooth'
+                                    });
+                                }
+                            }, 100);
+                        }
                     })
                     .catch(err => {
                         console.error('Popstate fetch error:', err);
@@ -175,12 +250,26 @@
 
             document.addEventListener('DOMContentLoaded', function() {
                 runPageInit(location.href);
+
+                // Handle initial hash if present
+                const hash = window.location.hash;
+                if (hash) {
+                    setTimeout(() => {
+                        const targetElement = document.querySelector(hash);
+                        if (targetElement) {
+                            targetElement.scrollIntoView({
+                                behavior: 'smooth'
+                            });
+                        }
+                    }, 100);
+                }
             });
 
-            window.addEventListener('load', function () {
+            window.addEventListener('load', function() {
                 document.getElementById('loader').classList.add('hidden');
                 document.getElementById('main-content').classList.remove('hidden');
             });
         </script>
     </body>
+
 </html>
