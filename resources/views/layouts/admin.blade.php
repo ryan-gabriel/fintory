@@ -38,8 +38,10 @@
                                 </svg>
                             </button>
                             <a href="/dashboard" class="flex ms-2 md:me-24">
-                                <img src="{{ asset('images/logo-black.svg') }}" alt="Fintory Logo" class="h-10 me-3 block dark:hidden" />
-                                <img src="{{ asset('images/logo.svg') }}" alt="Fintory Logo" class="h-10 me-3 hidden dark:block" />
+                                <img src="{{ asset('images/logo-black.svg') }}" alt="Fintory Logo"
+                                    class="h-10 me-3 block dark:hidden" />
+                                <img src="{{ asset('images/logo.svg') }}" alt="Fintory Logo"
+                                    class="h-10 me-3 hidden dark:block" />
                             </a>
                         </div>
                         <div class="flex items-center">
@@ -94,12 +96,91 @@
                 </div>
             </nav>
 
-            <x-manager-sidebar/>
+            <x-manager-sidebar />
 
-            <main class="md:ml-[17rem] py-12">
-                {{ $slot }}
-            </main>
+            <div class="md:ml-[17rem] py-24">
+                <p id="loader">loading...</p>
+                <main id="main-content" class="hidden"> 
+                    {!! $slot !!}
+                </main>
+            </div>
         </div>
+        <script src="https://cdn.jsdelivr.net/npm/simple-datatables@9.0.3"></script>
         <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
+        <script>
+            
+            const PageInits = {
+                'kas-ledger': function() {
+                    if (document.getElementById("pagination-table") && typeof simpleDatatables !== 'undefined') {
+                        new simpleDatatables.DataTable("#pagination-table", {
+                            paging: true,
+                            perPage: 5,
+                            perPageSelect: [5, 10, 15, 20, 25],
+                            sortable: true
+                        });
+                    }
+                },
+            };
+
+            function runPageInit(url) {
+                if (url.includes('kas-ledger')) {
+                    PageInits['kas-ledger']();
+                }
+            }
+
+            document.body.addEventListener('click', function(e) {
+                const link = e.target.closest('.menu-link');
+                if (!link) return;
+
+                e.preventDefault();
+                const url = link.href;
+
+                fetch(url, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(res => res.text())
+                    .then(html => {
+                        const container = document.getElementById('main-content');
+                        container.innerHTML = html;
+
+                        runPageInit(url);
+
+                        history.pushState({}, '', url);
+                    })
+                    .catch(err => {
+                        console.error('Fetch error:', err);
+                    });
+            });
+
+            window.addEventListener('popstate', function() {
+                const url = location.href;
+                fetch(url, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(res => res.text())
+                    .then(html => {
+                        const container = document.getElementById('main-content');
+                        container.innerHTML = html;
+
+                        runPageInit(url);
+                    })
+                    .catch(err => {
+                        console.error('Popstate fetch error:', err);
+                    });
+            });
+
+            document.addEventListener('DOMContentLoaded', function() {
+                runPageInit(location.href);
+            });
+
+            window.addEventListener('load', function () {
+                document.getElementById('loader').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+            });
+        </script>
     </body>
 </html>

@@ -7,11 +7,20 @@ use Illuminate\Http\Request;
 
 class KeuanganController extends Controller
 {
-    public function index(){
+    public function index(Request $request){
         $cashLedger = CashLedger::with(['outlet'])
             ->orderBy('tanggal', 'desc')
-            ->paginate(10);
-        return view('kas-ledger', compact('cashLedger'));
+            ->get();
+      
+        if ($request->ajax()) {
+            return view('kas-ledger', compact('cashLedger'));
+        }
+        return view('layouts.admin', [
+            'title' => 'Cash Ledger',
+            'slot' => view('kas-ledger', [
+                'cashLedger' => $cashLedger,
+            ]),
+        ]);
     }
 
     public function create(){
