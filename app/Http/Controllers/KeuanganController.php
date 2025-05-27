@@ -11,7 +11,7 @@ class KeuanganController extends Controller
         $cashLedger = CashLedger::with(['outlet'])
             ->orderBy('tanggal', 'desc')
             ->paginate(10);
-        return view('cash-ledger', compact('cashLedger'));
+        return view('kas-ledger', compact('cashLedger'));
     }
 
     public function create(){
@@ -19,7 +19,7 @@ class KeuanganController extends Controller
     }
     
     public function store(){
-        return view('cash-ledger');
+        return view('kas-ledger');
     }
     
     // public function edit(Request $request): Response
