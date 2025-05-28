@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\KeuanganController;
+use App\Http\Controllers\KasLedgerController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MenuController;
@@ -25,9 +25,9 @@ Route::middleware('auth')->group(function () {
 
     // Keuangan Management
     Route::prefix('dashboard/keuangan')->name('keuangan.')->group(function () {
-        Route::get('/kas-ledger', [KeuanganController::class, 'index'])->name('index');
-        Route::get('/kas-ledger/create', [KeuanganController::class, 'create'])->name('create');
-        Route::post('/kas-ledger', [KeuanganController::class, 'store'])->name('store');
+        Route::get('/kas-ledger', [KasLedgerController::class, 'index'])->name('index');
+        Route::get('/kas-ledger/create', [KasLedgerController::class, 'create'])->name('create');
+        Route::post('/kas-ledger', [KasLedgerController::class, 'store'])->name('store');
     });
 
     // Menu Management
