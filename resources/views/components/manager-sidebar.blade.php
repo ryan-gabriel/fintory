@@ -45,7 +45,9 @@
                             @foreach($menuItem->children as $childItem)
                                 <li>
                                     <a href="{{ $childItem->route ?: '#' }}"
-                                        class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 menu-link">
+                                        class="flex items-center w-full p-2 text-gray-900 transition duration-75 rounded-lg pl-8 group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 menu-link"
+                                        data-title='{{ $childItem->menu_name }}'
+                                        >
                                         @if($childItem->icon)
                                             @if(str_contains($childItem->icon, 'fa-'))
                                                 <i class="{{ $childItem->icon }} mr-2 text-lg text-gray-700 dark:text-gray-200"></i>

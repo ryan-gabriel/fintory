@@ -16,7 +16,7 @@ class KasLedgerController extends Controller
             return view('kas-ledger', compact('cashLedger'));
         }
         return view('layouts.admin', [
-            'title' => 'Cash Ledger',
+            'title' => 'Kas & Ledger',
             'slot' => view('kas-ledger', [
                 'cashLedger' => $cashLedger,
             ]),

@@ -155,6 +155,7 @@
 
             document.body.addEventListener('click', function(e) {
                 const link = e.target.closest('.menu-link');
+                const newTitle = link.getAttribute('data-title');
                 if (!link) return;
 
                 e.preventDefault();
@@ -178,7 +179,7 @@
                         container.innerHTML = html;
 
                         runPageInit(url);
-
+                        document.querySelector('title').innerHTML = newTitle;
                         // Handle hash after content is loaded
                         const hash = new URL(url).hash;
                         if (hash) {
