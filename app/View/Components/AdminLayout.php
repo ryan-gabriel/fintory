@@ -11,9 +11,15 @@ class AdminLayout extends Component
     /**
      * Create a new component instance.
      */
+
+    public $user;
+    public $lembaga;
+
     public function __construct()
     {
         //
+        $this->user = auth()->user();
+        $this->lembaga = $this->user ? $this->user->getCurrentLembaga() : null;
     }
 
     /**

@@ -44,4 +44,30 @@ class AuthenticatedSessionController extends Controller
 
         return redirect('/');
     }
+
+    protected function authenticated(Request $request, $user)
+    {
+        // 1) Count how many (lembaga_id, role_id) rows exist for this user
+        $combos = $user->lembagaRoles()->get(); 
+        $count = $combos->count();
+
+        if ($count === 0) {
+            // no assignment—log them out or show “no roles assigned” page
+            auth()->logout();
+            return redirect()->route('login')
+                ->withErrors(['You have no role assignment in any lembaga.']);
+        }
+        elseif ($count === 1) {
+            // Exactly one assignment: automatically pick that
+            $pivot = $combos->first()->pivot;
+            $request->session()->put('current_lembaga_id', $pivot->lembaga_id);
+            $request->session()->put('current_role_id', $pivot->role_id);
+
+            return redirect()->route('dashboard');
+        }
+        else {
+            // More than one assignment → send them to “choose your role” page
+            return redirect()->route('auth.choose_role');
+        }
+    }
 }
