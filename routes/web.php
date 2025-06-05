@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\CicilanController;
+use App\Http\Controllers\HutangController;
 use App\Http\Controllers\KasLedgerController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -26,12 +28,22 @@ Route::middleware('auth')->group(function () {
     // Keuangan Management
     Route::prefix('dashboard/keuangan')->name('keuangan.')->group(function () {
         Route::get('/kas-ledger', [KasLedgerController::class, 'index'])->name('index');
+        Route::get('/kas-ledger/data', [KasLedgerController::class, 'getData'])->name('data');
         Route::get('/kas-ledger/create', [KasLedgerController::class, 'create'])->name('create');
         Route::post('/kas-ledger', [KasLedgerController::class, 'store'])->name('store');
+        
+        Route::get('/hutang', [HutangController::class, 'index'])->name('index');
+        Route::get('/hutang/data', [HutangController::class, 'getData'])->name('data');
+        Route::get('/hutang/create', [HutangController::class, 'create'])->name('create');
+        Route::post('/hutang', [HutangController::class, 'store'])->name('store');
+        
+        Route::get('/cicilan', [CicilanController::class, 'index'])->name('index');
+        Route::get('/cicilan/data', [CicilanController::class, 'getData'])->name('data');
+        Route::get('/cicilan/create', [CicilanController::class, 'create'])->name('create');
+        Route::post('/cicilan', [CicilanController::class, 'store'])->name('store');
     });
 
     // Menu Management
-
     Route::resource('menu', MenuController::class);
     Route::patch('menu/{menu}/toggle-status', [MenuController::class, 'toggleStatus'])->name('menu.toggleStatus');
     Route::post('menu/update-order', [MenuController::class, 'updateOrder'])->name('menu.updateOrder');

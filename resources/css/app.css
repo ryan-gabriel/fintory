@@ -6,37 +6,12 @@
 
 @plugin "flowbite/plugin";
 @source "../../node_modules/flowbite";
+@source "../node_modules/flowbite-datepicker";
 
-#pagination-table th{
-    @apply dark:bg-gray-700 dark:text-gray-300
+.dt-length label select{
+    @apply w-16;
 }
 
-.datatable-pagination-list-item-link {
-    @apply p-3 text-sm font-medium text-gray-500 border border-r-0 border-gray-300 hover:text-gray-800 hover:bg-gray-100 transition-colors duration-200 dark:hover:bg-gray-700 dark:text-gray-300 dark:hover:text-white dark:border-gray-600;
-}
-
-.datatable-active .datatable-pagination-list-item-link {
-    @apply text-gray-800 bg-gray-100 dark:bg-gray-700 dark:text-white;
-}
-
-.datatable-pagination-list-item:first-child button,
-.datatable-pagination-list-item:last-child button {
-    @apply border font-thin text-lg;
-}
-
-.datatable-pagination-list-item:first-child button {
-    @apply border-r-0;
-}
-
-.datatable-pagination-list-item:first-child button::after,
-.datatable-pagination-list-item:last-child button::after {
-    @apply sr-only;
-}
-
-.datatable-input {
-    @apply rounded-lg border-gray-300 dark:bg-gray-900 dark:border-gray-700;
-}
-
-.datatable-selector{
-    @apply rounded-lg border-gray-300 text-gray-700 text-sm dark:bg-gray-900 dark:border-gray-700 dark:text-gray-200
+.datepicker-cell{
+    @apply p-2
 }

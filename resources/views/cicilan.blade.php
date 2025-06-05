@@ -10,19 +10,19 @@
                         <thead>
                             <tr>
                                 <th>Tanggal</th>
-                                <th>Tipe Transaksi</th>
-                                <th>Sumber</th>
-                                <th>Jumlah</th>
-                                <th>Saldo Akhir</th>
+                                <th>Pemberi Hutang</th>
+                                <th>Jumlah Bayar</th>
+                                <th>Sisa Hutang</th>
+                                <th>Metode Pembayaran</th>
                             </tr>
                         </thead>
                         <tfoot>
                             <tr>
                                 <th>Tanggal</th>
-                                <th>Tipe Transaksi</th>
-                                <th>Sumber</th>
-                                <th>Jumlah</th>
-                                <th>Saldo Akhir</th>
+                                <th>Pemberi Hutang</th>
+                                <th>Jumlah Bayar</th>
+                                <th>Sisa Hutang</th>
+                                <th>Metode Pembayaran</th>
                             </tr>
                         </tfoot>
                     </table>
