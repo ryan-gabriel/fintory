@@ -20,7 +20,7 @@ class OutletFactory extends Factory
             'name' => $this->faker->company,
             'address' => $this->faker->address,
             'phone' => $this->faker->phoneNumber,
-            'owner_id' => 1
+            'lembaga_id' => 1
         ];
     }
 }

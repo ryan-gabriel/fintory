@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cicilan;
+use App\Models\Hutang;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -114,12 +115,23 @@ class CicilanController extends Controller
     public function index(Request $request){
         $cicilan = Cicilan::with(['hutang'])->orderBy('created_at', 'desc')->get();
         if ($request->ajax()) {
-            return view('cicilan', compact('cicilan'));
+            return view('keuangan.cicilan', compact('cicilan'));
         }
         return view('layouts.admin', [
-            'slot' => view('cicilan', [
-                'cicilan' => $cicilan,
-            ]),
+            'slot' => view('keuangan.cicilan', compact('cicilan')),
+            'title' => 'Cicilan',
         ]);
+    }
+
+    public function create(Request $request){
+        $hutangs = Hutang::all();
+        if ($request->ajax()) {
+            return view('keuangan.cicilan-create', compact('hutangs'));
+        }
+        return view('layouts.admin', [
+            'slot' => view('keuangan.cicilan-create', compact('hutangs')),
+            'title' => 'Tambah Cicilan',
+            ]
+        );
     }
 }

@@ -15,12 +15,12 @@ class Outlet extends Model
         'name',
         'address',
         'phone',
-        'owner_id',
+        'lembaga_id',
     ];
 
     public function owner()
     {
-        return $this->belongsTo(User::class, 'owner_id');
+        return $this->belongsTo(Lembaga::class, 'lembaga_id');
     }
 
     public function balance()

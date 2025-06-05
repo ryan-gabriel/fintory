@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @plugin "flowbite/plugin";
-@source "../../node_modules/flowbite";
+/* @source "../../node_modules/flowbite"; */
 @source "../../node_modules/flowbite-datepicker";
 
 .dt-length label select{
@@ -12,4 +12,12 @@
 
 .datepicker-cell{
     @apply p-2
+}
+
+.today-btn{
+    @apply bg-blue-500 text-white hover:bg-blue-600 transition-all duration-200;
+}
+
+.clear-btn{
+    @apply bg-gray-100 text-gray-800 transition-all duration-200;
 }

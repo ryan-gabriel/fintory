@@ -82,4 +82,8 @@ class Lembaga extends Model
     {
         return $this->subscriptionStatus && $this->subscriptionStatus->isActive();
     }
+
+    public function outlets(){
+        return $this->hasMany(Outlet::class, 'lembaga_id');
+    }
 }

@@ -4,6 +4,27 @@
     <div class="h-full px-3 pb-4 overflow-y-auto bg-white dark:bg-gray-800">
         <ul class="space-y-2 font-medium">
             
+            @php
+                $user = auth()->user();
+                $outlets = $user->getCurrentLembaga()->outlets;
+                $activeOutlet = session('active_outlet', 'all');
+            @endphp
+
+            <div class="px-3 pb-4">
+                <label for="outlet-select" class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Select Outlet</label>
+                <select id="outlet-select"
+                    class="w-full p-2 text-sm border border-gray-300 rounded-md dark:bg-gray-700 dark:text-white dark:border-gray-600"
+                    name="outlet_id">
+                    <option value="all" {{ $activeOutlet === 'all' ? 'selected' : '' }}>All Outlets</option>
+                    @foreach($outlets as $outlet)
+                        <option value="{{ $outlet->id }}" {{ $activeOutlet == $outlet->id ? 'selected' : '' }}>
+                            {{ $outlet->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            
+            <hr />
             <!-- Current User Profile -->
             <li>
                 <div href="#"

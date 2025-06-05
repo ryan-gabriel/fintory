@@ -7,6 +7,7 @@ use App\Models\OutletBalance;
 use App\Models\CashLedger;
 use App\Models\Hutang;
 use App\Models\Cicilan;
+use App\Models\Lembaga;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -15,8 +16,8 @@ class KeuanganSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(): void
-    {
+    public function run(): void{
+        $lembaga = Lembaga::first();
 
         $user = User::firstOrCreate(['id' => 1], [
             'name' => 'Admin',
@@ -26,7 +27,7 @@ class KeuanganSeeder extends Seeder
 
         // Buat 20 outlet milik user ID 1
         $outlets = Outlet::factory()->count(20)->create([
-            'owner_id' => $user->id,
+            'lembaga_id' => $lembaga->id,
         ]);
 
         foreach ($outlets as $outlet) {

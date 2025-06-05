@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Hutang;
+use App\Models\Outlet;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -104,17 +105,24 @@ class HutangController extends Controller
     public function index(Request $request){
         $hutang = Hutang::with(['outlet'])->orderBy('created_at', 'desc')->get();
         if ($request->ajax()) {
-            return view('hutang', compact('hutang'));
+            return view('keuangan.hutang', compact('hutang'));
         }
         return view('layouts.admin', [
-            'slot' => view('hutang', [
-                'hutang' => $hutang,
-            ]),
+            'slot' => view('keuangan.hutang', compact('hutang')),
+            'title' => 'Hutang',
         ]);
     }
     
-    public function create(){
-
+    public function create(Request $request){
+        $outlets = Outlet::all();
+        if ($request->ajax()) {
+            return view('keuangan.hutang-create', compact('outlets'));
+        }
+        return view('layouts.admin', [
+            'slot' => view('keuangan.hutang-create', compact('outlets')),
+            'title' => 'Tambah Hutang',
+            ]
+        );
     }
 
     public function store(){

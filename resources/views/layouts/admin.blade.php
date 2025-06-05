@@ -86,11 +86,13 @@
 
             <!-- Main Content -->
             <div class="md:ml-[17rem] py-24">
-                <div id="loader" class="flex justify-center items-center h-32 bg-white dark:bg-gray-800">
-                    <div
-                        class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600 dark:border-white dark:text-white">
+                <div id="loader" class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-5 flex items-center justify-center">
+                        <div
+                            class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600 dark:border-white dark:text-white">
+                        </div>
+                        <span class="ml-2 text-gray-600">Loading...</span>
                     </div>
-                    <span class="ml-2 text-gray-600">Loading...</span>
                 </div>
                 <main id="main-content" class="hidden">
                     {!! $slot !!}
@@ -142,6 +144,10 @@
                         {
                             data: 4,
                             title: "Saldo Akhir"
+                        },
+                        {
+                            data: 5,
+                            title: "action"
                         }
                     ]
                 },
@@ -299,6 +305,11 @@
                     }
 
                     const config = PAGE_CONFIGS[pageType];
+                    config.columns.forEach(col => {
+                        if (col.title && col.title.toLowerCase() === 'action') {
+                            col.orderable = false;
+                        }
+                    });
                     const dataTableConfig = {
                         ...DATATABLE_CONFIG,
                         ajax: {
@@ -450,31 +461,347 @@
             };
 
             // Event Handlers
+            // Enhanced Event Handlers dengan dukungan multiple link types
             const EventHandlers = {
-                // Handle menu link clicks with better event handling
-                handleMenuClick(e) {
-                    const link = e.target.closest('.menu-link');
-                    if (!link) return;
+                // Konfigurasi untuk berbagai jenis link
+                linkConfigs: {
+                    '.menu-link': {
+                        method: 'GET',
+                        loadIntoContainer: '#main-content',
+                        showLoader: true,
+                        updateHistory: true,
+                        updateTitle: true
+                    },
+                    '.create-link': {
+                        method: 'GET',
+                        loadIntoContainer: '#main-content',
+                        showLoader: true,
+                        updateHistory: true,
+                        updateTitle: true,
+                    },
+                    '.edit-link': {
+                        method: 'GET',
+                        loadIntoContainer: '#main-content',
+                        showLoader: true,
+                        updateHistory: true,
+                        updateTitle: true,
+                    },
+                    '.delete-link': {
+                        method: 'DELETE',
+                        requireConfirmation: true,
+                        confirmMessage: 'Apakah Anda yakin ingin menghapus data ini?',
+                        onSuccess: (response, element) => {
+                            if ($.fn.DataTable.isDataTable('#data-table')) {
+                                $('#data-table').DataTable().ajax.reload();
+                            }
+                            // Show success message
+                            alert('Data berhasil dihapus');
+                        }
+                    },
+                    '.ajax-link': {
+                        method: 'GET',
+                        loadIntoContainer: '#main-content',
+                        showLoader: true,
+                        updateHistory: false,
+                        updateTitle: false
+                    },
+                    '.modal-link': {
+                        method: 'GET',
+                        loadIntoContainer: '#modal-content',
+                        showLoader: false,
+                        updateHistory: false,
+                        updateTitle: false,
+                        afterLoad: (response, element) => {
+                            // Show modal after content loaded
+                            const modal = document.getElementById('modal');
+                            if (modal) {
+                                modal.classList.remove('hidden');
+                            }
+                        }
+                    }
+                },
 
-                    e.preventDefault();
-                    e.stopPropagation(); // Prevent event bubbling
+                // Method untuk menentukan konfigurasi link
+                getLinkConfig(element) {
+                    for (const [selector, config] of Object.entries(this.linkConfigs)) {
+                        if (element.matches(selector) || element.closest(selector)) {
+                            return { selector, ...config };
+                        }
+                    }
+                    return null;
+                },
 
-                    const url = link.href;
-                    const newTitle = link.getAttribute('data-title');
+                // Enhanced handle click untuk semua jenis link
+                async handleLinkClick(e) {
+                    const clickedElement = e.target;
+                    let linkElement = null;
+                    let config = null;
 
-                    // Handle hash-only changes
-                    if (Utils.isHashOnlyChange(url)) {
-                        Utils.handleHashNavigation(url);
-                        return;
+                    // Cari link element dan konfigurasinya
+                    for (const selector of Object.keys(this.linkConfigs)) {
+                        const found = clickedElement.closest(selector);
+                        if (found) {
+                            linkElement = found;
+                            config = this.getLinkConfig(found);
+                            break;
+                        }
                     }
 
-                    // Load new page content
-                    Utils.loadPageContent(url).then(success => {
-                        if (success) {
+                    // Jika tidak ada link yang cocok, return
+                    if (!linkElement || !config) return;
+
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const url = linkElement.href || linkElement.getAttribute('data-url');
+                    if (!url) return;
+
+                    try {
+                        // Konfirmasi jika diperlukan
+                        if (config.requireConfirmation) {
+                            const confirmed = confirm(config.confirmMessage || 'Apakah Anda yakin?');
+                            if (!confirmed) return;
+                        }
+
+                        // Execute beforeLoad callback
+                        if (config.beforeLoad) {
+                            await config.beforeLoad(url, linkElement);
+                        }
+
+                        // Show loader jika diperlukan
+                        if (config.showLoader) {
+                            this.showLoader();
+                        }
+
+                        // Lakukan AJAX request
+                        const response = await this.makeAjaxRequest(url, config.method, linkElement);
+
+                        // Handle response berdasarkan method
+                        if (config.method === 'GET' && config.loadIntoContainer) {
+                            await this.loadContentIntoContainer(response, config.loadIntoContainer, url);
+                        }
+
+                        // Update history jika diperlukan
+                        if (config.updateHistory) {
+                            history.pushState({}, '', url);
+                        }
+
+                        // Update title jika diperlukan
+                        if (config.updateTitle) {
+                            const newTitle = linkElement.getAttribute('data-title');
                             if (newTitle) {
                                 document.title = newTitle;
                             }
-                            history.pushState({}, '', url);
+                        }
+
+                        // Execute success callback
+                        if (config.onSuccess) {
+                            await config.onSuccess(response, linkElement);
+                        }
+
+                        // Execute afterLoad callback
+                        if (config.afterLoad) {
+                            await config.afterLoad(response, linkElement);
+                        }
+
+                    } catch (error) {
+                        console.error('AJAX request failed:', error);
+                        
+                        // Execute error callback jika ada
+                        if (config.onError) {
+                            await config.onError(error, linkElement);
+                        } else {
+                            alert('Terjadi kesalahan. Silakan coba lagi.');
+                        }
+                    } finally {
+                        // Hide loader
+                        if (config.showLoader) {
+                            this.hideLoader();
+                        }
+                    }
+                },
+
+                // Method untuk melakukan AJAX request
+                async makeAjaxRequest(url, method = 'GET', element = null) {
+                    const options = {
+                        method: method,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                        }
+                    };
+
+                    // Jika method POST/PUT/PATCH, tambahkan Content-Type
+                    if (['POST', 'PUT', 'PATCH'].includes(method)) {
+                        options.headers['Content-Type'] = 'application/json';
+                    }
+
+                    // Handle form data jika link ada di dalam form
+                    if (method !== 'GET' && element) {
+                        const form = element.closest('form');
+                        if (form) {
+                            const formData = new FormData(form);
+                            options.body = formData;
+                            delete options.headers['Content-Type']; // Let browser set it for FormData
+                        }
+                    }
+
+                    const response = await fetch(url, options);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    // Return response berdasarkan content type
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        return await response.json();
+                    } else {
+                        return await response.text();
+                    }
+                },
+
+                // Method untuk load content ke container
+                async loadContentIntoContainer(content, containerSelector, url) {
+                    const container = document.querySelector(containerSelector);
+                    if (!container) {
+                        throw new Error(`Container ${containerSelector} not found`);
+                    }
+
+                    // Clean up existing components
+                    Utils.cleanupComponents();
+
+                    // Load new content
+                    if (typeof content === 'string') {
+                        container.innerHTML = content;
+                    } else {
+                        // Handle JSON response
+                        if (content.html) {
+                            container.innerHTML = content.html;
+                        }
+                    }
+
+                    // Initialize components untuk halaman baru
+                    const pageType = Utils.getPageType(url);
+                    if (pageType) {
+                        Utils.initDataTable(pageType);
+                    } else {
+                        Utils.initDatePickers();
+                    }
+
+                    // Handle hash navigation
+                    const hash = new URL(url, window.location.origin).hash;
+                    if (hash) {
+                        Utils.scrollToHash(hash);
+                    }
+
+                    // Reinitialize Flowbite components
+                    if (typeof window.initFlowbite === 'function') {
+                        window.initFlowbite();
+                    }
+                },
+
+                // Method untuk show/hide loader
+                showLoader() {
+                    const loader = document.getElementById('loader');
+                    const mainContent = document.getElementById('main-content');
+                    
+                    if (loader) loader.classList.remove('hidden');
+                    if (mainContent) mainContent.classList.add('hidden');
+                },
+
+                hideLoader() {
+                    const loader = document.getElementById('loader');
+                    const mainContent = document.getElementById('main-content');
+                    
+                    if (loader) loader.classList.add('hidden');
+                    if (mainContent) mainContent.classList.remove('hidden');
+                },
+
+                // Handle form submission via AJAX
+                async handleFormSubmit(e) {
+                    const form = e.target;
+                    
+                    // Cek apakah form memiliki class ajax-form
+                    if (!form.classList.contains('ajax-form')) return;
+
+                    e.preventDefault();
+
+                    const url = form.action;
+                    const method = form.method.toUpperCase();
+                    const formData = new FormData(form);
+
+                    try {
+                        this.showLoader();
+
+                        const response = await fetch(url, {
+                            method: method,
+                            body: formData,
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                            }
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP ${response.status}`);
+                        }
+
+                        const result = await response.json();
+
+                        // Handle success response
+                        if (result.success) {
+                            // Redirect jika ada redirect URL
+                            if (result.redirect) {
+                                await this.loadContentIntoContainer(
+                                    await this.makeAjaxRequest(result.redirect),
+                                    '#main-content',
+                                    result.redirect
+                                );
+                                history.pushState({}, '', result.redirect);
+                            }
+
+                            // Reload DataTable jika ada
+                            if ($.fn.DataTable.isDataTable('#data-table')) {
+                                $('#data-table').DataTable().ajax.reload();
+                            }
+
+                            // Show success message
+                            if (result.message) {
+                                alert(result.message);
+                            }
+                        } else {
+                            // Handle validation errors
+                            this.handleFormErrors(form, result.errors || {});
+                        }
+
+                    } catch (error) {
+                        console.error('Form submission failed:', error);
+                        alert('Terjadi kesalahan. Silakan coba lagi.');
+                    } finally {
+                        this.hideLoader();
+                    }
+                },
+
+                // Handle form validation errors
+                handleFormErrors(form, errors) {
+                    // Clear previous errors
+                    form.querySelectorAll('.error-message').forEach(el => el.remove());
+                    form.querySelectorAll('.border-red-500').forEach(el => {
+                        el.classList.remove('border-red-500');
+                    });
+
+                    // Display new errors
+                    Object.keys(errors).forEach(fieldName => {
+                        const field = form.querySelector(`[name="${fieldName}"]`);
+                        if (field) {
+                            field.classList.add('border-red-500');
+                            
+                            const errorDiv = document.createElement('div');
+                            errorDiv.className = 'error-message text-red-500 text-sm mt-1';
+                            errorDiv.textContent = errors[fieldName][0];
+                            
+                            field.parentNode.appendChild(errorDiv);
                         }
                     });
                 },
@@ -491,7 +818,11 @@
                     }
 
                     // Load page content
-                    Utils.loadPageContent(url);
+                    this.loadContentIntoContainer(
+                        this.makeAjaxRequest(url),
+                        '#main-content',
+                        url
+                    );
                 },
 
                 // Handle initial page load
@@ -500,29 +831,24 @@
                     if (pageType) {
                         Utils.initDataTable(pageType);
                     } else {
-                        // Initialize date pickers even if no DataTable
                         Utils.initDatePickers();
                     }
 
-                    // Handle initial hash
                     Utils.scrollToHash(window.location.hash);
                 },
 
                 // Handle window load
                 handleWindowLoad() {
-                    const loader = document.getElementById('loader');
-                    const mainContent = document.getElementById('main-content');
-
-                    if (loader) loader.classList.add('hidden');
-                    if (mainContent) mainContent.classList.remove('hidden');
+                    this.hideLoader();
                 }
             };
 
-            // Initialize Event Listeners with proper delegation
-            document.body.addEventListener('click', EventHandlers.handleMenuClick, true); // Use capture phase
-            window.addEventListener('popstate', EventHandlers.handlePopState);
-            document.addEventListener('DOMContentLoaded', EventHandlers.handleDOMContentLoaded);
-            window.addEventListener('load', EventHandlers.handleWindowLoad);
+            // Initialize Event Listeners dengan delegation untuk semua jenis link
+            document.body.addEventListener('click', EventHandlers.handleLinkClick.bind(EventHandlers), true);
+            document.body.addEventListener('submit', EventHandlers.handleFormSubmit.bind(EventHandlers), true);
+            window.addEventListener('popstate', EventHandlers.handlePopState.bind(EventHandlers));
+            document.addEventListener('DOMContentLoaded', EventHandlers.handleDOMContentLoaded.bind(EventHandlers));
+            window.addEventListener('load', EventHandlers.handleWindowLoad.bind(EventHandlers));
         </script>
     </body>
 

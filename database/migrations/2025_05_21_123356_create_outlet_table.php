@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('name', 100);
             $table->text('address')->nullable();
             $table->string('phone', 20)->nullable();
-            $table->unsignedBigInteger('owner_id');
-            $table->foreign('owner_id')->references('id')->on('users');
+            $table->unsignedBigInteger('lembaga_id');
+            $table->foreign('lembaga_id')->references('id')->on('users');
             $table->timestamps();
         });
     }
