@@ -10,6 +10,8 @@ use Illuminate\View\Component;
 class ManagerSidebar extends Component
 {
     public $menuItems;
+    public $user;        // ADD THIS
+
 
     /**
      * Create a new component instance.
@@ -17,6 +19,8 @@ class ManagerSidebar extends Component
     public function __construct()
     {
         $this->menuItems = MenuItem::getMenuHierarchy();
+        $this->user = auth()->user();  // ADD THIS
+
     }
 
     /**
@@ -25,7 +29,8 @@ class ManagerSidebar extends Component
     public function render(): View|Closure|string
     {
         return view('components.manager-sidebar', [
-            'menuItems' => $this->menuItems
+            'menuItems' => $this->menuItems,
+            'user' => $this->user,  // ADD THIS
         ]);
     }
 }

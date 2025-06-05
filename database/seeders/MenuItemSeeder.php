@@ -109,7 +109,7 @@ class MenuItemSeeder extends Seeder
         MenuItem::create([
             'menu_name' => 'Hutang',
             'icon' => 'fa-solid fa-sack-xmark',
-            'route' => '#',
+            'route' => '/dashboard/keuangan/hutang',
             'is_parent' => false,
             'parent_id' => $keuangan->id,
             'order' => 2
@@ -118,7 +118,7 @@ class MenuItemSeeder extends Seeder
         MenuItem::create([
             'menu_name' => 'Cicilan',
             'icon' => 'fa-solid fa-sack-dollar',
-            'route' => '#',
+            'route' => '/dashboard/keuangan/cicilan',
             'is_parent' => false,
             'parent_id' => $keuangan->id,
             'order' => 3

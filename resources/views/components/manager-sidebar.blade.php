@@ -8,10 +8,10 @@
             <li>
                 <div href="#"
                     class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-                    <img src="https://flowbite.com/docs/images/people/profile-picture-5.jpg" alt="current user profile"
+                    <img src="{{ $user->profile_picture ? asset('storage/' . $user->profile_picture) : asset('images/avatar.png') }}" alt="current user profile"
                         class="w-5 h-5 rounded-full">
                     <span class="ms-3">
-                        current_user
+                        {{ auth()->user()->email }}
                     </span>
                 </div>
             </li>
