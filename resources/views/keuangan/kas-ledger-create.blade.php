@@ -2,8 +2,8 @@
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-5">
             <h1 class="text-2xl font-semibold mb-5">Tambah Kas Ledger</h1>
-            <form action="/dashboard/keuangan/kas-ledger" method="GET" class="space-y-6">
-                
+            <form action="/dashboard/keuangan/kas-ledger" method="POST" class="space-y-6">
+                @csrf
                 <div>
                     <label for="tipe_transaksi" class="block mb-2 text-gray-900 dark:text-white">Tipe Transaksi</label>
                     <select id="tipe_transaksi" name="tipe" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>

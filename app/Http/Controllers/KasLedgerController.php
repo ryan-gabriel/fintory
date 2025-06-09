@@ -37,8 +37,8 @@ class KasLedgerController extends Controller
         );
     }
     
-    public function store(){
-        return view('kas-ledger');
+    public function store(Request $request){
+        return response()->json($request->all());
     }
 
     public function getData(Request $request)

@@ -1,39 +1,42 @@
-<!DOCTYPE html>
+<!DOCTYPE html>Add commentMore actions
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
+
         <title>{{ $title ?? 'Fintory Dashboard' }}</title>
 
-        <!-- Fonts & Styles -->
+        <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
         <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-        <link rel="stylesheet" href="https://cdn.datatables.net/2.3.1/css/dataTables.dataTables.css" />
+        <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+
     </head>
 
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
 
-            <!-- Navigation Bar -->
             <nav
                 class="fixed top-0 z-50 w-full bg-white border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700">
                 <div class="px-3 py-3 lg:px-5 lg:pl-3">
                     <div class="flex items-center justify-between">
-
-                        <!-- Left Side - Logo & Menu Toggle -->
                         <div class="flex items-center justify-start rtl:justify-end">
                             <button data-drawer-target="sidebar" data-drawer-toggle="sidebar" aria-controls="sidebar"
                                 type="button"
                                 class="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600">
                                 <span class="sr-only">Open sidebar</span>
-                                <i class="fas fa-bars w-6 h-6"></i>
+                                <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path clip-rule="evenodd" fill-rule="evenodd"
+                                        d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z">
+                                    </path>
+                                </svg>
                             </button>
-
                             <a href="/dashboard" class="flex ms-2 md:me-24">
                                 <img src="{{ asset('images/logo-black.svg') }}" alt="Fintory Logo"
                                     class="h-10 me-3 block dark:hidden" />
@@ -41,62 +44,73 @@
                                     class="h-10 me-3 hidden dark:block" />
                             </a>
                         </div>
-
-                        <!-- Right Side - User Menu -->
-                        <div class="flex items-center ms-3">
-                            <button type="button"
-                                class="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
-                                aria-expanded="false" data-dropdown-toggle="dropdown-user">
-                                <span class="sr-only">Open user menu</span>
-                                <img class="w-8 h-8 rounded-full"
-                                    src="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
-                                    alt="user photo">
-                            </button>
-
-                            <div class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-sm shadow-sm dark:bg-gray-700 dark:divide-gray-600"
-                                id="dropdown-user">
-                                <div class="px-4 py-3">
-                                    <p class="text-sm text-gray-900 dark:text-white">Neil Sims</p>
-                                    <p class="text-sm font-medium text-gray-900 truncate dark:text-gray-300">
-                                        neil.sims@flowbite.com
-                                    </p>
+                        <div class="flex items-center">
+                            <div class="flex items-center ms-3">
+                                <div>
+                                    <button type="button"
+                                        class="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+                                        aria-expanded="false" data-dropdown-toggle="dropdown-user">
+                                        <span class="sr-only">Open user menu</span>
+                                        <img class="w-8 h-8 rounded-full"
+                                            src="{{ $lembaga->logo_path ? asset('storage/' . $lembaga->logo_path) : asset('images/avatar.png') }}"
+                                            alt="lembaga logo">
+                                    </button>
                                 </div>
-                                <ul class="py-1">
-                                    <li><a href="#"
-                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white">Dashboard</a>
-                                    </li>
-                                    <li><a href="#"
-                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white">Settings</a>
-                                    </li>
-                                    <li><a href="#"
-                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white">Earnings</a>
-                                    </li>
-                                    <li><a href="#"
-                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white">Sign
-                                            out</a></li>
-                                </ul>
+                                <div class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-sm shadow-sm dark:bg-gray-700 dark:divide-gray-600"
+                                    id="dropdown-user">
+                                    <div class="px-4 py-3" role="none">
+                                        <p class="text-sm text-gray-900 dark:text-white" role="none">
+                                            {{ auth()->user()->getCurrentRole()->role_name ?? 'N/A' }}
+                                        </p>
+                                        <p class="text-sm font-medium text-gray-900 truncate dark:text-gray-300"
+                                            role="none">
+                                            {{ auth()->user()->email }}
+                                        </p>
+                                    </div>
+                                    <ul class="py-1" role="none">
+                                        <li>
+                                            <a href="#"
+                                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+                                                role="menuitem">Dashboard</a>
+                                        </li>
+                                        <li>
+                                            <a href="{{ route('profile.edit') }}"
+                                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+                                                role="menuitem">Profile</a>
+                                        </li>
+                                        <li>
+                                            <a href="#"
+                                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+                                                role="menuitem">Earnings</a>
+                                        </li>
+                                        <li>
+                                            <!-- Replace the old <a>Sign out</a> with this form: -->
+                                            <form method="POST" action="{{ route('logout') }}">
+                                                @csrf
+                                                <button type="submit"
+                                                    class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100
+                       dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+                                                    role="menuitem">
+                                                    Sign out
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </nav>
 
-            <!-- Sidebar -->
             <x-manager-sidebar />
 
-            <!-- Main Content -->
             <div class="md:ml-[17rem] py-24">
-                <div id="loader" class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-5 flex items-center justify-center">
-                        <div
-                            class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600 dark:border-white dark:text-white">
-                        </div>
-                        <span class="ml-2 text-gray-600">Loading...</span>
-                    </div>
-                </div>
+                <p id="loader">loading...</p>
                 <main id="main-content" class="hidden">
                     {!! $slot !!}
                 </main>
+
             </div>
         </div>
 
@@ -525,7 +539,10 @@
                 getLinkConfig(element) {
                     for (const [selector, config] of Object.entries(this.linkConfigs)) {
                         if (element.matches(selector) || element.closest(selector)) {
-                            return { selector, ...config };
+                            return {
+                                selector,
+                                ...config
+                            };
                         }
                     }
                     return null;
@@ -606,7 +623,7 @@
 
                     } catch (error) {
                         console.error('AJAX request failed:', error);
-                        
+
                         // Execute error callback jika ada
                         if (config.onError) {
                             await config.onError(error, linkElement);
@@ -627,7 +644,8 @@
                         method: method,
                         headers: {
                             'X-Requested-With': 'XMLHttpRequest',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute(
+                                'content') || ''
                         }
                     };
 
@@ -647,7 +665,7 @@
                     }
 
                     const response = await fetch(url, options);
-                    
+
                     if (!response.ok) {
                         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     }
@@ -705,7 +723,7 @@
                 showLoader() {
                     const loader = document.getElementById('loader');
                     const mainContent = document.getElementById('main-content');
-                    
+
                     if (loader) loader.classList.remove('hidden');
                     if (mainContent) mainContent.classList.add('hidden');
                 },
@@ -713,7 +731,7 @@
                 hideLoader() {
                     const loader = document.getElementById('loader');
                     const mainContent = document.getElementById('main-content');
-                    
+
                     if (loader) loader.classList.add('hidden');
                     if (mainContent) mainContent.classList.remove('hidden');
                 },
@@ -721,7 +739,7 @@
                 // Handle form submission via AJAX
                 async handleFormSubmit(e) {
                     const form = e.target;
-                    
+
                     // Cek apakah form memiliki class ajax-form
                     if (!form.classList.contains('ajax-form')) return;
 
@@ -739,7 +757,8 @@
                             body: formData,
                             headers: {
                                 'X-Requested-With': 'XMLHttpRequest',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute(
+                                    'content') || ''
                             }
                         });
 
@@ -796,11 +815,11 @@
                         const field = form.querySelector(`[name="${fieldName}"]`);
                         if (field) {
                             field.classList.add('border-red-500');
-                            
+
                             const errorDiv = document.createElement('div');
                             errorDiv.className = 'error-message text-red-500 text-sm mt-1';
                             errorDiv.textContent = errors[fieldName][0];
-                            
+
                             field.parentNode.appendChild(errorDiv);
                         }
                     });

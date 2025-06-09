@@ -3,7 +3,7 @@
         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-5">
             <h1 class="text-2xl font-semibold mb-5">Tambah Hutang</h1>
             <form action="/dashboard/keuangan/hutang" method="GET" class="space-y-6">
-                
+                @csrf
                 <div>
                     <label for="outlet" class="block mb-2 text-gray-900 dark:text-white">Pilih Outlet</label>
                     <select id="outlet" name="outlet" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>

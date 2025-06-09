@@ -25,10 +25,7 @@ class KeuanganSeeder extends Seeder
             'password' => bcrypt('12345678'),
         ]);
 
-        // Buat 20 outlet milik user ID 1
-        $outlets = Outlet::factory()->count(20)->create([
-            'lembaga_id' => $lembaga->id,
-        ]);
+        $outlets = Outlet::all();
 
         foreach ($outlets as $outlet) {
             // OutletBalance untuk setiap outlet

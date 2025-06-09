@@ -73,6 +73,12 @@ class DatabaseSeeder extends Seeder
         $this->command->info('   - Admin user: admin@gmail.com (password: 12345678)');
         $this->command->info('   - Lembaga: Moezza Petshop with Pro subscription');
         $this->command->info('   - All roles seeded with descriptions');
+
+        $this->call(MenuItemSeeder::class);
+        $this->call(OutletSeeder::class);
+
+        // keuangan seeder butuh outlet seeder terlebih dahulu
+        $this->call(KeuanganSeeder::class);
     }
 
     /**
@@ -143,4 +149,7 @@ class DatabaseSeeder extends Seeder
 
         $this->command->info('✅ Roles seeded: ' . implode(', ', array_column($roles, 'role_name')));
     }
+
+
+
 }
