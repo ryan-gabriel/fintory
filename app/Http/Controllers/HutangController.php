@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Hutang;
+use App\Models\Lembaga;
 use App\Models\Outlet;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -110,6 +111,7 @@ class HutangController extends Controller
         return view('layouts.admin', [
             'slot' => view('keuangan.hutang', compact('hutang')),
             'title' => 'Hutang',
+            'lembaga' => Lembaga::find(session('current_lembaga_id')),
         ]);
     }
     
@@ -121,6 +123,7 @@ class HutangController extends Controller
         return view('layouts.admin', [
             'slot' => view('keuangan.hutang-create', compact('outlets')),
             'title' => 'Tambah Hutang',
+            'lembaga' => Lembaga::find(session('current_lembaga_id')),
             ]
         );
     }

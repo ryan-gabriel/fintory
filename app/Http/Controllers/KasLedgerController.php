@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\CashLedger;
+use App\Models\Lembaga;
 use App\Models\Outlet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -22,6 +23,7 @@ class KasLedgerController extends Controller
         return view('layouts.admin', [
             'slot' => view('keuangan.kas-ledger', compact('cashLedger')),
             'title' => 'Kas & Ledger',
+            'lembaga' => Lembaga::find(session('current_lembaga_id')),
         ]);
     }
     
@@ -33,6 +35,7 @@ class KasLedgerController extends Controller
         return view('layouts.admin', [
             'slot' => view('keuangan.kas-ledger-create', compact('outlets')),
             'title' => 'Tambah Kas & Ledger',
+            'lembaga' => Lembaga::find(session('current_lembaga_id')),
             ]
         );
     }

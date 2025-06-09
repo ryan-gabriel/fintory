@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Cicilan;
 use App\Models\Hutang;
+use App\Models\Lembaga;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -120,6 +121,7 @@ class CicilanController extends Controller
         return view('layouts.admin', [
             'slot' => view('keuangan.cicilan', compact('cicilan')),
             'title' => 'Cicilan',
+            'lembaga' => Lembaga::find(session('current_lembaga_id')),
         ]);
     }
 
@@ -131,6 +133,7 @@ class CicilanController extends Controller
         return view('layouts.admin', [
             'slot' => view('keuangan.cicilan-create', compact('hutangs')),
             'title' => 'Tambah Cicilan',
+            'lembaga' => Lembaga::find(session('current_lembaga_id')),
             ]
         );
     }

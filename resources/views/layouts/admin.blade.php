@@ -1,4 +1,4 @@
-<!DOCTYPE html>Add commentMore actions
+<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
     <head>
@@ -13,6 +13,7 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
         <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+        <link rel="stylesheet" href="https://cdn.datatables.net/2.3.1/css/dataTables.dataTables.css" />
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -628,6 +629,7 @@
                         if (config.onError) {
                             await config.onError(error, linkElement);
                         } else {
+                            console.log(error)
                             alert('Terjadi kesalahan. Silakan coba lagi.');
                         }
                     } finally {
@@ -828,15 +830,16 @@
                 // Handle browser back/forward navigation
                 handlePopState() {
                     const url = location.href;
-
-                    // Handle hash-only changes
-                    if (Utils.isHashOnlyChange(url, document.referrer)) {
+                    const referrer = document.referrer;
+                    
+                    // Handle hash-only changes - don't reload content
+                    if (referrer && Utils.isHashOnlyChange(url, referrer)) {
                         const hash = new URL(url).hash;
                         Utils.scrollToHash(hash);
                         return;
                     }
 
-                    // Load page content
+                    // Only load content if it's not a hash-only change
                     this.loadContentIntoContainer(
                         this.makeAjaxRequest(url),
                         '#main-content',
