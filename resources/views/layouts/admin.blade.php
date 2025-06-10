@@ -551,6 +551,21 @@
 
                 // Enhanced handle click untuk semua jenis link
                 async handleLinkClick(e) {
+                    // If the clicked link is a hash-only navigation, just scroll to the section without AJAX
+                    const nextUrl = e.target.closest('a')?.href || e.target.getAttribute('data-url');
+                    if (nextUrl && Utils.isHashOnlyChange(nextUrl, window.location.href)) {
+                        console.log('nextUrl:', nextUrl);
+
+                        const hash = new URL(nextUrl, window.location.origin).hash;
+                        if (hash) {
+                            Utils.scrollToHash(hash);
+                            // Update the URL hash in the address bar
+                            history.pushState({}, '', nextUrl);
+                        }
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return;
+                    }
                     const clickedElement = e.target;
                     let linkElement = null;
                     let config = null;
