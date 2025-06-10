@@ -130,6 +130,9 @@
         <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
 
         <script>
+
+            let previousUrl = window.location.href;
+
             const DATATABLE_CONFIG = {
                 language: {
                     processing: "Memproses...",
@@ -563,7 +566,6 @@
                     // If the clicked link is a hash-only navigation, just scroll to the section without AJAX
                     const nextUrl = e.target.closest('a')?.href || e.target.getAttribute('data-url');
                     if (nextUrl && Utils.isHashOnlyChange(nextUrl, window.location.href)) {
-                        console.log('nextUrl:', nextUrl);
 
                         const hash = new URL(nextUrl, window.location.origin).hash;
                         if (hash) {
@@ -597,7 +599,6 @@
 
                     const url = linkElement.href || linkElement.getAttribute('data-url');
                     if (!url) return;
-
                     try {
                         // Konfirmasi jika diperlukan
                         if (config.requireConfirmation) {
@@ -625,6 +626,7 @@
 
                         // Update history jika diperlukan
                         if (config.updateHistory) {
+                            previousUrl = window.location.href;
                             history.pushState({}, '', url);
                         }
 
@@ -852,23 +854,34 @@
                 },
 
                 // Handle browser back/forward navigation
-                handlePopState() {
-                    const url = location.href;
-                    const referrer = document.referrer;
+                handlePopState(event) {
+                    const currentUrl = window.location.href;
                     
-                    // Handle hash-only changes - don't reload content
-                    if (referrer && Utils.isHashOnlyChange(url, referrer)) {
-                        const hash = new URL(url).hash;
+                    if (Utils.isHashOnlyChange(currentUrl, previousUrl)) {
+                        const hash = new URL(currentUrl).hash;
                         Utils.scrollToHash(hash);
+                        previousUrl = currentUrl;
                         return;
                     }
-
-                    // Only load content if it's not a hash-only change
-                    this.loadContentIntoContainer(
-                        this.makeAjaxRequest(url),
-                        '#main-content',
-                        url
-                    );
+                    
+                    this.showLoader();
+                    
+                    this.makeAjaxRequest(currentUrl)
+                        .then(content => {
+                            this.loadContentIntoContainer(
+                                content,    
+                                '#main-content',
+                                currentUrl
+                            );
+                        })
+                        .catch(error => {
+                            console.error('Failed to load page:', error);
+                            window.location.reload();
+                        })
+                        .finally(() => {
+                            this.hideLoader();
+                            previousUrl = currentUrl;
+                        });
                 },
 
                 // Handle initial page load
