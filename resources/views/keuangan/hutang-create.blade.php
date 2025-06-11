@@ -19,10 +19,12 @@
                     <input type="text" id="nama_pemberi_hutang" name="nama_pemberi_hutang" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
                 </div>
 
-                <div>
+                <!-- <div>
                     <label for="jumlah" class="block mb-2 text-gray-900 dark:text-white">Jumlah Hutang</label>
                     <input type="number" id="jumlah" name="jumlah" min="1" step="1" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required>
-                </div>
+                </div> -->
+
+                @livewire(name: 'terbilang-input')
 
 
                 <div>
