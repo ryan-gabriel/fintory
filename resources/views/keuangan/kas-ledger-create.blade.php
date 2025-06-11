@@ -44,7 +44,7 @@
                         readonly disabled>
                 </div> -->
 
-                @livewire(name: 'terbilang-input')
+                @livewire('terbilang-input', [], key('form-kas-ledger'))
 
 
                 <div>
