@@ -18,6 +18,7 @@
         "vite": "^6.2.4"
     },
     "dependencies": {
-        "flowbite": "^3.1.2"
+        "flowbite": "^3.1.2",
+        "terbilang-js": "^1.0.1"
     }
 }
