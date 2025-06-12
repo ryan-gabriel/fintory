@@ -41,7 +41,79 @@ class KasLedgerController extends Controller
     }
     
     public function store(Request $request){
-        return response()->json($request->all());
+        $request->validate([
+            'tanggal' => 'required|date',
+            'tipe' => 'required|string|max:255',
+            'sumber' => 'nullable|string|max:255',
+            'amount' => 'required|numeric|min:0',
+            'outlet_id' => 'required|exists:outlets,id',
+        ]);
+
+        // $tipentay adalha berikut = ['INCOME','EXPENSE','TRANSFER_IN','TRANSFER_OUT','ADJUSTMENT'];
+        $tanggal = Carbon::createFromFormat('m/d/Y', $request->tanggal)->startOfDay();
+        $saldoSebelum = CashLedger::where('outlet_id', $request->outlet_id)
+            ->where('tanggal', '<=', $tanggal)
+            ->orderBy('tanggal', 'desc')
+            ->value('saldo_setelah') ?? 0;
+
+        if($saldoSebelum < 0 && $request->tipe === 'pengeluaran') {
+            return view('layouts.admin', [
+                'slot' => view('keuangan.kas-ledger-create', ['error' => 'Saldo tidak mencukupi untuk pengeluaran.']),
+                'title' => 'Tambah Kas & Ledger',
+                'lembaga' => Lembaga::find(session('current_lembaga_id')),
+            ]);
+        }
+        if($saldoSebelum < 0 && $request->tipe === 'pemasukan') {
+            return view('layouts.admin', [
+                'slot' => view('keuangan.kas-ledger-create', ['error' => 'Saldo tidak mencukupi untuk pemasukan.']),
+                'title' => 'Tambah Kas & Ledger',
+                'lembaga' => Lembaga::find(session('current_lembaga_id')),
+            ]);
+        }
+        if ($request->tipe === 'pengeluaran' && $saldoSebelum < $request->amount) {
+            return view('layouts.admin', [
+                'slot' => view('keuangan.kas-ledger-create', ['error' => 'Saldo tidak mencukupi untuk pengeluaran.']),
+                'title' => 'Tambah Kas & Ledger',
+                'lembaga' => Lembaga::find(session('current_lembaga_id')),
+            ]);
+        }
+        if ($request->tipe === 'pemasukan' && $saldoSebelum < 0) {
+            return view('layouts.admin', [
+                'slot' => view('keuangan.kas-ledger-create', ['error' => 'Saldo tidak mencukupi untuk pemasukan.']),
+                'title' => 'Tambah Kas & Ledger',
+                'lembaga' => Lembaga::find(session('current_lembaga_id')),
+            ]);
+        }
+        if ($request->tipe === 'pengeluaran') {
+            $saldoSebelum -= $request->amount;
+        } elseif ($request->tipe === 'pemasukan') {
+            $saldoSebelum += $request->amount;
+        } else {
+            return view('layouts.admin', [
+                'slot' => view('keuangan.kas-ledger-create', ['error' => 'Tipe tidak valid.']),
+                'title' => 'Tambah Kas & Ledger',
+                'lembaga' => Lembaga::find(session('current_lembaga_id')),
+            ]);
+        }
+
+
+
+        $saldoSetelah = $saldoSebelum + $request->amount;
+        CashLedger::create([
+            'tanggal' => $tanggal,
+            'tipe' => $request->tipe,
+            'sumber' => $request->sumber,
+            'amount' => $request->amount,
+            'saldo_sebelum' => $saldoSebelum,
+            'saldo_setelah' => $saldoSetelah,
+            'outlet_id' => $request->outlet_id,
+        ]);
+
+        return view('layouts.admin', [
+            'slot' => view('keuangan.kas-ledger-create', ['success' => 'Data kas ledger berhasil disimpan.']),
+            'title' => 'Tambah Kas & Ledger',
+            'lembaga' => Lembaga::find(session('current_lembaga_id')),
+        ]);
     }
 
     public function getData(Request $request)

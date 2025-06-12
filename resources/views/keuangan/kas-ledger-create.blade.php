@@ -55,12 +55,10 @@
                 </div>
                 
                 <div class="flex justify-end">
-                    <button class="bg-green-600 text-white px-6 py-3 rounded-md">
+                    <button type="submit" class="bg-green-600 text-white px-6 py-3 rounded-md">
                         Submit
                     </button>
                 </div>
-
-
             </form>
         </div>
     </div>
