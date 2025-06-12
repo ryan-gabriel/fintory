@@ -2,7 +2,7 @@
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-5">
             <h1 class="text-2xl font-semibold mb-5">Tambah Hutang</h1>
-            <form action="/dashboard/keuangan/hutang" method="GET" class="space-y-6">
+            <form action="/dashboard/keuangan/hutang" method="POST" class="space-y-6" id="form-create">
                 @csrf
                 <div>
                     <label for="outlet" class="block mb-2 text-gray-900 dark:text-white">Pilih Outlet</label>
@@ -43,12 +43,10 @@
                 </div>
                 
                 <div class="flex justify-end">
-                    <button class="bg-green-600 text-white px-6 py-3 rounded-md">
+                    <button id="btn-submit" type="submit" class="bg-green-600 text-white px-6 py-3 rounded-md">
                         Submit
                     </button>
                 </div>
-
-
             </form>
         </div>
     </div>

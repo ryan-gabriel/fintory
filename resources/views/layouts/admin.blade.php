@@ -108,10 +108,17 @@
 
             <div class="md:ml-[17rem] py-24">
                 <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-                    <div role="status" id="loader" class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-5 flex justify-center">
-                        <svg aria-hidden="true" class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
-                            <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
+                    <div role="status" id="loader"
+                        class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-5 flex justify-center">
+                        <svg aria-hidden="true"
+                            class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+                            viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                                fill="currentColor" />
+                            <path
+                                d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                                fill="currentFill" />
                         </svg>
                         <span class="sr-only">Loading...</span>
                     </div>
@@ -130,7 +137,6 @@
         <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
 
         <script>
-
             let previousUrl = window.location.href;
 
             const DATATABLE_CONFIG = {
@@ -484,13 +490,170 @@
                     // Clear stored event handlers
                     this.dateChangeHandlers.startDate = null;
                     this.dateChangeHandlers.endDate = null;
+                },
+
+                cleanCreateFormHandler() {
+                    const form = document.getElementById('form-create');
+                    if (form) {
+                        // Clean up datepicker first
+                        this.cleanCreateDatePicker();
+                        
+                        // Remove existing event listeners by cloning
+                        const newForm = form.cloneNode(true);
+                        form.parentNode.replaceChild(newForm, form);
+
+                        // Reset form input
+                        newForm.reset();
+
+                        // Remove error messages
+                        newForm.querySelectorAll('.error-message').forEach(el => el.remove());
+
+                        // Remove red border classes
+                        newForm.querySelectorAll('.border-red-500').forEach(el => el.classList.remove('border-red-500'));
+
+                        // Reset submit button
+                        const submitBtn = newForm.querySelector('#btn-submit');
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = 'Submit';
+                            submitBtn.type = 'submit';
+                        }
+                    }
+                },
+
+                initFormCreateHandler() {
+                    // Clean existing handlers first
+                    this.cleanCreateFormHandler();
+
+                    // Get the fresh form after cleaning
+                    const form = document.getElementById('form-create');
+
+                    if (form) {
+                        // Set form attributes
+                        form.method = 'POST';
+                        form.action = "/dashboard/keuangan/hutang";
+
+                        const submitBtn = form.querySelector('#btn-submit');
+
+                        // Add submit event listener
+                        form.addEventListener('submit', async (e) => {
+                            e.preventDefault();
+
+                            // Prevent double submission
+                            if (submitBtn.disabled) {
+                                return;
+                            }
+
+                            submitBtn.disabled = true;
+                            submitBtn.innerHTML = `
+                                <svg aria-hidden="true" role="status" class="inline w-4 h-4 me-3 text-white animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="#E5E7EB"/>
+                                <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentColor"/>
+                                </svg>
+                                Loading...
+                            `;
+
+                            try {
+                                // Use self instead of this to reference the correct context
+                                const response = await EventHandlers.makeAjaxRequest(form.action, 'POST', form);
+                                
+                                // Reset button
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = 'Submit';
+                                
+                                // Handle success based on response type
+                                if (typeof response === 'object' && response.redirect) {
+                                    window.location.href = response.redirect;
+                                } else if (typeof response === 'object' && response.message) {
+                                    // Show success message
+                                    alert(response.message); 
+                                    form.reset();
+                                } else if (typeof response === 'string') {
+                                    console.log('HTML response received');
+                                }
+                                
+                            } catch (error) {
+                                console.error('Error:', error);
+                                
+                                // Reset button on error
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = 'Submit';
+                                
+                                // Show error message
+                                alert('An error occurred: ' + error.message); // Replace with your error handling
+                            }
+                        });
+
+                        // Initialize date picker after form is ready
+                        this.initCreateDatePicker();
+                    }
+                },
+
+                cleanCreateDatePicker() {
+                    const tanggalPicker = document.getElementById('tanggal');
+
+                    if (tanggalPicker) {
+                        try {
+                            // Remove event listener if exists
+                            if (this.dateChangeHandlers?.tanggalHutang) {
+                                tanggalPicker.removeEventListener('changeDate', this.dateChangeHandlers.tanggalHutang);
+                                delete this.dateChangeHandlers.tanggalHutang;
+                            }
+
+                            // Destroy datepicker instance if exists
+                            if (tanggalPicker._datepicker) {
+                                tanggalPicker._datepicker.destroy();
+                                delete tanggalPicker._datepicker;
+                            }
+
+                            // Clean up any other datepicker properties
+                            if (tanggalPicker._flatpickr) {
+                                tanggalPicker._flatpickr.destroy();
+                                delete tanggalPicker._flatpickr;
+                            }
+                        } catch (e) {
+                            console.log('Clean up error for Tanggal Hutang datepicker:', e);
+                        }
+                    }
+                },
+
+                initCreateDatePicker() {
+                    const tanggalPicker = document.getElementById('tanggal');
+
+                    if (tanggalPicker) {
+                        // Clean up first
+                        this.cleanCreateDatePicker();
+
+                        // Wait a bit for cleanup to complete
+                        setTimeout(() => {
+                            try {
+                                if (typeof window.initDatePicker === 'function') {
+                                    window.initDatePicker('#tanggal');
+                                } else if (typeof window.initFlowbite === 'function') {
+                                    window.initFlowbite();
+                                }
+                            } catch (e) {
+                                console.log('Init error for Tanggal Hutang datepicker:', e);
+                            }
+
+                            // Initialize date change handlers
+                            if (!this.dateChangeHandlers) {
+                                this.dateChangeHandlers = {};
+                            }
+
+                            this.dateChangeHandlers.tanggalHutang = (e) => {
+                                this.selectedTanggalHutang = e.detail.date;
+                            };
+
+                            tanggalPicker.addEventListener('changeDate', this.dateChangeHandlers.tanggalHutang);
+                        }, 100);
+                    }
                 }
             };
 
             // Event Handlers
             // Enhanced Event Handlers dengan dukungan multiple link types
             const EventHandlers = {
-                // Konfigurasi untuk berbagai jenis link
                 linkConfigs: {
                     '.menu-link': {
                         method: 'GET',
@@ -505,6 +668,14 @@
                         showLoader: true,
                         updateHistory: true,
                         updateTitle: true,
+                        afterLoad: () => {
+                            // Pastikan DOM sudah siap sebelum inisialisasi
+                            setTimeout(() => {
+                                if (typeof Utils !== 'undefined' && Utils.initFormCreateHandler) {
+                                    Utils.initFormCreateHandler();
+                                }
+                            }, 100);
+                        }
                     },
                     '.edit-link': {
                         method: 'GET',
@@ -539,7 +710,6 @@
                         updateHistory: false,
                         updateTitle: false,
                         afterLoad: (response, element) => {
-                            // Show modal after content loaded
                             const modal = document.getElementById('modal');
                             if (modal) {
                                 modal.classList.remove('hidden');
@@ -702,6 +872,9 @@
                     const contentType = response.headers.get('content-type');
                     if (contentType && contentType.includes('application/json')) {
                         return await response.json();
+                    } else if (response.redirected && response.url) {
+                        window.location.href = response.url;
+                        return;
                     } else {
                         return await response.text();
                     }
@@ -856,20 +1029,20 @@
                 // Handle browser back/forward navigation
                 handlePopState(event) {
                     const currentUrl = window.location.href;
-                    
+
                     if (Utils.isHashOnlyChange(currentUrl, previousUrl)) {
                         const hash = new URL(currentUrl).hash;
                         Utils.scrollToHash(hash);
                         previousUrl = currentUrl;
                         return;
                     }
-                    
+
                     this.showLoader();
-                    
+
                     this.makeAjaxRequest(currentUrl)
                         .then(content => {
                             this.loadContentIntoContainer(
-                                content,    
+                                content,
                                 '#main-content',
                                 currentUrl
                             );
@@ -903,7 +1076,7 @@
             };
 
             // Initialize Event Listeners dengan delegation untuk semua jenis link
-            document.body.addEventListener('click', EventHandlers.handleLinkClick.bind(EventHandlers), true);
+            document.body.addEventListener('click', EventHandlers.handleLinkClick.bind(EventHandlers));
             document.body.addEventListener('submit', EventHandlers.handleFormSubmit.bind(EventHandlers), true);
             window.addEventListener('popstate', EventHandlers.handlePopState.bind(EventHandlers));
             document.addEventListener('DOMContentLoaded', EventHandlers.handleDOMContentLoaded.bind(EventHandlers));

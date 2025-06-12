@@ -42,20 +42,20 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
 
     // Keuangan Management
     Route::prefix('dashboard/keuangan')->name('keuangan.')->group(function () {
-        Route::get('/kas-ledger', [KasLedgerController::class, 'index'])->name('index');
-        Route::get('/kas-ledger/data', [KasLedgerController::class, 'getData'])->name('data');
-        Route::get('/kas-ledger/create', [KasLedgerController::class, 'create'])->name('create');
-        Route::post('/kas-ledger', [KasLedgerController::class, 'store'])->name('store');
+        Route::get('/kas-ledger', [KasLedgerController::class, 'index'])->name('kas-ledger.index');
+        Route::get('/kas-ledger/data', [KasLedgerController::class, 'getData'])->name('kas-ledger.data');
+        Route::get('/kas-ledger/create', [KasLedgerController::class, 'create'])->name('kas-ledger.create');
+        Route::post('/kas-ledger', [KasLedgerController::class, 'store'])->name('kas-ledger.store');
         
-        Route::get('/hutang', [HutangController::class, 'index'])->name('index');
-        Route::get('/hutang/data', [HutangController::class, 'getData'])->name('data');
-        Route::get('/hutang/create', [HutangController::class, 'create'])->name('create');
-        Route::post('/hutang', [HutangController::class, 'store'])->name('store');
+        Route::get('/hutang', [HutangController::class, 'index'])->name('hutang.index');
+        Route::get('/hutang/data', [HutangController::class, 'getData'])->name('hutang.data');
+        Route::get('/hutang/create', [HutangController::class, 'create'])->name('hutang.create');
+        Route::post('/hutang', [HutangController::class, 'store'])->name('hutang.store');
         
-        Route::get('/cicilan', [CicilanController::class, 'index'])->name('index');
-        Route::get('/cicilan/data', [CicilanController::class, 'getData'])->name('data');
-        Route::get('/cicilan/create', [CicilanController::class, 'create'])->name('create');
-        Route::post('/cicilan', [CicilanController::class, 'store'])->name('store');
+        Route::get('/cicilan', [CicilanController::class, 'index'])->name('cicilan.index');
+        Route::get('/cicilan/data', [CicilanController::class, 'getData'])->name('cicilan.data');
+        Route::get('/cicilan/create', [CicilanController::class, 'create'])->name('cicilan.create');
+        Route::post('/cicilan', [CicilanController::class, 'store'])->name('cicilan.store');
     });
 
     // Menu Management
