@@ -128,7 +128,25 @@ class HutangController extends Controller
         );
     }
 
-    public function store(){
+    public function store(Request $request){
+        $request->validate([
+            'outlet' => 'required|exists:outlet,id',
+            'nama_pemberi_hutang' => 'required|string|max:255',
+            'jumlah' => 'required|numeric|min:0',
+            'tanggal' => 'required|date_format:m/d/Y',
+            'deskripsi' => 'nullable|string|max:500',
+        ]);
 
+        $tanggal = Carbon::createFromFormat('m/d/Y', $request->tanggal)->startOfDay();
+        $hutang = new Hutang();
+        $hutang->outlet_id = $request->outlet;
+        $hutang->nama_pemberi_hutang = $request->nama_pemberi_hutang;
+        $hutang->jumlah = $request->jumlah;
+        $hutang->tanggal_hutang = $tanggal;
+        $hutang->deskripsi = $request->deskripsi;
+        $hutang->created_by = auth()->user()->id;
+        $hutang->save();
+        echo 'saved';
+        return redirect()->route('keuangan.hutang.index')->with('success', 'Hutang berhasil ditambahkan.');
     }
 }
