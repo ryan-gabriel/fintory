@@ -16,6 +16,7 @@
         <link rel="stylesheet" href="https://cdn.datatables.net/2.3.1/css/dataTables.dataTables.css" />
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @livewireStyles
 
     </head>
 
@@ -125,6 +126,7 @@
         </div>
 
         <!-- Scripts -->
+         @livewireScripts
         <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
         <script src="https://cdn.datatables.net/2.3.1/js/dataTables.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
@@ -225,7 +227,119 @@
                             title: "Sisa Hutang"
                         },
                     ]
-                }
+                },
+                '/dashboard/produk-stok/barang': {
+                    url: '/dashboard/produk-stok/barang/data',
+                    columns: [{
+                            data: 0,
+                            title: "Nama"
+                        },
+                        {
+                            data: 1,
+                            title: "Deskripsi"
+                        },
+                        {
+                            data: 2,
+                            title: "action"
+                        }
+                    ]
+                },
+                '/dashboard/produk-stok/kategori': {
+                    url: '/dashboard/produk-stok/kategori/data',
+                    columns: [{
+                            data: 0,
+                            title: "Nama Kategori"
+                        },
+                        {
+                            data: 1,
+                            title: "Deskripsi"
+                        },
+                        {
+                            data: 2,
+                            title: "action"
+                        }
+                    ]
+                },
+                '/dashboard/produk-stok/produk': {
+                    url: '/dashboard/produk-stok/produk/data',
+                    columns: [{
+                            data: 0,
+                            title: "Nama Barang"
+                        },
+                        {
+                            data: 1,
+                            title: "Kategori"
+                        },
+                        {
+                            data: 2,
+                            title: "Outlet"
+                        },
+                        {
+                            data: 3,
+                            title: "Harga Jual"
+                        },
+                        {
+                            data: 4,
+                            title: "Stok"
+                        },
+                        {
+                            data: 5,
+                            title: "action"
+                        }
+                    ]
+                },
+                '/dashboard/produk-stok/mutasi': {
+                    url: '/dashboard/produk-stok/mutasi/data',
+                    columns: [{
+                            data: 0,
+                            title: "Tanggal"
+                        },
+                        {
+                            data: 1,
+                            title: "Produk"
+                        },
+                        {
+                            data: 2,
+                            title: "Outlet"
+                        },
+                        {
+                            data: 3,
+                            title: "Tipe"
+                        },
+                        {
+                            data: 4,
+                            title: "Kuantitas"
+                        },
+                        {
+                            data: 5,
+                            title: "Referensi"
+                        }
+                    ]
+                },
+                '/dashboard/penjualan/riwayat': {
+                    url: '/dashboard/penjualan/riwayat/data',
+                    columns: [{
+                            data: 0,
+                            title: "Tanggal"
+                        },
+                        {
+                            data: 1,
+                            title: "No. Transaksi"
+                        },
+                        {
+                            data: 2,
+                            title: "Outlet"
+                        },
+                        {
+                            data: 3,
+                            title: "Pelanggan"
+                        },
+                        {
+                            data: 4,
+                            title: "Total"
+                        },
+                    ]
+                },
             };
 
             const Utils = {
@@ -563,6 +677,7 @@
 
                 // Enhanced handle click untuk semua jenis link
                 async handleLinkClick(e) {
+                    
                     // If the clicked link is a hash-only navigation, just scroll to the section without AJAX
                     const nextUrl = e.target.closest('a')?.href || e.target.getAttribute('data-url');
                     if (nextUrl && Utils.isHashOnlyChange(nextUrl, window.location.href)) {
@@ -581,6 +696,7 @@
                     let linkElement = null;
                     let config = null;
 
+                    
                     // Cari link element dan konfigurasinya
                     for (const selector of Object.keys(this.linkConfigs)) {
                         const found = clickedElement.closest(selector);

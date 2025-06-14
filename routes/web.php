@@ -4,6 +4,8 @@ use App\Http\Controllers\CicilanController;
 use App\Http\Controllers\HutangController;
 use App\Http\Controllers\KasLedgerController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Penjualan\SaleHistoryController;
+use App\Http\Controllers\Penjualan\SaleTransactionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\Auth\RoleChoiceController;
@@ -57,6 +59,33 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
         Route::get('/cicilan/create', [CicilanController::class, 'create'])->name('create');
         Route::post('/cicilan', [CicilanController::class, 'store'])->name('store');
     });
+
+    // Produk Management
+    Route::prefix('dashboard/produk-stok')->name('produk-stok.')->group(function () {
+        // Rute untuk Barang
+        Route::get('barang/data', [\App\Http\Controllers\BarangController::class, 'getData'])->name('barang.data');
+        Route::resource('barang', \App\Http\Controllers\BarangController::class)->except(['show']);
+
+        // Rute untuk Kategori
+        Route::get('kategori/data', [\App\Http\Controllers\KategoriController::class, 'getData'])->name('kategori.data');
+        Route::resource('kategori', \App\Http\Controllers\KategoriController::class)->except(['show']);
+
+        // Rute untuk Produk
+        Route::get('produk/data', [\App\Http\Controllers\ProductController::class, 'getData'])->name('produk.data');
+        Route::resource('produk', \App\Http\Controllers\ProductController::class)->except(['show']);
+
+        // Rute untuk Mutasi Stok
+        Route::get('mutasi', [\App\Http\Controllers\StockMutationController::class, 'index'])->name('mutasi.index');
+        Route::get('mutasi/data', [\App\Http\Controllers\StockMutationController::class, 'getData'])->name('mutasi.data');
+    });
+
+    // Penjualan Management
+    Route::prefix('dashboard/penjualan')->name('penjualan.')->group(function () {
+        Route::get('transaksi', [SaleTransactionController::class, 'index'])->name('transaksi.index');
+        Route::get('riwayat', [SaleHistoryController::class, 'index'])->name('riwayat.index');
+        Route::get('riwayat/data', [SaleHistoryController::class, 'getData'])->name('riwayat.data');
+    });
+
 
     // Menu Management
     Route::resource('menu', MenuController::class);
