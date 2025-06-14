@@ -1308,12 +1308,16 @@
                     const id = button.dataset.id;
                     const url = button.dataset.url;
                     const modalId = button.dataset.modalHide;
-                    
+
+                    if (!confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+                        return;
+                    }
+
                     // Show loading state
                     button.disabled = true;
                     const originalText = button.innerHTML;
                     button.innerHTML = `<span class="loading-spinner">Deleting...</span>`;
-                    console.log(url)
+
                     fetch(url, {
                         method: 'DELETE',
                         headers: {
@@ -1322,22 +1326,20 @@
                             'X-Requested-With': 'XMLHttpRequest'
                         }
                     })
-                    .then(response => {
-                        return response.json();
-                    })
+                    .then(response => response.json())
                     .then(data => {
                         // Close modal
                         const modal = document.getElementById(modalId);
                         if (modal) modal.classList.add('hidden');
-                        
+
                         // Reload DataTable
                         if ($.fn.DataTable.isDataTable('#data-table')) {
                             $('#data-table').DataTable().ajax.reload(null, false);
                         }
-                        
                     })
                     .catch(error => {
                         console.error('Error:', error);
+                        alert('Terjadi kesalahan saat menghapus data.');
                     })
                     .finally(() => {
                         button.disabled = false;
