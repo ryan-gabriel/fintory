@@ -26,6 +26,7 @@
                                 <th>Pemberi Hutang</th>
                                 <th>Jumlah Hutang</th>
                                 <th>Sisa Hutang</th>
+                                <th>Aksi</th>
                             </tr>
                         </thead>
                         <tfoot>
@@ -35,10 +36,12 @@
                                 <th>Pemberi Hutang</th>
                                 <th>Jumlah Hutang</th>
                                 <th>Sisa Hutang</th>
+                                <th>Aksi</th>
                             </tr>
                         </tfoot>
                     </table>
                 </div>
+                
             </div>
         </div>
     </div>

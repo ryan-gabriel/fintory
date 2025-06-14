@@ -53,6 +53,9 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
         Route::get('/hutang/data', [HutangController::class, 'getData'])->name('hutang.data');
         Route::get('/hutang/create', [HutangController::class, 'create'])->name('hutang.create');
         Route::post('/hutang', [HutangController::class, 'store'])->name('hutang.store');
+        Route::get('/hutang/{id}/edit', [HutangController::class, 'edit'])->name('hutang.edit');
+        Route::patch('/hutang/{id}', [HutangController::class, 'update'])->name('hutang.update');
+        Route::delete('/hutang/{id}', [HutangController::class, 'destroy'])->name('hutang.destroy');
         
         Route::get('/cicilan', [CicilanController::class, 'index'])->name('cicilan.index');
         Route::get('/cicilan/data', [CicilanController::class, 'getData'])->name('cicilan.data');

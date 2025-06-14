@@ -207,7 +207,7 @@
                         {
                             data: 4,
                             title: "Metode Pembayaran"
-                        },
+                        }
                     ]
                 },
                 '/dashboard/keuangan/hutang': {
@@ -232,6 +232,10 @@
                             data: 4,
                             title: "Sisa Hutang"
                         },
+                        {
+                            data: 5,
+                            title: "Aksi"
+                        }
                     ]
                 },
                 '/dashboard/produk-stok/barang': {
@@ -343,9 +347,9 @@
                         {
                             data: 4,
                             title: "Total"
-                        },
+                        }
                     ]
-                },
+                }
             };
 
             const Utils = {
@@ -762,6 +766,68 @@
                             tanggalPicker.addEventListener('changeDate', this.dateChangeHandlers.tanggalHutang);
                         }, 100);
                     }
+                },
+
+                initFormEditHandler() {
+                    // Wait for the form to be available in the DOM
+                    const waitForForm = () => {
+                        const form = document.getElementById('form-edit');
+                        if (form) {
+                            // Set form attributes
+                            form.method = 'POST';
+                            
+                            const submitBtn = form.querySelector('#btn-submit');
+                            
+                            form.addEventListener('submit', async (e) => {
+                                e.preventDefault();
+                                
+                                if (submitBtn.disabled) return;
+                                
+                                submitBtn.disabled = true;
+                                submitBtn.innerHTML = `
+                                    <svg aria-hidden="true" role="status" class="inline w-4 h-4 me-3 text-white animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="#E5E7EB"/>
+                                    <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentColor"/>
+                                    </svg>
+                                    Loading...
+                                `;
+
+                                try {
+                                    const response = await fetch(form.action, {
+                                        method: 'POST',
+                                        headers: {
+                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                            'Accept': 'application/json',
+                                            'X-Requested-With': 'XMLHttpRequest'
+                                        },
+                                        body: new FormData(form)
+                                    });
+
+                                    const result = await response.json();
+                                    
+                                    submitBtn.disabled = false;
+                                    submitBtn.innerHTML = 'Update';
+                                    
+                                    if (result.redirect) {
+                                        window.location.href = result.redirect;
+                                    } else if (result.message) {
+                                        alert(result.message);
+                                    }
+                                    
+                                } catch (error) {
+                                    console.error('Error:', error);
+                                    submitBtn.disabled = false;
+                                    submitBtn.innerHTML = 'Update';
+                                    alert('An error occurred: ' + error.message);
+                                }
+                            });
+                        } else {
+                            // Retry after a short delay if form not found
+                            setTimeout(waitForForm, 100);
+                        }
+                    };
+                    
+                    waitForForm();
                 }
             };
 
@@ -797,6 +863,40 @@
                         showLoader: true,
                         updateHistory: true,
                         updateTitle: true,
+                        afterLoad: (response, element) => {
+                            // Use MutationObserver to wait for dynamic content
+                            const observer = new MutationObserver((mutations, obs) => {
+                                const form = document.getElementById('form-edit');
+                                if (form) {
+                                    Utils.initFormEditHandler();
+                                    
+                                    // Initialize datepicker
+                                    const tanggalInput = document.getElementById('tanggal');
+                                    if (tanggalInput) {
+                                        if (tanggalInput._datepicker) {
+                                            tanggalInput._datepicker.destroy();
+                                        }
+                                        
+                                        const datepickerInstance = new Datepicker(tanggalInput, {
+                                            format: "yyyy/mm/dd",
+                                            autohide: true,
+                                            buttons: true
+                                        });
+                                        
+                                        if (tanggalInput.value) {
+                                            datepickerInstance.setDate(new Date(tanggalInput.value));
+                                        }
+                                    }
+                                    
+                                    obs.disconnect(); // Stop observing once done
+                                }
+                            });
+
+                            observer.observe(document.getElementById('main-content'), {
+                                childList: true,
+                                subtree: true
+                            });
+                        }
                     },
                     '.delete-link': {
                         method: 'DELETE',
@@ -970,8 +1070,9 @@
 
                     // Handle form data jika link ada di dalam form
                     if (method !== 'GET' && element) {
-                        const form = element.closest('form');
                         if (form) {
+                            const form = element.closest('form');
+                            console.log("Form: " + form)
                             const formData = new FormData(form);
                             options.body = formData;
                             delete options.headers['Content-Type']; // Let browser set it for FormData
@@ -1197,6 +1298,53 @@
             window.addEventListener('popstate', EventHandlers.handlePopState.bind(EventHandlers));
             document.addEventListener('DOMContentLoaded', EventHandlers.handleDOMContentLoaded.bind(EventHandlers));
             window.addEventListener('load', EventHandlers.handleWindowLoad.bind(EventHandlers));
+
+            // Replace your existing delete handler with this
+            document.addEventListener('click', function(e) {
+                // Handle delete confirmation
+                if (e.target.classList.contains('confirm-delete')) {
+                    e.preventDefault();
+                    const button = e.target;
+                    const id = button.dataset.id;
+                    const url = button.dataset.url;
+                    const modalId = button.dataset.modalHide;
+                    
+                    // Show loading state
+                    button.disabled = true;
+                    const originalText = button.innerHTML;
+                    button.innerHTML = `<span class="loading-spinner">Deleting...</span>`;
+                    console.log(url)
+                    fetch(url, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => {
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Close modal
+                        const modal = document.getElementById(modalId);
+                        if (modal) modal.classList.add('hidden');
+                        
+                        // Reload DataTable
+                        if ($.fn.DataTable.isDataTable('#data-table')) {
+                            $('#data-table').DataTable().ajax.reload(null, false);
+                        }
+                        
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    })
+                    .finally(() => {
+                        button.disabled = false;
+                        button.innerHTML = originalText;
+                    });
+                }
+            });
         </script>
     </body>
 
