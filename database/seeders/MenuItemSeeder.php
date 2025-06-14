@@ -37,7 +37,7 @@ class MenuItemSeeder extends Seeder
         MenuItem::create([
             'menu_name' => 'Transaksi Penjualan',
             'icon' => 'fa-solid fa-money-bill-transfer',
-            'route' => '#',
+            'route' => '/dashboard/penjualan/transaksi', // <-- UBAH INI
             'is_parent' => false,
             'parent_id' => $penjualan->id,
             'order' => 1
@@ -46,7 +46,7 @@ class MenuItemSeeder extends Seeder
         MenuItem::create([
             'menu_name' => 'Riwayat Penjualan',
             'icon' => 'fa-solid fa-clock-rotate-left',
-            'route' => '#',
+            'route' => '/dashboard/penjualan/riwayat', // <-- UBAH INI
             'is_parent' => false,
             'parent_id' => $penjualan->id,
             'order' => 2
@@ -64,7 +64,7 @@ class MenuItemSeeder extends Seeder
         MenuItem::create([
             'menu_name' => 'Daftar Produk',
             'icon' => 'fa-solid fa-clipboard-list',
-            'route' => '#',
+            'route' => '/dashboard/produk-stok/produk', // <-- UBAH INI
             'is_parent' => false,
             'parent_id' => $produkStok->id,
             'order' => 1
@@ -73,19 +73,20 @@ class MenuItemSeeder extends Seeder
         MenuItem::create([
             'menu_name' => 'Manajemen Barang',
             'icon' => 'fa-solid fa-list-check',
-            'route' => '#',
+            'route' => '/dashboard/produk-stok/barang', // <-- Pastikan route ini benar
             'is_parent' => false,
             'parent_id' => $produkStok->id,
             'order' => 2
         ]);
 
+
         MenuItem::create([
             'menu_name' => 'Mutasi Stok',
             'icon' => 'fa-solid fa-truck-moving',
-            'route' => '#',
+            'route' => '/dashboard/produk-stok/mutasi', // <-- UBAH INI
             'is_parent' => false,
             'parent_id' => $produkStok->id,
-            'order' => 3
+            'order' => 3 // Sesuaikan urutannya
         ]);
 
         // Keuangan
@@ -216,11 +217,11 @@ class MenuItemSeeder extends Seeder
 
         MenuItem::create([
             'menu_name' => 'Kategori Produk',
-            'icon' => 'fa-solid fa-table',
-            'route' => '#',
+            'icon' => 'fa-solid fa-tags', // Icon yang lebih relevan
+            'route' => '/dashboard/produk-stok/kategori', // <-- UBAH INI
             'is_parent' => false,
-            'parent_id' => $pengaturan->id,
-            'order' => 2
+            'parent_id' => $pengaturan->id, // Jadikan anak dari menu Produk & Stok
+            'order' => 2 // Sesuaikan urutannya
         ]);
 
         // Log Aktivitas
