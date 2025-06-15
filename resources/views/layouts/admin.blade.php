@@ -434,6 +434,7 @@
                         }
                     ]
                 },
+                
                 '/dashboard/laporan/penjualan': {
                     url: '{{ route("laporan.penjualan.data") }}',
                     columns: [
@@ -443,6 +444,17 @@
                         { data: 3, title: "Pelanggan" },
                         { data: 4, title: "Total", className: "text-right" },
                         { data: 5, title: "Aksi", className: "text-center", orderable: false, searchable: false }
+                    ]
+                },
+                '/dashboard/penjualan': {
+                    url: '{{ route("penjualan.data") }}',
+                    columns: [
+                        { data: 0, name: 'sale_date', title: "Tanggal" },
+                        { data: 1, name: 'id', title: "No. Transaksi" },
+                        { data: 2, name: 'outlet.name', title: "Outlet" },
+                        { data: 3, name: 'customer_name', title: "Pelanggan" },
+                        { data: 4, name: 'total', title: "Total", className: "text-right" },
+                        { data: 5, name: 'action', title: "Aksi", className: "text-center", orderable: false, searchable: false }
                     ]
                 }
             };

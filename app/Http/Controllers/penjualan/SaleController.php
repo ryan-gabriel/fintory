@@ -20,8 +20,7 @@ class SaleController extends Controller
      */
     public function index(Request $request)
     {
-        $sales = Sale::with('outlet')->latest()->paginate(15);
-        $view = view('penjualan.index', compact('sales'));
+        $view = view('penjualan.index'); // <-- HAPUS compact('sales') DARI SINI
 
         if ($request->ajax()) {
             return $view;
@@ -34,6 +33,81 @@ class SaleController extends Controller
         ]);
     }
 
+    public function getData(Request $request)
+    {
+        $query = Sale::with(['outlet']); // Relasi yang dibutuhkan
+
+        // ▼▼▼ LOGIKA FILTER PENCARIAN (SEARCH) ▼▼▼
+        if ($request->filled('search.value')) {
+            $search = $request->input('search.value');
+            $query->where(function ($q) use ($search) {
+                $q->where('customer_name', 'like', "%{$search}%")
+                  ->orWhere('id', 'like', "%{$search}%")
+                  ->orWhere('total', 'like', "%{$search}%")
+                  ->orWhereHas('outlet', function ($q2) use ($search) {
+                      $q2->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+        
+        // Logika filter global berdasarkan outlet yang aktif
+        $activeOutletId = session('selected_outlet_id');
+        if ($activeOutletId && $activeOutletId !== 'all') {
+            $query->where('outlet_id', $activeOutletId);
+        }
+
+        // ▼▼▼ LOGIKA FILTER TANGGAL ▼▼▼
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            try {
+                $startDate = \Carbon\Carbon::createFromFormat('Y-m-d', $request->start_date)->startOfDay();
+                $endDate = \Carbon\Carbon::createFromFormat('Y-m-d', $request->end_date)->endOfDay();
+                $query->whereBetween('sale_date', [$startDate, $endDate]);
+            } catch (\Exception $e) {
+                Log::warning('Invalid date format: ' . $e->getMessage());
+            }
+        }
+        
+
+        $totalFiltered = $query->count();
+
+        // Ordering
+        $orderColIndex = $request->input('order.0.column', 0);
+        $orderDir = strtolower($request->input('order.0.dir', 'desc')) === 'desc' ? 'desc' : 'asc';
+        $orderColName = $columns[$orderColIndex] ?? 'sale_date';
+
+        if ($orderColName === 'outlet.name') {
+            $query->join('outlet', 'outlet.id', '=', 'sale.outlet_id')
+                  ->orderBy('outlet.name', $orderDir)
+                  ->select('sale.*');
+        } else {
+            $query->orderBy($orderColName, $orderDir);
+        }
+        
+        $data = $query->offset($request->start)->limit($request->length)->get();
+
+        // Format data untuk response JSON
+        $jsonData = [
+            "draw"            => intval($request->input('draw')),
+            "recordsTotal"    => Sale::count(),
+            "recordsFiltered" => $totalFiltered,
+            "data"            => []
+        ];
+
+        foreach ($data as $sale) {
+            // Data dimasukkan sebagai array, bukan objek dengan key
+            $jsonData['data'][] = [
+                \Carbon\Carbon::parse($sale->sale_date)->format('d M Y'),
+                'TRX-' . str_pad($sale->id, 5, '0', STR_PAD_LEFT),
+                $sale->outlet->name ?? 'N/A',
+                $sale->customer_name,
+                'Rp ' . number_format($sale->total, 0, ',', '.'),
+                '<a href="' . route('penjualan.show', $sale->id) . '" class="text-indigo-600 hover:underline font-medium">Detail</a>'
+            ];
+        }
+
+        return response()->json($jsonData);
+    }
+
     /**
      * Menampilkan form untuk membuat transaksi baru.
      */
@@ -43,7 +117,7 @@ class SaleController extends Controller
         $data = [
             'outlets' => Outlet::where('lembaga_id', $lembaga_id)->orderBy('name')->get(),
         ];
-        
+
         $view = view('penjualan.create', $data);
 
         if ($request->ajax()) {
@@ -81,14 +155,14 @@ class SaleController extends Controller
                 foreach ($validated['products'] as $index => $productId) {
                     $product = Product::with('barang')->find($productId);
                     $quantity = $validated['quantities'][$index];
-                    
+
                     if ($product->stok < $quantity) {
                         throw new \Exception('Stok untuk produk "' . $product->barang->nama . '" tidak mencukupi. Stok tersedia: ' . $product->stok);
                     }
 
                     $subtotal = $product->harga_jual * $quantity;
                     $total += $subtotal;
-                    
+
                     $cart[] = ['product' => $product, 'quantity' => $quantity, 'subtotal' => $subtotal];
                 }
 
@@ -125,7 +199,7 @@ class SaleController extends Controller
             ->where('is_active', true)
             ->orderBy('id')
             ->get();
-        
+
         return response()->json($products);
     }
 

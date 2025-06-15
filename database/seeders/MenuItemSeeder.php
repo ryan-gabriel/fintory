@@ -34,7 +34,7 @@ class MenuItemSeeder extends Seeder
         $penjualan = MenuItem::create([
             'menu_name' => 'Penjualan',
             'icon' => 'fa-solid fa-magnifying-glass-chart',
-            'route' => '/dashboard/penjualan',
+            'route' => '/dashboard/penjualan', // <-- UBAH INI
             'is_parent' => false,
             'order' => 2
         ]);
