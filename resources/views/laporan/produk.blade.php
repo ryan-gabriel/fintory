@@ -23,7 +23,7 @@
                 </div>
                 <!-- End Tab Menu -->
 
-                <h1 class="text-2xl font-semibold">Laporan Mutasi Stok <span id="current_selected_outlet_name">{{ $selectedOutletName }}</span></h1>
+                <h1 class="text-2xl font-semibold">Laporan Stok Produk <span id="current_selected_outlet_name">{{ $selectedOutletName }}</span></h1>
 
 
                 <div class="w-full mt-5 flex flex-col md:flex-row md:justify-between md:items-center gap-4 md:gap-24">
