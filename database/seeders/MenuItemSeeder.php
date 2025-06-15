@@ -37,7 +37,7 @@ class MenuItemSeeder extends Seeder
         MenuItem::create([
             'menu_name' => 'Transaksi Penjualan',
             'icon' => 'fa-solid fa-money-bill-transfer',
-            'route' => '/dashboard/penjualan/transaksi', // <-- UBAH INI
+            'route' => '/dashboard/penjualan/create', // <-- UBAH INI
             'is_parent' => false,
             'parent_id' => $penjualan->id,
             'order' => 1
@@ -46,7 +46,7 @@ class MenuItemSeeder extends Seeder
         MenuItem::create([
             'menu_name' => 'Riwayat Penjualan',
             'icon' => 'fa-solid fa-clock-rotate-left',
-            'route' => '/dashboard/penjualan/riwayat', // <-- UBAH INI
+            'route' => '/dashboard/penjualan', // <-- UBAH INI
             'is_parent' => false,
             'parent_id' => $penjualan->id,
             'order' => 2

@@ -13,17 +13,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class SaleTransactionController extends Controller
+class SaleController extends Controller
 {
-    /**
-     * Menampilkan halaman riwayat penjualan.
-     * Halaman ini akan menjadi halaman utama untuk menu "Riwayat Penjualan".
-     */
     public function index()
     {
-        // Mengambil data penjualan dengan paginasi
         $sales = Sale::with('outlet')->latest()->paginate(15);
-
         return view('layouts.admin', [
             'slot' => view('penjualan.index', compact('sales')),
             'title' => 'Riwayat Penjualan',
@@ -31,17 +25,12 @@ class SaleTransactionController extends Controller
         ]);
     }
 
-    /**
-     * Menampilkan form untuk membuat transaksi baru.
-     * Halaman ini untuk menu "Transaksi Penjualan".
-     */
     public function create()
     {
         $lembaga_id = session('current_lembaga_id');
         $data = [
             'outlets' => Outlet::where('lembaga_id', $lembaga_id)->orderBy('name')->get(),
         ];
-        
         return view('layouts.admin', [
             'slot' => view('penjualan.create', $data),
             'title' => 'Buat Transaksi Penjualan',
@@ -49,9 +38,6 @@ class SaleTransactionController extends Controller
         ]);
     }
 
-    /**
-     * Menyimpan transaksi baru dari form ke database.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -66,7 +52,7 @@ class SaleTransactionController extends Controller
         ]);
 
         try {
-            DB::transaction(function () use ($validated) {
+            DB::transaction(function () use ($validated, $request) {
                 $total = 0;
                 $cart = [];
 
@@ -75,18 +61,13 @@ class SaleTransactionController extends Controller
                     $quantity = $validated['quantities'][$index];
                     
                     if ($product->stok < $quantity) {
-                        // Jika stok tidak cukup, batalkan transaksi
                         throw new \Exception('Stok untuk produk "' . $product->barang->nama . '" tidak mencukupi. Stok tersedia: ' . $product->stok);
                     }
 
                     $subtotal = $product->harga_jual * $quantity;
                     $total += $subtotal;
                     
-                    $cart[] = [
-                        'product' => $product,
-                        'quantity' => $quantity,
-                        'subtotal' => $subtotal
-                    ];
+                    $cart[] = ['product' => $product, 'quantity' => $quantity, 'subtotal' => $subtotal];
                 }
 
                 $sale = Sale::create([
@@ -98,45 +79,24 @@ class SaleTransactionController extends Controller
                 ]);
 
                 foreach ($cart as $item) {
-                    SaleItem::create([
-                        'sale_id' => $sale->id,
-                        'product_id' => $item['product']->id,
-                        'quantity' => $item['quantity'],
-                        'harga_satuan' => $item['product']->harga_jual,
-                        'subtotal' => $item['subtotal'],
-                    ]);
+                    SaleItem::create(['sale_id' => $sale->id, 'product_id' => $item['product']->id, 'quantity' => $item['quantity'], 'harga_satuan' => $item['product']->harga_jual, 'subtotal' => $item['subtotal']]);
                     $item['product']->decrement('stok', $item['quantity']);
-                    StockMutation::create([
-                        'product_id' => $item['product']->id,
-                        'outlet_id' => $validated['outlet_id'],
-                        'quantity' => $item['quantity'],
-                        'type' => 'out',
-                        'reference_type' => 'sale',
-                        'reference_id' => $sale->id,
-                    ]);
+                    StockMutation::create(['product_id' => $item['product']->id, 'outlet_id' => $validated['outlet_id'], 'quantity' => $item['quantity'], 'type' => 'out', 'reference_type' => 'sale', 'reference_id' => $sale->id]);
                 }
             });
-
             return redirect()->route('penjualan.index')->with('success', 'Transaksi berhasil disimpan!');
-
         } catch (\Exception $e) {
             Log::error("Gagal menyimpan transaksi: " . $e->getMessage());
             return back()->withInput()->with('error', $e->getMessage());
         }
     }
 
-     /**
-     * Endpoint untuk mengambil data produk berdasarkan outlet, akan digunakan oleh JavaScript.
-     */
     public function getProductsByOutlet(Request $request)
     {
         $products = Product::with('barang')
             ->where('outlet_id', $request->outlet_id)
-            ->where('stok', '>', 0)
-            ->where('is_active', true)
-            ->orderBy('id')
-            ->get();
-        
+            ->where('stok', '>', 0)->where('is_active', true)
+            ->orderBy('id')->get();
         return response()->json($products);
     }
 }

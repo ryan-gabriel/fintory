@@ -3,6 +3,7 @@
 use App\Http\Controllers\CicilanController;
 use App\Http\Controllers\HutangController;
 use App\Http\Controllers\KasLedgerController;
+use App\Http\Controllers\Penjualan\SaleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Penjualan\SaleHistoryController;
 use App\Http\Controllers\Penjualan\SaleTransactionController;
@@ -67,7 +68,7 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
         Route::get('/hutang/{id}/edit', [HutangController::class, 'edit'])->name('hutang.edit');
         Route::patch('/hutang/{id}', [HutangController::class, 'update'])->name('hutang.update');
         Route::delete('/hutang/{id}', [HutangController::class, 'destroy'])->name('hutang.destroy');
-        
+
         Route::get('/cicilan', [CicilanController::class, 'index'])->name('cicilan.index');
         Route::get('/cicilan/data', [CicilanController::class, 'getData'])->name('cicilan.data');
         Route::get('/cicilan/create', [CicilanController::class, 'create'])->name('cicilan.create');
@@ -96,11 +97,14 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
         Route::get('mutasi/data', [\App\Http\Controllers\StockMutationController::class, 'getData'])->name('mutasi.data');
     });
 
-    // Penjualan Management
-    Route::prefix('dashboard/penjualan')->name('penjualan.')->group(function () {
-        Route::get('transaksi', [SaleTransactionController::class, 'index'])->name('transaksi.index');
-        Route::get('riwayat', [SaleHistoryController::class, 'index'])->name('riwayat.index');
-        Route::get('riwayat/data', [SaleHistoryController::class, 'getData'])->name('riwayat.data');
+    Route::prefix('dashboard')->group(function() {
+        // Penjualan Management
+        Route::prefix('penjualan')->name('penjualan.')->group(function () {
+            Route::get('produk/search', [SaleController::class, 'getProductsByOutlet'])->name('produk.search');
+            Route::get('/', [SaleController::class, 'index'])->name('index');
+            Route::get('/create', [SaleController::class, 'create'])->name('create');
+            Route::post('/', [SaleController::class, 'store'])->name('store');
+        });
     });
 
 
