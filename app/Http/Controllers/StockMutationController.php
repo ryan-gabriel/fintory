@@ -27,6 +27,24 @@ class StockMutationController extends Controller
         // Eager load relasi untuk efisiensi query
         $query = StockMutation::with(['product.barang', 'outlet']);
 
+        if ($request->filled('start_date')) {
+            try {
+            $startDate = \Carbon\Carbon::createFromFormat('d/m/Y', $request->start_date)->startOfDay();
+            $query->where('created_at', '>=', $startDate);
+            } catch (\Exception $e) {
+            Log::warning('Invalid start_date format in Stock Mutation: ' . $request->start_date);
+            }
+        }
+
+        if ($request->filled('end_date')) {
+            try {
+            $endDate = \Carbon\Carbon::createFromFormat('d/m/Y', $request->end_date)->endOfDay();
+            $query->where('created_at', '<=', $endDate);
+            } catch (\Exception $e) {
+            Log::warning('Invalid end_date format in Stock Mutation: ' . $request->end_date);
+            }
+        }
+
         // Filter pencarian
         if ($request->filled('search.value')) {
             $search = $request->input('search.value');
@@ -48,6 +66,29 @@ class StockMutationController extends Controller
             $query->where('outlet_id', $activeOutletId);
         }
 
+
+        // Ambil parameter sorting dari request
+        $orderCol = $request->input('order.0.column');
+        $orderDir = $request->input('order.0.dir', 'asc');
+        $columns = [
+            0 => 'created_at',
+            1 => 'product_id',
+            2 => 'outlet_id',
+            3 => 'type',
+            4 => 'quantity',
+            5 => 'reference_type'
+        ];
+        $orderCol = isset($columns[$orderCol]) ? $columns[$orderCol] : 'created_at';
+
+        // Handle sorting by related column (e.g., outlet.name)
+        if ($orderCol === 'outlet.name') {
+            $query->join('outlets', 'outlets.id', '=', 'stock_mutations.outlet_id')
+                ->orderBy('outlets.name', $orderDir)
+                ->select('stock_mutations.*'); // ensure stock_mutations.* is selected after join
+        } else {
+            $query->orderBy($orderCol, $orderDir);
+        }
+
         $totalFiltered = $query->count();
         $data = $query->latest()->offset($request->start)->limit($request->length)->get();
 
@@ -63,7 +104,7 @@ class StockMutationController extends Controller
             $quantity_prefix = $mutation->type === 'in' ? '+' : '-';
 
             $jsonData['data'][] = [
-                $mutation->created_at->format('d-m-Y H:i'),
+                $mutation->created_at->format('d-m-Y'),
                 $mutation->product->barang->nama ?? 'Produk Dihapus',
                 $mutation->outlet->name ?? 'Outlet Dihapus',
                 ucfirst($mutation->type),

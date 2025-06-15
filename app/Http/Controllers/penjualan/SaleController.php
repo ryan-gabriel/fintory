@@ -56,16 +56,21 @@ class SaleController extends Controller
             $query->where('outlet_id', $activeOutletId);
         }
 
-        // ▼▼▼ LOGIKA FILTER TANGGAL ▼▼▼
-        if ($request->filled('start_date') && $request->filled('end_date')) {
+        if ($request->filled('start_date')) {
             try {
-                $startDate = \Carbon\Carbon::createFromFormat('Y-m-d', $request->start_date)->startOfDay();
-                $endDate = \Carbon\Carbon::createFromFormat('Y-m-d', $request->end_date)->endOfDay();
-                $query->whereBetween('sale_date', [$startDate, $endDate]);
+            // Konversi format dari datepicker ke format database
+            $startDate = \Carbon\Carbon::createFromFormat('m/d/Y', $request->start_date)->startOfDay();
+            if ($request->filled('end_date')) {
+                $endDate = \Carbon\Carbon::createFromFormat('m/d/Y', $request->end_date)->endOfDay();
+            } else {
+                $endDate = now()->endOfDay();
+            }
+            $query->whereBetween('sale_date', [$startDate, $endDate]);
             } catch (\Exception $e) {
-                Log::warning('Invalid date format: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::warning('Invalid date format in Sale report: ' . $request->start_date . ' or ' . $request->end_date);
             }
         }
+        
         
 
         $totalFiltered = $query->count();
