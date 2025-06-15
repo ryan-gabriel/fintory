@@ -42,14 +42,14 @@ class SaleController extends Controller
             $search = $request->input('search.value');
             $query->where(function ($q) use ($search) {
                 $q->where('customer_name', 'like', "%{$search}%")
-                  ->orWhere('id', 'like', "%{$search}%")
-                  ->orWhere('total', 'like', "%{$search}%")
-                  ->orWhereHas('outlet', function ($q2) use ($search) {
-                      $q2->where('name', 'like', "%{$search}%");
-                  });
+                    ->orWhere('id', 'like', "%{$search}%")
+                    ->orWhere('total', 'like', "%{$search}%")
+                    ->orWhereHas('outlet', function ($q2) use ($search) {
+                        $q2->where('name', 'like', "%{$search}%");
+                    });
             });
         }
-        
+
         // Logika filter global berdasarkan outlet yang aktif
         $activeOutletId = session('selected_outlet_id');
         if ($activeOutletId && $activeOutletId !== 'all') {
@@ -58,20 +58,20 @@ class SaleController extends Controller
 
         if ($request->filled('start_date')) {
             try {
-            // Konversi format dari datepicker ke format database
-            $startDate = \Carbon\Carbon::createFromFormat('m/d/Y', $request->start_date)->startOfDay();
-            if ($request->filled('end_date')) {
-                $endDate = \Carbon\Carbon::createFromFormat('m/d/Y', $request->end_date)->endOfDay();
-            } else {
-                $endDate = now()->endOfDay();
-            }
-            $query->whereBetween('sale_date', [$startDate, $endDate]);
+                // Konversi format dari datepicker ke format database
+                $startDate = \Carbon\Carbon::createFromFormat('m/d/Y', $request->start_date)->startOfDay();
+                if ($request->filled('end_date')) {
+                    $endDate = \Carbon\Carbon::createFromFormat('m/d/Y', $request->end_date)->endOfDay();
+                } else {
+                    $endDate = now()->endOfDay();
+                }
+                $query->whereBetween('sale_date', [$startDate, $endDate]);
             } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning('Invalid date format in Sale report: ' . $request->start_date . ' or ' . $request->end_date);
+                \Illuminate\Support\Facades\Log::warning('Invalid date format in Sale report: ' . $request->start_date . ' or ' . $request->end_date);
             }
         }
-        
-        
+
+
 
         $totalFiltered = $query->count();
 
@@ -82,20 +82,20 @@ class SaleController extends Controller
 
         if ($orderColName === 'outlet.name') {
             $query->join('outlet', 'outlet.id', '=', 'sale.outlet_id')
-                  ->orderBy('outlet.name', $orderDir)
-                  ->select('sale.*');
+                ->orderBy('outlet.name', $orderDir)
+                ->select('sale.*');
         } else {
             $query->orderBy($orderColName, $orderDir);
         }
-        
+
         $data = $query->offset($request->start)->limit($request->length)->get();
 
         // Format data untuk response JSON
         $jsonData = [
-            "draw"            => intval($request->input('draw')),
-            "recordsTotal"    => Sale::count(),
+            "draw" => intval($request->input('draw')),
+            "recordsTotal" => Sale::count(),
             "recordsFiltered" => $totalFiltered,
-            "data"            => []
+            "data" => []
         ];
 
         foreach ($data as $sale) {
@@ -148,17 +148,15 @@ class SaleController extends Controller
             'products.*' => 'required|exists:product,id',
             'quantities' => 'required|array',
             'quantities.*' => 'required|integer|min:1',
-        ], [
-            'products.required' => 'Keranjang belanja tidak boleh kosong.'
-        ]);
+        ], ['products.required' => 'Keranjang belanja tidak boleh kosong.']);
 
         try {
             DB::transaction(function () use ($validated) {
                 $total = 0;
-                $cart = [];
+                $cartItemsForInsert = [];
 
                 foreach ($validated['products'] as $index => $productId) {
-                    $product = Product::with('barang')->find($productId);
+                    $product = \App\Models\Product::find($productId);
                     $quantity = $validated['quantities'][$index];
 
                     if ($product->stok < $quantity) {
@@ -168,7 +166,12 @@ class SaleController extends Controller
                     $subtotal = $product->harga_jual * $quantity;
                     $total += $subtotal;
 
-                    $cart[] = ['product' => $product, 'quantity' => $quantity, 'subtotal' => $subtotal];
+                    $cartItemsForInsert[] = [
+                        'product_id' => $product->id,
+                        'quantity' => $quantity,
+                        'harga_satuan' => $product->harga_jual,
+                        'subtotal' => $subtotal
+                    ];
                 }
 
                 $sale = Sale::create([
@@ -179,14 +182,15 @@ class SaleController extends Controller
                     'created_by' => auth()->id(),
                 ]);
 
-                foreach ($cart as $item) {
-                    SaleItem::create(['sale_id' => $sale->id, 'product_id' => $item['product']->id, 'quantity' => $item['quantity'], 'harga_satuan' => $item['product']->harga_jual, 'subtotal' => $item['subtotal']]);
-                    $item['product']->decrement('stok', $item['quantity']);
-                    StockMutation::create(['product_id' => $item['product']->id, 'outlet_id' => $validated['outlet_id'], 'quantity' => $item['quantity'], 'type' => 'out', 'reference_type' => 'sale', 'reference_id' => $sale->id]);
+                // Sekarang kita hanya perlu membuat SaleItem.
+                // Pengurangan stok & mutasi stok akan diurus oleh TRIGGER di database.
+                foreach ($cartItemsForInsert as $item) {
+                    $sale->items()->create($item);
                 }
             });
 
             return redirect()->route('penjualan.index')->with('success', 'Transaksi berhasil disimpan!');
+
         } catch (\Exception $e) {
             Log::error("Gagal menyimpan transaksi: " . $e->getMessage());
             return back()->withInput()->with('error', $e->getMessage());

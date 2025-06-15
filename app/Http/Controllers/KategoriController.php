@@ -31,6 +31,18 @@ class KategoriController extends Controller
                   ->orWhere('deskripsi', 'like', "%{$search}%");
         }
 
+        // Assign order column and direction from request, with defaults
+        $orderCol = $request->input('order.0.column', 0);
+        $orderDir = $request->input('order.0.dir', 'asc');
+        // Map column index to actual column name
+        $columns = [
+            0 => 'nama',
+            1 => 'deskripsi',
+        ];
+        $orderCol = $columns[$orderCol] ?? 'nama';
+
+        $query->orderBy($orderCol, $orderDir);
+
         $totalFiltered = $query->count();
         $data = $query->latest()->offset($request->start)->limit($request->length)->get();
 
