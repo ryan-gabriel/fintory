@@ -76,6 +76,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call(MenuItemSeeder::class);
         $this->call(OutletSeeder::class);
+        $this->call(ProdukPenjualanSeeder::class);
 
         // keuangan seeder butuh outlet seeder terlebih dahulu
         $this->call(KeuanganSeeder::class);

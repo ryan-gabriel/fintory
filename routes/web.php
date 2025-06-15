@@ -96,11 +96,20 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
         Route::get('mutasi/data', [\App\Http\Controllers\StockMutationController::class, 'getData'])->name('mutasi.data');
     });
 
+
+    // Penjualan Management
     Route::prefix('dashboard/penjualan')->name('penjualan.')->group(function () {
         Route::get('/', [SaleController::class, 'index'])->name('index');
         Route::get('/create', [SaleController::class, 'create'])->name('create');
         Route::post('/', [SaleController::class, 'store'])->name('store');
         Route::get('/produk/search', [SaleController::class, 'getProductsByOutlet'])->name('produk.search');
+        Route::get('/{penjualan}', [SaleController::class, 'show'])->name('show');
+    });
+
+    // Laporan Management
+    Route::prefix('dashboard/laporan')->name('laporan.')->group(function () {
+        Route::get('/penjualan', [\App\Http\Controllers\Laporan\LaporanPenjualanController::class, 'index'])->name('penjualan.index');
+        Route::get('/penjualan/data', [\App\Http\Controllers\Laporan\LaporanPenjualanController::class, 'getData'])->name('penjualan.data');
     });
 
 

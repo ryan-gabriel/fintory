@@ -377,6 +377,17 @@
                             title: "Total"
                         }
                     ]
+                },
+                '/dashboard/laporan/penjualan': {
+                    url: '{{ route("laporan.penjualan.data") }}',
+                    columns: [
+                        { data: 0, title: "Tanggal" },
+                        { data: 1, title: "No. Transaksi" },
+                        { data: 2, title: "Outlet" },
+                        { data: 3, title: "Pelanggan" },
+                        { data: 4, title: "Total", className: "text-right" },
+                        { data: 5, title: "Aksi", className: "text-center", orderable: false, searchable: false }
+                    ]
                 }
             };
 

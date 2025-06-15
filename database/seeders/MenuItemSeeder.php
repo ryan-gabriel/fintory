@@ -29,28 +29,28 @@ class MenuItemSeeder extends Seeder
         $penjualan = MenuItem::create([
             'menu_name' => 'Penjualan',
             'icon' => 'fa-solid fa-magnifying-glass-chart',
-            'route' => null,
-            'is_parent' => true,
+            'route' => '/dashboard/penjualan',
+            'is_parent' => false,
             'order' => 2
         ]);
 
-        MenuItem::create([
-            'menu_name' => 'Transaksi Penjualan',
-            'icon' => 'fa-solid fa-money-bill-transfer',
-            'route' => '/dashboard/penjualan/create', // <-- UBAH INI
-            'is_parent' => false,
-            'parent_id' => $penjualan->id,
-            'order' => 1
-        ]);
+        // MenuItem::create([
+        //     'menu_name' => 'Transaksi Penjualan',
+        //     'icon' => 'fa-solid fa-money-bill-transfer',
+        //     'route' => '/dashboard/penjualan/create', // <-- UBAH INI
+        //     'is_parent' => false,
+        //     'parent_id' => $penjualan->id,
+        //     'order' => 1
+        // ]);
 
-        MenuItem::create([
-            'menu_name' => 'Riwayat Penjualan',
-            'icon' => 'fa-solid fa-clock-rotate-left',
-            'route' => '/dashboard/penjualan', // <-- UBAH INI
-            'is_parent' => false,
-            'parent_id' => $penjualan->id,
-            'order' => 2
-        ]);
+        // MenuItem::create([
+        //     'menu_name' => 'Riwayat Penjualan',
+        //     'icon' => 'fa-solid fa-clock-rotate-left',
+        //     'route' => '/dashboard/penjualan', // <-- UBAH INI
+        //     'is_parent' => false,
+        //     'parent_id' => $penjualan->id,
+        //     'order' => 2
+        // ]);
 
         // Produk & Stok
         $produkStok = MenuItem::create([
@@ -173,7 +173,7 @@ class MenuItemSeeder extends Seeder
         MenuItem::create([
             'menu_name' => 'Laporan Penjualan',
             'icon' => 'fa-solid fa-square-poll-vertical',
-            'route' => '#',
+            'route' => '/dashboard/laporan/penjualan', // <-- UBAH URL INI
             'is_parent' => false,
             'parent_id' => $laporan->id,
             'order' => 1

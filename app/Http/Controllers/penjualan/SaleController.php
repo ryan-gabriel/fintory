@@ -128,4 +128,17 @@ class SaleController extends Controller
         
         return response()->json($products);
     }
+
+    public function show(Sale $penjualan)
+    {
+        // 'penjualan' adalah variabel yang otomatis diambil oleh Laravel berdasarkan ID di URL.
+        // Kita gunakan 'load' untuk memuat relasi-relasi yang dibutuhkan.
+        $penjualan->load(['outlet', 'creator', 'items.product.barang']);
+
+        return view('layouts.admin', [
+            'slot' => view('penjualan.show', ['sale' => $penjualan]),
+            'title' => 'Detail Transaksi ' . 'TRX-' . str_pad($penjualan->id, 5, '0', STR_PAD_LEFT),
+            'lembaga' => Lembaga::find(session('current_lembaga_id')),
+        ]);
+    }
 }
