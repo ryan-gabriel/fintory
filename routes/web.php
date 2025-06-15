@@ -1,16 +1,16 @@
 <?php
 
+use App\Http\Controllers\Auth\RoleChoiceController;
 use App\Http\Controllers\CicilanController;
 use App\Http\Controllers\HutangController;
 use App\Http\Controllers\KasLedgerController;
+use App\Http\Controllers\LaporanKeuanganController;
+use App\Http\Controllers\MenuController;
+use App\Http\Controllers\MutasiStokController;
 use App\Http\Controllers\Penjualan\SaleController;
 use App\Http\Controllers\ProfileController;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\MenuController;
-use App\Http\Controllers\Auth\RoleChoiceController;
-use App\Http\Controllers\LaporanKeuanganController;
-use App\Http\Controllers\MutasiStokController;
 use App\Http\Controllers\StokProdukController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
@@ -61,7 +61,7 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
         Route::get('/kas-ledger/{id}/edit', [KasLedgerController::class, 'edit'])->name('kas-ledger.edit');
         Route::patch('/kas-ledger/{id}', [KasLedgerController::class, 'update'])->name('kas-ledger.update');
         Route::delete('/kas-ledger/{id}', [KasLedgerController::class, 'destroy'])->name('kas-ledger.destroy');
-        
+
         Route::get('/hutang', [HutangController::class, 'index'])->name('hutang.index');
         Route::get('/hutang/data', [HutangController::class, 'getData'])->name('hutang.data');
         Route::get('/hutang/create', [HutangController::class, 'create'])->name('hutang.create');
@@ -98,7 +98,6 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
         Route::get('mutasi/data', [\App\Http\Controllers\StockMutationController::class, 'getData'])->name('mutasi.data');
     });
 
-
     // Penjualan Management
     Route::prefix('dashboard/penjualan')->name('penjualan.')->group(function () {
         Route::get('/', [SaleController::class, 'index'])->name('index');
@@ -114,18 +113,22 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
         Route::get('/penjualan/data', [\App\Http\Controllers\Laporan\LaporanPenjualanController::class, 'getData'])->name('penjualan.data');
     });
 
-
-    // Menu Management
-    Route::resource('menu', MenuController::class);
-    Route::patch('menu/{menu}/toggle-status', [MenuController::class, 'toggleStatus'])
-        ->name('menu.toggleStatus');
-    Route::post('menu/update-order', [MenuController::class, 'updateOrder'])
-        ->name('menu.updateOrder');
-
+    // Menu Management (hanya untuk super admin)
+    Route::prefix('dashboard/admin')->name('admin.')->group(function () {
+        Route::resource('menu', MenuController::class);
+        Route::patch('menu/{menu}/toggle-status', [MenuController::class, 'toggleStatus'])
+            ->name('menu.toggleStatus');
+        Route::post('menu/update-order', [MenuController::class, 'updateOrder'])
+            ->name('menu.updateOrder');
+        Route::get('menu/{menu}/manage-roles', [MenuController::class, 'manageRoles'])
+            ->name('menu.manageRoles');
+        Route::patch('menu/{menu}/update-roles', [MenuController::class, 'updateRoles'])
+            ->name('menu.updateRoles');
+    });
 
     // Produk Management
     Route::prefix('dashboard/laporan')->name('laporan.')->group(function () {
-        
+
         Route::prefix('stok')->name('stok.')->group(function () {
             Route::get('/mutasi-stok/data', [MutasiStokController::class, 'getData'])->name('mutasi-stok.data');
             Route::get('/mutasi-stok', [MutasiStokController::class, 'index'])->name('mutasi-stok.index');

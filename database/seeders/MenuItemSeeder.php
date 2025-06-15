@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\MenuItem;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class MenuItemSeeder extends Seeder
 {
@@ -12,13 +13,17 @@ class MenuItemSeeder extends Seeder
      */
     public function run(): void
     {
-        // Clear existing menu items
-        MenuItem::truncate();
+        // Clear existing menu items safely
+        DB::table('menu_roles')->delete();
+        MenuItem::query()->delete();
+        
+        // Reset auto increment
+        DB::statement('ALTER TABLE menu_items AUTO_INCREMENT = 1');
 
         // Dashboard
         $dashboard = MenuItem::create([
             'menu_name' => 'Dashboard',
-            'icon'      => 'fas fa-tachometer-alt',  // <— Font Awesome class
+            'icon'      => 'fas fa-tachometer-alt',
             'route'     => '#',
             'is_parent' => false,
             'order'     => 1,
@@ -34,24 +39,6 @@ class MenuItemSeeder extends Seeder
             'order' => 2
         ]);
 
-        // MenuItem::create([
-        //     'menu_name' => 'Transaksi Penjualan',
-        //     'icon' => 'fa-solid fa-money-bill-transfer',
-        //     'route' => '/dashboard/penjualan/create', // <-- UBAH INI
-        //     'is_parent' => false,
-        //     'parent_id' => $penjualan->id,
-        //     'order' => 1
-        // ]);
-
-        // MenuItem::create([
-        //     'menu_name' => 'Riwayat Penjualan',
-        //     'icon' => 'fa-solid fa-clock-rotate-left',
-        //     'route' => '/dashboard/penjualan', // <-- UBAH INI
-        //     'is_parent' => false,
-        //     'parent_id' => $penjualan->id,
-        //     'order' => 2
-        // ]);
-
         // Produk & Stok
         $produkStok = MenuItem::create([
             'menu_name' => 'Produk & Stok',
@@ -64,7 +51,7 @@ class MenuItemSeeder extends Seeder
         MenuItem::create([
             'menu_name' => 'Daftar Produk',
             'icon' => 'fa-solid fa-clipboard-list',
-            'route' => '/dashboard/produk-stok/produk', // <-- UBAH INI
+            'route' => '/dashboard/produk-stok/produk',
             'is_parent' => false,
             'parent_id' => $produkStok->id,
             'order' => 1
@@ -73,20 +60,19 @@ class MenuItemSeeder extends Seeder
         MenuItem::create([
             'menu_name' => 'Manajemen Barang',
             'icon' => 'fa-solid fa-list-check',
-            'route' => '/dashboard/produk-stok/barang', // <-- Pastikan route ini benar
+            'route' => '/dashboard/produk-stok/barang',
             'is_parent' => false,
             'parent_id' => $produkStok->id,
             'order' => 2
         ]);
 
-
         MenuItem::create([
             'menu_name' => 'Mutasi Stok',
             'icon' => 'fa-solid fa-truck-moving',
-            'route' => '/dashboard/produk-stok/mutasi', // <-- UBAH INI
+            'route' => '/dashboard/produk-stok/mutasi',
             'is_parent' => false,
             'parent_id' => $produkStok->id,
-            'order' => 3 // Sesuaikan urutannya
+            'order' => 3
         ]);
 
         // Keuangan
@@ -173,7 +159,7 @@ class MenuItemSeeder extends Seeder
         MenuItem::create([
             'menu_name' => 'Laporan Penjualan',
             'icon' => 'fa-solid fa-square-poll-vertical',
-            'route' => '/dashboard/laporan/penjualan', // <-- UBAH URL INI
+            'route' => '/dashboard/laporan/penjualan',
             'is_parent' => false,
             'parent_id' => $laporan->id,
             'order' => 1
@@ -216,12 +202,21 @@ class MenuItemSeeder extends Seeder
         ]);
 
         MenuItem::create([
-            'menu_name' => 'Kategori Produk',
-            'icon' => 'fa-solid fa-tags', // Icon yang lebih relevan
-            'route' => '/dashboard/produk-stok/kategori', // <-- UBAH INI
+            'menu_name' => 'Manajemen Role & Menu',
+            'icon' => 'fa-solid fa-list-ul',
+            'route' => '/dashboard/admin/menu',
             'is_parent' => false,
-            'parent_id' => $pengaturan->id, // Jadikan anak dari menu Produk & Stok
-            'order' => 2 // Sesuaikan urutannya
+            'parent_id' => $pengaturan->id,
+            'order' => 2
+        ]);
+
+        MenuItem::create([
+            'menu_name' => 'Kategori Produk',
+            'icon' => 'fa-solid fa-tags',
+            'route' => '/dashboard/produk-stok/kategori',
+            'is_parent' => false,
+            'parent_id' => $pengaturan->id,
+            'order' => 3
         ]);
 
         // Log Aktivitas

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MenuItem;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -14,11 +15,21 @@ class MenuController extends Controller
      */
     public function index(): View
     {
-        $menuItems = MenuItem::with('parent', 'children')
+        // Check if user has super role to access this page
+        $currentRoleId = session('current_role_id');
+        $currentRole = Role::find($currentRoleId);
+        
+        if (!$currentRole || $currentRole->role_name !== 'super') {
+            abort(403, 'Access denied. Only Super Administrator can access menu management.');
+        }
+
+        $menuItems = MenuItem::with('parent', 'children', 'roles')
             ->orderBy('order')
             ->get();
 
-        return view('admin.menu.index', compact('menuItems'));
+        $roles = Role::all();
+
+        return view('admin.menu.index', compact('menuItems', 'roles'));
     }
 
     /**
@@ -26,12 +37,17 @@ class MenuController extends Controller
      */
     public function create(): View
     {
+        // Check super role access
+        $this->checkSuperAccess();
+
         $parentMenus = MenuItem::where('is_parent', true)
             ->orWhere('parent_id', null)
             ->orderBy('order')
             ->get();
 
-        return view('admin.menu.create', compact('parentMenus'));
+        $roles = Role::all();
+
+        return view('admin.menu.create', compact('parentMenus', 'roles'));
     }
 
     /**
@@ -39,6 +55,9 @@ class MenuController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // Check super role access
+        $this->checkSuperAccess();
+
         $validated = $request->validate([
             'menu_name' => 'required|string|max:255',
             'icon' => 'nullable|string|max:255',
@@ -46,7 +65,9 @@ class MenuController extends Controller
             'is_parent' => 'boolean',
             'parent_id' => 'nullable|exists:menu_items,id',
             'order' => 'required|integer|min:0',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
+            'roles' => 'array',
+            'roles.*' => 'exists:roles,id'
         ]);
 
         // Set is_parent to false if parent_id is provided
@@ -54,7 +75,12 @@ class MenuController extends Controller
             $validated['is_parent'] = false;
         }
 
-        MenuItem::create($validated);
+        $menuItem = MenuItem::create($validated);
+
+        // Attach roles if provided
+        if (isset($validated['roles'])) {
+            $menuItem->roles()->attach($validated['roles']);
+        }
 
         return redirect()->route('menu.index')
             ->with('success', 'Menu item created successfully.');
@@ -65,7 +91,10 @@ class MenuController extends Controller
      */
     public function show(MenuItem $menu): View
     {
-        $menu->load('parent', 'children');
+        // Check super role access
+        $this->checkSuperAccess();
+
+        $menu->load('parent', 'children', 'roles');
         return view('admin.menu.show', compact('menu'));
     }
 
@@ -74,6 +103,9 @@ class MenuController extends Controller
      */
     public function edit(MenuItem $menu): View
     {
+        // Check super role access
+        $this->checkSuperAccess();
+
         $parentMenus = MenuItem::where('is_parent', true)
             ->where('id', '!=', $menu->id)
             ->orWhere('parent_id', null)
@@ -81,7 +113,10 @@ class MenuController extends Controller
             ->orderBy('order')
             ->get();
 
-        return view('admin.menu.edit', compact('menu', 'parentMenus'));
+        $roles = Role::all();
+        $menu->load('roles');
+
+        return view('admin.menu.edit', compact('menu', 'parentMenus', 'roles'));
     }
 
     /**
@@ -89,6 +124,9 @@ class MenuController extends Controller
      */
     public function update(Request $request, MenuItem $menu): RedirectResponse
     {
+        // Check super role access
+        $this->checkSuperAccess();
+
         $validated = $request->validate([
             'menu_name' => 'required|string|max:255',
             'icon' => 'nullable|string|max:255',
@@ -96,7 +134,9 @@ class MenuController extends Controller
             'is_parent' => 'boolean',
             'parent_id' => 'nullable|exists:menu_items,id',
             'order' => 'required|integer|min:0',
-            'is_active' => 'boolean'
+            'is_active' => 'boolean',
+            'roles' => 'array',
+            'roles.*' => 'exists:roles,id'
         ]);
 
         // Set is_parent to false if parent_id is provided
@@ -105,6 +145,13 @@ class MenuController extends Controller
         }
 
         $menu->update($validated);
+
+        // Sync roles
+        if (isset($validated['roles'])) {
+            $menu->roles()->sync($validated['roles']);
+        } else {
+            $menu->roles()->detach();
+        }
 
         return redirect()->route('menu.index')
             ->with('success', 'Menu item updated successfully.');
@@ -115,12 +162,17 @@ class MenuController extends Controller
      */
     public function destroy(MenuItem $menu): RedirectResponse
     {
+        // Check super role access
+        $this->checkSuperAccess();
+
         // Check if menu has children
         if ($menu->children()->count() > 0) {
             return redirect()->route('menu.index')
                 ->with('error', 'Cannot delete menu item that has child items.');
         }
 
+        // Detach roles before deleting
+        $menu->roles()->detach();
         $menu->delete();
 
         return redirect()->route('menu.index')
@@ -132,6 +184,9 @@ class MenuController extends Controller
      */
     public function toggleStatus(MenuItem $menu): RedirectResponse
     {
+        // Check super role access
+        $this->checkSuperAccess();
+
         $menu->update(['is_active' => !$menu->is_active]);
 
         return redirect()->route('menu.index')
@@ -143,6 +198,9 @@ class MenuController extends Controller
      */
     public function updateOrder(Request $request): RedirectResponse
     {
+        // Check super role access
+        $this->checkSuperAccess();
+
         $validated = $request->validate([
             'menu_orders' => 'required|array',
             'menu_orders.*.id' => 'required|exists:menu_items,id',
@@ -156,5 +214,51 @@ class MenuController extends Controller
 
         return redirect()->route('menu.index')
             ->with('success', 'Menu order updated successfully.');
+    }
+
+    /**
+     * Check if current user has super role access
+     */
+    private function checkSuperAccess(): void
+    {
+        $currentRoleId = session('current_role_id');
+        $currentRole = Role::find($currentRoleId);
+        
+        if (!$currentRole || $currentRole->role_name !== 'super') {
+            abort(403, 'Access denied. Only Super Administrator can access menu management.');
+        }
+    }
+
+    /**
+     * Manage menu roles assignment
+     */
+    public function manageRoles(MenuItem $menu): View
+    {
+        // Check super role access
+        $this->checkSuperAccess();
+
+        $menu->load('roles');
+        $roles = Role::all();
+
+        return view('admin.menu.manage-roles', compact('menu', 'roles'));
+    }
+
+    /**
+     * Update menu roles assignment
+     */
+    public function updateRoles(Request $request, MenuItem $menu): RedirectResponse
+    {
+        // Check super role access
+        $this->checkSuperAccess();
+
+        $validated = $request->validate([
+            'roles' => 'array',
+            'roles.*' => 'exists:roles,id'
+        ]);
+
+        $menu->roles()->sync($validated['roles'] ?? []);
+
+        return redirect()->route('menu.index')
+            ->with('success', 'Menu roles updated successfully.');
     }
 }
