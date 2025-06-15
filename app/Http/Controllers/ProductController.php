@@ -50,6 +50,29 @@ class ProductController extends Controller
             $query->where('outlet_id', $activeOutletId);
         }
 
+        // Ambil kolom dan arah pengurutan dari request, gunakan default jika tidak ada
+        $orderCol = $request->input('order.0.column');
+        $orderDir = $request->input('order.0.dir', 'asc');
+
+        // Map kolom index ke nama kolom database
+        $columns = [
+            0 => 'barang_id',
+            1 => 'kategori_id',
+            2 => 'outlet_id',
+            3 => 'harga_jual',
+            4 => 'stok',
+        ];
+        $orderCol = isset($columns[$orderCol]) ? $columns[$orderCol] : 'id';
+
+        if ($orderCol === 'outlet_id') {
+            $query->join('outlets', 'outlets.id', '=', 'products.outlet_id')
+                ->orderBy('outlets.name', $orderDir)
+                ->select('products.*'); // ensure products.* is selected after join
+        } else {
+            $query->orderBy($orderCol, $orderDir);
+        }
+
+
         $totalFiltered = $query->count();
         $data = $query->latest()->offset($request->start)->limit($request->length)->get();
 
@@ -68,8 +91,8 @@ class ProductController extends Controller
                 'Rp ' . number_format($product->harga_jual, 0, ',', '.'),
                 $product->stok,
                 '<div class="text-center">' .
-                    '<a href="'.route('produk-stok.produk.edit', $product->id).'" class="edit-link text-yellow-500 font-semibold hover:underline">Edit</a> | ' .
-                    '<a href="'.route('produk-stok.produk.destroy', $product->id).'" class="delete-link text-red-500 font-semibold hover:underline" data-id="'.$product->id.'">Hapus</a>' .
+                    '<a href="'.route('produk-stok.produk.edit', $product->id).'" class="edit-link inline-block px-3 py-1 bg-blue-500 text-white rounded font-semibold hover:bg-blue-600 transition">Edit</a> ' .
+                    '<a href="'.route('produk-stok.produk.destroy', $product->id).'" class="delete-link inline-block px-3 py-1 bg-red-500 text-white rounded font-semibold hover:bg-red-600 transition" data-id="'.$product->id.'">Hapus</a>' .
                 '</div>'
             ];
         }

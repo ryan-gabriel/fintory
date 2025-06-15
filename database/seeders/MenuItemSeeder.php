@@ -16,19 +16,18 @@ class MenuItemSeeder extends Seeder
         // Clear existing menu items safely
         DB::table('menu_roles')->delete();
         MenuItem::query()->delete();
-        
+
         // Reset auto increment
         DB::statement('ALTER TABLE menu_items AUTO_INCREMENT = 1');
 
         // Dashboard
         $dashboard = MenuItem::create([
             'menu_name' => 'Dashboard',
-            'icon'      => 'fas fa-tachometer-alt',
-            'route'     => '#',
+            'icon' => 'fas fa-tachometer-alt',
+            'route' => '#',
             'is_parent' => false,
-            'order'     => 1,
+            'order' => 1,
         ]);
-        
 
         // Penjualan
         $penjualan = MenuItem::create([
@@ -36,7 +35,7 @@ class MenuItemSeeder extends Seeder
             'icon' => 'fa-solid fa-magnifying-glass-chart',
             'route' => '/dashboard/penjualan', // <-- UBAH INI
             'is_parent' => false,
-            'order' => 2
+            'order' => 2,
         ]);
 
         // Produk & Stok
@@ -45,7 +44,7 @@ class MenuItemSeeder extends Seeder
             'icon' => 'fa-solid fa-boxes-stacked',
             'route' => null,
             'is_parent' => true,
-            'order' => 3
+            'order' => 3,
         ]);
 
         MenuItem::create([
@@ -54,7 +53,7 @@ class MenuItemSeeder extends Seeder
             'route' => '/dashboard/produk-stok/produk',
             'is_parent' => false,
             'parent_id' => $produkStok->id,
-            'order' => 1
+            'order' => 1,
         ]);
 
         MenuItem::create([
@@ -63,7 +62,7 @@ class MenuItemSeeder extends Seeder
             'route' => '/dashboard/produk-stok/barang',
             'is_parent' => false,
             'parent_id' => $produkStok->id,
-            'order' => 2
+            'order' => 2,
         ]);
 
         MenuItem::create([
@@ -72,7 +71,7 @@ class MenuItemSeeder extends Seeder
             'route' => '/dashboard/produk-stok/mutasi',
             'is_parent' => false,
             'parent_id' => $produkStok->id,
-            'order' => 3
+            'order' => 3,
         ]);
 
         // Keuangan
@@ -81,7 +80,7 @@ class MenuItemSeeder extends Seeder
             'icon' => 'fa-solid fa-coins',
             'route' => null,
             'is_parent' => true,
-            'order' => 4
+            'order' => 4,
         ]);
 
         MenuItem::create([
@@ -90,7 +89,7 @@ class MenuItemSeeder extends Seeder
             'route' => '/dashboard/keuangan/kas-ledger',
             'is_parent' => false,
             'parent_id' => $keuangan->id,
-            'order' => 1
+            'order' => 1,
         ]);
 
         MenuItem::create([
@@ -99,7 +98,7 @@ class MenuItemSeeder extends Seeder
             'route' => '/dashboard/keuangan/hutang',
             'is_parent' => false,
             'parent_id' => $keuangan->id,
-            'order' => 2
+            'order' => 2,
         ]);
 
         MenuItem::create([
@@ -108,7 +107,7 @@ class MenuItemSeeder extends Seeder
             'route' => '/dashboard/keuangan/cicilan',
             'is_parent' => false,
             'parent_id' => $keuangan->id,
-            'order' => 3
+            'order' => 3,
         ]);
 
         // Outlet & Karyawan
@@ -117,7 +116,7 @@ class MenuItemSeeder extends Seeder
             'icon' => 'fa-solid fa-shop',
             'route' => null,
             'is_parent' => true,
-            'order' => 5
+            'order' => 5,
         ]);
 
         MenuItem::create([
@@ -126,7 +125,7 @@ class MenuItemSeeder extends Seeder
             'route' => '#',
             'is_parent' => false,
             'parent_id' => $outletKaryawan->id,
-            'order' => 1
+            'order' => 1,
         ]);
 
         MenuItem::create([
@@ -135,7 +134,7 @@ class MenuItemSeeder extends Seeder
             'route' => '#',
             'is_parent' => false,
             'parent_id' => $outletKaryawan->id,
-            'order' => 2
+            'order' => 2,
         ]);
 
         MenuItem::create([
@@ -144,7 +143,7 @@ class MenuItemSeeder extends Seeder
             'route' => '#',
             'is_parent' => false,
             'parent_id' => $outletKaryawan->id,
-            'order' => 3
+            'order' => 3,
         ]);
 
         // Laporan
@@ -153,7 +152,7 @@ class MenuItemSeeder extends Seeder
             'icon' => 'fa-solid fa-book',
             'route' => null,
             'is_parent' => true,
-            'order' => 6
+            'order' => 6,
         ]);
 
         MenuItem::create([
@@ -162,7 +161,7 @@ class MenuItemSeeder extends Seeder
             'route' => '/dashboard/laporan/penjualan',
             'is_parent' => false,
             'parent_id' => $laporan->id,
-            'order' => 1
+            'order' => 1,
         ]);
 
         MenuItem::create([
@@ -171,7 +170,7 @@ class MenuItemSeeder extends Seeder
             'route' => '/dashboard/laporan/stok/mutasi-stok',
             'is_parent' => false,
             'parent_id' => $laporan->id,
-            'order' => 2
+            'order' => 2,
         ]);
 
         MenuItem::create([
@@ -180,7 +179,7 @@ class MenuItemSeeder extends Seeder
             'route' => '/dashboard/laporan/keuangan',
             'is_parent' => false,
             'parent_id' => $laporan->id,
-            'order' => 3
+            'order' => 3,
         ]);
 
         // Pengaturan
@@ -189,25 +188,25 @@ class MenuItemSeeder extends Seeder
             'icon' => 'fa-solid fa-gear',
             'route' => null,
             'is_parent' => true,
-            'order' => 7
+            'order' => 7,
         ]);
 
+        // Untuk Manajemen User & Role
         MenuItem::create([
             'menu_name' => 'Manajemen User & Role',
             'icon' => 'fa-solid fa-users-gear',
-            'route' => '#',
+            'route' => '/dashboard/admin/user-management',
             'is_parent' => false,
             'parent_id' => $pengaturan->id,
-            'order' => 1
+            'order' => 1,
         ]);
-
         MenuItem::create([
             'menu_name' => 'Manajemen Role & Menu',
             'icon' => 'fa-solid fa-list-ul',
             'route' => '/dashboard/admin/menu',
             'is_parent' => false,
             'parent_id' => $pengaturan->id,
-            'order' => 2
+            'order' => 2,
         ]);
 
         MenuItem::create([
@@ -216,7 +215,7 @@ class MenuItemSeeder extends Seeder
             'route' => '/dashboard/produk-stok/kategori',
             'is_parent' => false,
             'parent_id' => $pengaturan->id,
-            'order' => 3
+            'order' => 3,
         ]);
 
         // Log Aktivitas
@@ -225,7 +224,7 @@ class MenuItemSeeder extends Seeder
             'icon' => 'fa-solid fa-timeline',
             'route' => '#',
             'is_parent' => false,
-            'order' => 8
+            'order' => 8,
         ]);
     }
 }

@@ -30,12 +30,22 @@ class BarangController extends Controller
     public function getData(Request $request)
     {
         $query = Barang::query();
-        
+
         // Filter pencarian
         if ($request->filled('search.value')) {
             $search = $request->input('search.value');
             $query->where('nama', 'like', "%{$search}%")
-                  ->orWhere('deskripsi', 'like', "%{$search}%");
+                ->orWhere('deskripsi', 'like', "%{$search}%");
+        }
+
+        // filter ordering
+        if ($request->filled('order')) {
+            $columnIndex = $request->input('order.0.column');
+            $direction = $request->input('order.0.dir', 'asc');
+            $columns = ['nama', 'deskripsi']; // Sesuaikan dengan kolom yang ada
+            if (isset($columns[$columnIndex])) {
+                $query->orderBy($columns[$columnIndex], $direction);
+            }
         }
 
         $totalFiltered = $query->count();
@@ -57,8 +67,8 @@ class BarangController extends Controller
                 // Kolom 1: Deskripsi
                 $barang->deskripsi ?? '-',
                 // Kolom 2: Aksi
-                '<a href="'.route('produk-stok.barang.edit', $barang->kode_barang).'" class="edit-link text-yellow-500 font-semibold hover:underline">Edit</a> | ' .
-                '<a href="'.route('produk-stok.barang.destroy', $barang->kode_barang).'" class="delete-link text-red-500 font-semibold hover:underline" data-id="'.$barang->kode_barang.'">Hapus</a>'
+                '<a href="' . route('produk-stok.barang.edit', $barang->kode_barang) . '" class="edit-link inline-block px-3 py-1 bg-blue-500 text-white rounded font-semibold hover:bg-blue-600 transition mr-2">Edit</a>' .
+                '<a href="' . route('produk-stok.barang.destroy', $barang->kode_barang) . '" class="delete-link inline-block px-3 py-1 bg-red-500 text-white rounded font-semibold hover:bg-red-600 transition" data-id="' . $barang->kode_barang . '">Hapus</a>'
             ];
         }
 
@@ -116,12 +126,12 @@ class BarangController extends Controller
     public function update(Request $request, Barang $barang)
     {
         $validated = $request->validate([
-            'nama' => 'required|string|max:100|unique:barang,nama,'.$barang->kode_barang.',kode_barang',
+            'nama' => 'required|string|max:100|unique:barang,nama,' . $barang->kode_barang . ',kode_barang',
             'deskripsi' => 'nullable|string',
         ]);
 
         $barang->update($validated);
-        
+
         // ==========================================================
         // === PERBAIKAN DI SINI (menggunakan nama route yang benar) ===
         // ==========================================================

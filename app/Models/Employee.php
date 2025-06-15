@@ -2,13 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Employee extends Model
 {
-    use HasFactory;
-
     protected $table = 'employee';
 
     protected $fillable = [
@@ -20,26 +18,30 @@ class Employee extends Model
         'joined_at',
     ];
 
+    protected $casts = [
+        'joined_at' => 'date',
+    ];
+
     /**
-     * Relasi ke model User.
+     * Get the user that owns the employee.
      */
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
     /**
-     * Relasi ke model Outlet.
+     * Get the outlet that owns the employee.
      */
-    public function outlet()
+    public function outlet(): BelongsTo
     {
         return $this->belongsTo(Outlet::class);
     }
 
     /**
-     * Relasi ke model Lembaga.
+     * Get the lembaga that owns the employee.
      */
-    public function lembaga()
+    public function lembaga(): BelongsTo
     {
         return $this->belongsTo(Lembaga::class);
     }

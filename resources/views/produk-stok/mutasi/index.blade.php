@@ -4,7 +4,12 @@
             <div class="p-6 text-gray-900 dark:text-gray-100">
                 <div>
                     <h1 class="text-2xl font-semibold">Riwayat Mutasi Stok</h1>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Catatan semua perubahan stok yang terjadi di semua outlet.</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Catatan semua perubahan stok yang terjadi
+                        di semua outlet.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <p class="text-gray-600 text-sm">Filter Tanggal:</p>
+                    <x-date-range-picker />
                 </div>
 
                 <div class="overflow-x-auto relative mt-4 sm:rounded-lg">
