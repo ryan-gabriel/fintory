@@ -129,6 +129,7 @@
         <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
         <script src="https://cdn.datatables.net/2.3.1/js/dataTables.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.46.0/dist/apexcharts.min.js"></script>
 
         <script>
             let previousUrl = window.location.href;
@@ -946,6 +947,16 @@
                         showLoader: true,
                         updateHistory: true,
                         updateTitle: true
+                        ,onSuccess: (response, element) => {
+                            // Jika masuk ke /dashboard, lakukan refresh
+                            const url = element.href || element.getAttribute('data-url');
+                            if (url) {
+                                const pathname = new URL(url, window.location.origin).pathname;
+                                if (pathname === '/dashboard') {
+                                    window.location.reload();
+                                }
+                            }
+                        }
                     },
                     '.create-link': {
                         method: 'GET',
@@ -1515,6 +1526,66 @@
                     });
                 }
             })
+
+            document.addEventListener("DOMContentLoaded", () => {
+    fetch("/api/sales-last-7-days")
+        .then(response => response.json())
+        .then(data => {
+            const dates = data.map(item => item.date);
+            const totals = data.map(item => item.total);
+
+            const options = {
+                chart: {
+                    height: "100%",
+                    type: "area",
+                    fontFamily: "Inter, sans-serif",
+                    toolbar: { show: false },
+                    dropShadow: { enabled: false },
+                },
+                tooltip: {
+                    enabled: true,
+                    x: { show: true },
+                },
+                fill: {
+                    type: "gradient",
+                    gradient: {
+                        opacityFrom: 0.55,
+                        opacityTo: 0,
+                        shade: "#1C64F2",
+                        gradientToColors: ["#1C64F2"],
+                    },
+                },
+                dataLabels: { enabled: false },
+                stroke: { width: 6 },
+                grid: {
+                    show: false,
+                    strokeDashArray: 4,
+                    padding: { left: 2, right: 2, top: 0 },
+                },
+                series: [{
+                    name: "Sales",
+                    data: totals,
+                    color: "#1A56DB",
+                }],
+                xaxis: {
+                    categories: dates,
+                    labels: { show: true },
+                    axisBorder: { show: false },
+                    axisTicks: { show: true },
+                },
+                yaxis: { show: false },
+            };
+
+            const el = document.getElementById("area-chart");
+            if (el && typeof ApexCharts !== 'undefined') {
+                const chart = new ApexCharts(el, options);
+                chart.render();
+            }
+        })
+        .catch(error => {
+            console.error("Error fetching chart data:", error);
+        });
+});
         </script>
     </body>
 

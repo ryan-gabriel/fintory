@@ -10,6 +10,9 @@ use App\Http\Controllers\MutasiStokController;
 use App\Http\Controllers\Penjualan\SaleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StokProdukController;
+use App\Http\Controllers\DashboardController;
+use App\Models\Product;
+use App\Models\Sale;
 use App\Http\Controllers\UserManagementController; // Tambahkan ini
 use Illuminate\Support\Facades\Route;
 
@@ -22,23 +25,8 @@ Route::get('/', function () {
 // But we do want it on dashboard + all child routes.
 Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
     // Dashboard (now guarded by role.selected)
-    Route::get('/dashboard', function () {
-        // Check if user has any roles, if not redirect to setup
-        $user = auth()->user();
-        if (!$user->hasAnyRole()) {
-            return redirect()->route('auth.setup.lembaga');
-        }
-
-        // you can retrieve: session('current_lembaga_id'), session('current_role_id')
-
-        // Get all session data
-        // $sessionData = session()->all();
-
-        // // Dump and die
-        // dd($sessionData);
-
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/api/sales-last-7-days', [DashboardController::class, 'getSalesLast7Days'])->name('api.sales.last7days');
 
     // Profile Management
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
