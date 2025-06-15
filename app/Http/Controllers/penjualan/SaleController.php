@@ -15,29 +15,51 @@ use Illuminate\Support\Facades\Log;
 
 class SaleController extends Controller
 {
-    public function index()
+    /**
+     * Menampilkan halaman riwayat penjualan.
+     */
+    public function index(Request $request)
     {
         $sales = Sale::with('outlet')->latest()->paginate(15);
+        $view = view('penjualan.index', compact('sales'));
+
+        if ($request->ajax()) {
+            return $view;
+        }
+
         return view('layouts.admin', [
-            'slot' => view('penjualan.index', compact('sales')),
+            'slot' => $view,
             'title' => 'Riwayat Penjualan',
             'lembaga' => Lembaga::find(session('current_lembaga_id')),
         ]);
     }
 
-    public function create()
+    /**
+     * Menampilkan form untuk membuat transaksi baru.
+     */
+    public function create(Request $request)
     {
         $lembaga_id = session('current_lembaga_id');
         $data = [
             'outlets' => Outlet::where('lembaga_id', $lembaga_id)->orderBy('name')->get(),
         ];
+        
+        $view = view('penjualan.create', $data);
+
+        if ($request->ajax()) {
+            return $view;
+        }
+
         return view('layouts.admin', [
-            'slot' => view('penjualan.create', $data),
+            'slot' => $view,
             'title' => 'Buat Transaksi Penjualan',
             'lembaga' => Lembaga::find($lembaga_id),
         ]);
     }
 
+    /**
+     * Menyimpan transaksi baru dari form ke database.
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -52,7 +74,7 @@ class SaleController extends Controller
         ]);
 
         try {
-            DB::transaction(function () use ($validated, $request) {
+            DB::transaction(function () use ($validated) {
                 $total = 0;
                 $cart = [];
 
@@ -84,6 +106,7 @@ class SaleController extends Controller
                     StockMutation::create(['product_id' => $item['product']->id, 'outlet_id' => $validated['outlet_id'], 'quantity' => $item['quantity'], 'type' => 'out', 'reference_type' => 'sale', 'reference_id' => $sale->id]);
                 }
             });
+
             return redirect()->route('penjualan.index')->with('success', 'Transaksi berhasil disimpan!');
         } catch (\Exception $e) {
             Log::error("Gagal menyimpan transaksi: " . $e->getMessage());
@@ -91,12 +114,18 @@ class SaleController extends Controller
         }
     }
 
+    /**
+     * Endpoint untuk JavaScript mengambil data produk berdasarkan outlet.
+     */
     public function getProductsByOutlet(Request $request)
     {
         $products = Product::with('barang')
             ->where('outlet_id', $request->outlet_id)
-            ->where('stok', '>', 0)->where('is_active', true)
-            ->orderBy('id')->get();
+            ->where('stok', '>', 0)
+            ->where('is_active', true)
+            ->orderBy('id')
+            ->get();
+        
         return response()->json($products);
     }
 }

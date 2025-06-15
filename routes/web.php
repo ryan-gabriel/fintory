@@ -5,8 +5,6 @@ use App\Http\Controllers\HutangController;
 use App\Http\Controllers\KasLedgerController;
 use App\Http\Controllers\Penjualan\SaleController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Penjualan\SaleHistoryController;
-use App\Http\Controllers\Penjualan\SaleTransactionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\Auth\RoleChoiceController;
@@ -97,14 +95,11 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
         Route::get('mutasi/data', [\App\Http\Controllers\StockMutationController::class, 'getData'])->name('mutasi.data');
     });
 
-    Route::prefix('dashboard')->group(function() {
-        // Penjualan Management
-        Route::prefix('penjualan')->name('penjualan.')->group(function () {
-            Route::get('produk/search', [SaleController::class, 'getProductsByOutlet'])->name('produk.search');
-            Route::get('/', [SaleController::class, 'index'])->name('index');
-            Route::get('/create', [SaleController::class, 'create'])->name('create');
-            Route::post('/', [SaleController::class, 'store'])->name('store');
-        });
+    Route::prefix('dashboard/penjualan')->name('penjualan.')->group(function () {
+        Route::get('/', [SaleController::class, 'index'])->name('index');
+        Route::get('/create', [SaleController::class, 'create'])->name('create');
+        Route::post('/', [SaleController::class, 'store'])->name('store');
+        Route::get('/produk/search', [SaleController::class, 'getProductsByOutlet'])->name('produk.search');
     });
 
 
