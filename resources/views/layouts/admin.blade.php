@@ -80,12 +80,6 @@
                                                 role="menuitem">Profile</a>
                                         </li>
                                         <li>
-                                            <a href="#"
-                                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
-                                                role="menuitem">Earnings</a>
-                                        </li>
-                                        <li>
-                                            <!-- Replace the old <a>Sign out</a> with this form: -->
                                             <form method="POST" action="{{ route('logout') }}">
                                                 @csrf
                                                 <button type="submit"
@@ -237,6 +231,38 @@
                         {
                             data: 5,
                             title: "Action"
+                        }
+                    ]
+                },
+                '/dashboard/laporan/keuangan': {
+                    url: '/dashboard/laporan/keuangan/data',
+                    columns: [{
+                            data: 0,
+                            title: "Tanggal"
+                        },
+                        {
+                            data: 1,
+                            title: "Tipe"
+                        },
+                        {
+                            data: 2,
+                            title: "Sumber"
+                        },
+                        {
+                            data: 3,
+                            title: "Deskripsi"
+                        },
+                        {
+                            data: 4,
+                            title: "Jumlah"
+                        },
+                        {
+                            data: 5,
+                            title: "Saldo Setelah"
+                        },
+                        {
+                            data: 6,
+                            title: "Outlet"
                         }
                     ]
                 },
@@ -1350,7 +1376,7 @@
                             body: JSON.stringify({ selected_outlet_id: outletId })
                         })
                         .then(response => {
-                            console.log(outletId)
+                            console.log(response)
                             if (!response.ok) throw new Error(response);
                             return response.json();
                         })
@@ -1358,6 +1384,37 @@
                             // Reload DataTable jika ada
                             if ($.fn.DataTable.isDataTable('#data-table')) {
                                 $('#data-table').DataTable().ajax.reload();
+                            }
+                            const current_selected_outlet_name = document.getElementById('current_selected_outlet_name');
+                            
+                            if (current_selected_outlet_name) {
+                                current_selected_outlet_name.innerHTML = this.options[this.selectedIndex].text;
+                            }
+
+                            const totalHutang = document.getElementById('totalHutang')
+                            const totalSaldo = document.getElementById('totalSaldo')
+
+                            // Jika kedua elemen ada, lakukan AJAX request ke URL saat ini
+                            if (totalHutang && totalSaldo) {
+                                fetch(window.location.href, {
+                                    headers: {
+                                        'X-Requested-With': 'XMLHttpRequest'
+                                    }
+                                })
+                                .then(response => response.text())
+                                .then(html => {
+                                    // Buat elemen dummy untuk parsing HTML
+                                    const parser = new DOMParser();
+                                    const doc = parser.parseFromString(html, 'text/html');
+                                    // Ambil nilai terbaru dari response
+                                    const newTotalHutang = doc.getElementById('totalHutang');
+                                    const newTotalSaldo = doc.getElementById('totalSaldo');
+                                    if (newTotalHutang) totalHutang.innerHTML = newTotalHutang.innerHTML;
+                                    if (newTotalSaldo) totalSaldo.innerHTML = newTotalSaldo.innerHTML;
+                                })
+                                .catch(error => {
+                                    console.error('Gagal update total hutang/saldo:', error);
+                                });
                             }
                         })
                         .catch(error => {

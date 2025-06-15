@@ -8,6 +8,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\Auth\RoleChoiceController;
+use App\Http\Controllers\LaporanKeuanganController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -109,6 +110,13 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
         ->name('menu.toggleStatus');
     Route::post('menu/update-order', [MenuController::class, 'updateOrder'])
         ->name('menu.updateOrder');
+
+
+    // Produk Management
+    Route::prefix('dashboard/laporan')->name('laporan.')->group(function () {
+        Route::get('/keuangan/data', [LaporanKeuanganController::class, 'getData'])->name('keuangan.data');
+        Route::get('/keuangan', [LaporanKeuanganController::class, 'index'])->name('keuangan.index');
+    });
 });
 
 // These two "choose-role" routes must be reachable whenever a user is logged in
