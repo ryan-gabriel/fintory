@@ -18,11 +18,11 @@ class CashLedgerFactory extends Factory
      */
     public function definition(): array
     {
-        $tipe = ['INCOME','EXPENSE','TRANSFER_IN','TRANSFER_OUT','ADJUSTMENT'];
+        $tipe = ['INCOME','EXPENSE','TRANSFER_IN','TRANSFER_OUT'];
 
         return [
             'outlet_id' => Outlet::factory(),
-            'tanggal' => $this->faker->dateTimeThisYear,
+            'tanggal' => $this->faker->date(),
             'tipe' => $this->faker->randomElement($tipe),
             'sumber' => $this->faker->word,
             'referensi_id' => null,

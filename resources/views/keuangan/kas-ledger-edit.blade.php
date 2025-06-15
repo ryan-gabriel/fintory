@@ -1,19 +1,20 @@
 <div>
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-5">
-            <h1 class="text-2xl font-semibold mb-5">Tambah Kas Ledger</h1>
-            <form action="/dashboard/keuangan/kas-ledger" method="POST" class="space-y-6">
+            <h1 class="text-2xl font-semibold mb-5">Edit Kas Ledger</h1>
+            <form action="/dashboard/keuangan/kas-ledger/{{ $kasLedger->id }}" method="POST" class="space-y-6">
                 @csrf
+                @method('PATCH')
                 <div>
                     <label for="tipe_transaksi" class="block mb-2 text-gray-900 dark:text-white">Tipe Transaksi</label>
                     <select id="tipe_transaksi" name="tipe"
                         class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                         required>
-                        <option value="" selected disabled hidden>--Pilih Tipe Transaksi--</option>
-                        <option value="INCOME">INCOME</option>
-                        <option value="EXPENSE">EXPENSE</option>
-                        <option value="TRANSFER_IN">TRANSFER_IN</option>
-                        <option value="TRANSFER_OUT">TRANSFER_OUT</option>
+                        <option value="" disabled hidden>--Pilih Tipe Transaksi--</option>
+                        <option value="INCOME" {{ $kasLedger->tipe == 'INCOME' ? 'selected' : '' }}>INCOME</option>
+                        <option value="EXPENSE" {{ $kasLedger->tipe == 'EXPENSE' ? 'selected' : '' }}>EXPENSE</option>
+                        <option value="TRANSFER_IN" {{ $kasLedger->tipe == 'TRANSFER_IN' ? 'selected' : '' }}>TRANSFER_IN</option>
+                        <option value="TRANSFER_OUT" {{ $kasLedger->tipe == 'TRANSFER_OUT' ? 'selected' : '' }}>TRANSFER_OUT</option>
                     </select>
                 </div>
 
@@ -22,9 +23,9 @@
                     <select id="outlet" name="outlet_id"
                         class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                         required>
-                        <option value="" selected disabled hidden>--Pilih Outlet--</option>
+                        <option value="" disabled hidden>--Pilih Outlet--</option>
                         @foreach ($outlets as $outlet)
-                            <option value="{{ $outlet->id }}">{{ $outlet->name }}</option>
+                            <option value="{{ $outlet->id }}" {{ $kasLedger->outlet_id == $outlet->id ? 'selected' : '' }}>{{ $outlet->name }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -33,19 +34,17 @@
                     <label for="jumlah" class="block mb-2 text-gray-900 dark:text-white">Jumlah Uang (Rp.)</label>
                     <input type="number" id="jumlah" name="jumlah" min="1" step="1"
                         class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                        required>
+                        value="{{ old('jumlah', $kasLedger->amount) }}" required>
                 </div>
                 
                 {{-- @livewire('terbilang-input', [], key('form-kas-ledger')) --}}
-
 
                 <div>
                     <label for="sumber" class="block mb-2 text-gray-900 dark:text-white">Sumber</label>
                     <input type="text" id="sumber" name="sumber"
                         class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                        required>
+                        value="{{ old('sumber', $kasLedger->sumber) }}" required>
                 </div>
-
 
                 <div>
                     <label for="tanggal">Tanggal</label>
@@ -60,7 +59,7 @@
                         <input id="tanggal" name="tanggal" datepicker datepicker-autohide datepicker datepicker-buttons
                             datepicker-autoselect-today type="text"
                             class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                            placeholder="Select date" required>
+                            placeholder="Select date" value="{{ old('tanggal', $kasLedger->tanggal) }}" required>
                     </div>
                 </div>
 
@@ -68,7 +67,7 @@
                     <label for="description" class="block text-gray-900 dark:text-white">Deskripsi</label>
                     <textarea id="description" rows="4" name="deskripsi"
                         class="block p-2.5 w-full text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                        placeholder="Tuliskan deskripsi untuk ledger ini..." required></textarea>
+                        placeholder="Tuliskan deskripsi untuk ledger ini..." required>{{ old('deskripsi', $kasLedger->deskripsi) }}</textarea>
                 </div>
 
                 <div class="flex justify-end">

@@ -41,6 +41,13 @@ class HutangController extends Controller
             }
         }
 
+        if (session()->has('selected_outlet_id')) {
+            $selectedOutletId = session('selected_outlet_id');
+            if (!empty($selectedOutletId) && $selectedOutletId !== 'all') {
+                $query->where('outlet_id', $selectedOutletId);
+            }
+        }
+
         // Search filter
         if (!empty($request->input('search.value'))) {
             $search = $request->input('search.value');

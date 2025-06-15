@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('cashledger', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('outlet_id');
-            $table->timestamp('tanggal')->useCurrent();
-            $table->enum('tipe', ['INCOME','EXPENSE','TRANSFER_IN','TRANSFER_OUT','ADJUSTMENT']);
+            $table->date('tanggal')->useCurrent();
+            $table->enum('tipe', ['INCOME','EXPENSE','TRANSFER_IN','TRANSFER_OUT']);
             $table->string('sumber', 100)->nullable();
             $table->unsignedBigInteger('referensi_id')->nullable();
             $table->text('deskripsi')->nullable();

@@ -39,7 +39,15 @@ class CicilanController extends Controller
                 Log::warning('Invalid end_date format: ' . $request->end_date);
             }
         }
-
+        
+        if (session()->has('selected_outlet_id')) {
+            $selectedOutletId = session('selected_outlet_id');
+            if (!empty($selectedOutletId) && $selectedOutletId !== 'all') {
+                $query->whereHas('hutang', function ($q) use ($selectedOutletId) {
+                    $q->where('outlet_id', $selectedOutletId);
+                });
+            }
+        }
         // Total sebelum filter
         $totalData = Cicilan::count();
 
@@ -101,12 +109,26 @@ class CicilanController extends Controller
         ];
 
         foreach ($data as $row) {
+
+            $editUrl = route('keuangan.cicilan.edit', $row->id);
+            $deleteUrl = route('keuangan.cicilan.destroy', $row->id);
+
+            ob_start(); ?>
+                <div class="flex space-x-2">
+                    <a href="<?= $editUrl ?>" class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition edit-link">Edit</a>
+                    <button type="button" class="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition delete-btn confirm-delete" data-id="<?= $row->id ?>" data-url="<?= $deleteUrl ?>">Delete</button>
+                </div>
+            <?php
+            $actionButtons = ob_get_clean();
+
+
             $jsonData['data'][] = [
                 $row->tanggal_bayar ? date('d-m-Y', strtotime($row->tanggal_bayar)) : '-',
                 $row->hutang->nama_pemberi_hutang ?? '-',
                 'Rp ' . number_format($row->jumlah_bayar ?? 0, 0, ',', '.'),
                 'Rp ' . number_format($row->hutang->sisa_hutang ?? 0, 0, ',', '.'),
                 $row->metode_pembayaran ?? '-',
+                $actionButtons
             ];
         }
 
@@ -137,4 +159,128 @@ class CicilanController extends Controller
             ]
         );
     }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'hutang_id' => 'required|exists:hutang,id',
+            'tanggal_bayar' => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    try {
+                        \Carbon\Carbon::createFromFormat('m/d/Y', $value);
+                    } catch (\Exception $e) {
+                        $fail('Format tanggal tidak valid. Gunakan format mm/dd/yyyy.');
+                    }
+                }
+            ],
+            'jumlah_bayar' => 'required|numeric|min:1',
+            'metode_pembayaran' => 'required|string|max:255',
+            'deskripsi' => 'required|string|max:255',
+        ]);
+
+        // Konversi tanggal_bayar ke format Y-m-d
+        $tanggalBayar = \Carbon\Carbon::createFromFormat('m/d/Y', $request->tanggal_bayar)->format('Y-m-d');
+
+        $cicilan = new Cicilan();
+        $cicilan->hutang_id = $request->hutang_id;
+        $cicilan->tanggal_bayar = $tanggalBayar;
+        $cicilan->jumlah_bayar = $request->jumlah_bayar;
+        $cicilan->metode_pembayaran = $request->metode_pembayaran;
+        $cicilan->deskripsi = $request->deskripsi;
+        $cicilan->save();
+
+        // Update sisa_hutang pada hutang terkait
+        $hutang = Hutang::find($request->hutang_id);
+        if ($hutang) {
+            $hutang->sisa_hutang = max(0, $hutang->sisa_hutang - $request->jumlah_bayar);
+            $hutang->save();
+        }
+
+        return redirect()->route('keuangan.cicilan.index')->with('success', 'Cicilan berhasil ditambahkan.');
+    }
+    public function edit($id, Request $request)
+    {
+        $cicilan = Cicilan::with('hutang')->findOrFail($id);
+        $hutangs = Hutang::all();
+        if ($request->ajax()) {
+            return view('keuangan.cicilan-edit', compact('cicilan', 'hutangs'));
+        }
+        return view('layouts.admin', [
+            'slot' => view('keuangan.cicilan-edit', compact('cicilan', 'hutangs')),
+            'title' => 'Edit Cicilan',
+            'lembaga' => Lembaga::find(session('current_lembaga_id')),
+        ]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $cicilan = Cicilan::findOrFail($id);
+
+        $request->validate([
+            'hutang_id' => 'required|exists:hutang,id',
+            'tanggal_bayar' => [
+                'required',
+                function ($attribute, $value, $fail) {
+                    try {
+                        \Carbon\Carbon::createFromFormat('m/d/Y', $value);
+                    } catch (\Exception $e) {
+                        $fail('Format tanggal tidak valid. Gunakan format mm/dd/yyyy.');
+                    }
+                }
+            ],
+            'jumlah_bayar' => 'required|numeric|min:1',
+            'metode_pembayaran' => 'required|string|max:255',
+            'deskripsi' => 'required|string|max:255',
+        ]);
+
+        // Hitung selisih jumlah_bayar untuk update sisa_hutang
+        $oldJumlahBayar = $cicilan->jumlah_bayar;
+        $hutang = Hutang::find($cicilan->hutang_id);
+
+        // Konversi tanggal_bayar ke format Y-m-d
+        $tanggalBayar = \Carbon\Carbon::createFromFormat('m/d/Y', $request->tanggal_bayar)->format('Y-m-d');
+
+        $cicilan->hutang_id = $request->hutang_id;
+        $cicilan->tanggal_bayar = $tanggalBayar;
+        $cicilan->jumlah_bayar = $request->jumlah_bayar;
+        $cicilan->metode_pembayaran = $request->metode_pembayaran;
+        $cicilan->deskripsi = $request->deskripsi;
+        $cicilan->save();
+
+        // Update sisa_hutang pada hutang lama jika hutang_id berubah
+        if ($hutang && $cicilan->wasChanged('hutang_id')) {
+            $hutang->sisa_hutang += $oldJumlahBayar;
+            $hutang->save();
+
+            $newHutang = Hutang::find($request->hutang_id);
+            if ($newHutang) {
+                $newHutang->sisa_hutang = max(0, $newHutang->sisa_hutang - $request->jumlah_bayar);
+                $newHutang->save();
+            }
+        } elseif ($hutang) {
+            // Jika hutang_id tidak berubah, update sisa_hutang pada hutang yang sama
+            $hutang->sisa_hutang = max(0, $hutang->sisa_hutang + $oldJumlahBayar - $request->jumlah_bayar);
+            $hutang->save();
+        }
+
+        return redirect()->route('keuangan.cicilan.index')->with('success', 'Cicilan berhasil diupdate.');
+    }
+
+    public function destroy($id)
+    {
+        $cicilan = Cicilan::findOrFail($id);
+        $hutang = Hutang::find($cicilan->hutang_id);
+
+        // Kembalikan jumlah_bayar ke sisa_hutang
+        if ($hutang) {
+            $hutang->sisa_hutang += $cicilan->jumlah_bayar;
+            $hutang->save();
+        }
+
+        $cicilan->delete();
+
+        return response()->json(['success' => true, 'message' => 'Cicilan berhasil dihapus.']);
+    }
+
 }

@@ -2,33 +2,38 @@
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-5">
             <h1 class="text-2xl font-semibold mb-5">Tambah Cicilan</h1>
-            <form action="/dashboard/keuangan/cicilan" method="POST" class="space-y-6">
+            <form action="/dashboard/keuangan/cicilan/{{ $cicilan->id }}" method="POST" class="space-y-6" id="form-edit">
                 @csrf
+                @method('PATCH')
                 <div>
                     <label for="hutang" class="block mb-2 text-gray-900 dark:text-white">Pilih Hutang yang
                         Dibayar</label>
-                    <select id="hutang" name="hutang_id"
-                        class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                        required>
-                        <option value="" selected disabled hidden>--Pilih Hutang--</option>
+                    <select id="hutang" name="hutang_id" ... required>
+                        <option value="" disabled hidden>--Pilih Hutang--</option>
                         @foreach ($hutangs as $hutang)
-                            <option value="{{ $hutang->id }}">{{ $hutang->nama_pemberi_hutang }} - {{ $hutang->deskripsi}}
+                            <option value="{{ $hutang->id }}"
+                                {{ $hutang->id == old('hutang', $cicilan->hutang_id) ? 'selected' : '' }}>
+                                {{ $hutang->nama_pemberi_hutang }} - {{ $hutang->deskripsi }}
                             </option>
                         @endforeach
                     </select>
+
                 </div>
 
                 <div>
                     <label for="metode_pembayaran" class="block mb-2 text-gray-900 dark:text-white">Metode
                         Pembayaran</label>
-                    <select id="metode_pembayaran" name="metode_pembayaran"
-                        class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                        required>
-                        <option value="" selected disabled hidden>--Pilih Metode Pembayaran--</option>
-                        <option value="cash">Cash</option>
-                        <option value="transfer">Transfer</option>
-                        <option value="qris">QRIS</option>
+                    <select id="metode_pembayaran" name="metode_pembayaran" ... required>
+                        <option value="" disabled hidden>--Pilih Metode Pembayaran--</option>
+                        <option value="cash"
+                            {{ old('metode_pembayaran', $cicilan->metode_pembayaran) == 'cash' ? 'selected' : '' }}>Cash</option>
+                        <option value="transfer"
+                            {{ old('metode_pembayaran', $cicilan->metode_pembayaran) == 'transfer' ? 'selected' : '' }}>Transfer
+                        </option>
+                        <option value="qris"
+                            {{ old('metode_pembayaran', $cicilan->metode_pembayaran) == 'qris' ? 'selected' : '' }}>QRIS</option>
                     </select>
+
                 </div>
 
 
@@ -37,7 +42,7 @@
                         Cicilan</label>
                     <input type="number" id="jumlah_bayar" name="jumlah_bayar" min="1" step="1"
                         class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                        required>
+                        required value="{{ old('jumlah_bayar', $cicilan->jumlah_bayar) }}">
                 </div>
 
                 <div>
@@ -50,10 +55,11 @@
                                     d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
                             </svg>
                         </div>
-                        <input id="tanggal_bayar" name="tanggal_bayar" datepicker datepicker-autohide datepicker
+                        <input id="tanggal" name="tanggal_bayar" datepicker datepicker-autohide datepicker
                             datepicker-buttons datepicker-autoselect-today type="text"
                             class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                            placeholder="Select date" required>
+                            placeholder="Select date" required
+                            value="{{ old('tanggal_bayar', \Carbon\Carbon::parse($cicilan->tanggal_bayar)->format('m/d/Y')) }}">
                     </div>
                 </div>
 
@@ -61,12 +67,12 @@
                     <label for="deskripsi" class="block text-gray-900 dark:text-white">Deskripsi</label>
                     <textarea id="deskripsi" rows="4" name="deskripsi"
                         class="block p-2.5 w-full text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                        placeholder="Tuliskan deskripsi untuk cicilan ini..." required></textarea>
+                        placeholder="Tuliskan deskripsi untuk cicilan ini..." required>{{ old('deskripsi', $cicilan->deskripsi) }}</textarea>
                 </div>
 
                 <div class="flex justify-end">
-                    <button class="bg-green-600 text-white px-6 py-3 rounded-md">
-                        Submit
+                    <button id="btn-submit" class="bg-green-600 text-white px-6 py-3 rounded-md">
+                        Update
                     </button>
                 </div>
             </form>

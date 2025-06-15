@@ -25,6 +25,7 @@
                                 <th>Jumlah Bayar</th>
                                 <th>Sisa Hutang</th>
                                 <th>Metode Pembayaran</th>
+                                <th>Aksi</th>
                             </tr>
                         </thead>
                         <tfoot>
@@ -34,6 +35,7 @@
                                 <th>Jumlah Bayar</th>
                                 <th>Sisa Hutang</th>
                                 <th>Metode Pembayaran</th>
+                                <th>Aksi</th>
                             </tr>
                         </tfoot>
                     </table>

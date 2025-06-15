@@ -207,6 +207,10 @@
                         {
                             data: 4,
                             title: "Metode Pembayaran"
+                        },
+                        {
+                            data: 5,
+                            title: "Action"
                         }
                     ]
                 },
@@ -234,7 +238,7 @@
                         },
                         {
                             data: 5,
-                            title: "Aksi"
+                            title: "Action"
                         }
                     ]
                 },
@@ -639,23 +643,19 @@
                     }
                 },
 
-                initFormCreateHandler() {
+                async initFormCreateHandler() {
                     // Clean existing handlers first
                     this.cleanCreateFormHandler();
 
-                    // Get the fresh form after cleaning
-                    const form = document.getElementById('form-create');
+                    const submitBtn = document.getElementById('btn-submit');
 
-                    if (form) {
-                        // Set form attributes
-                        form.method = 'POST';
-                        form.action = "/dashboard/keuangan/hutang";
-
-                        const submitBtn = form.querySelector('#btn-submit');
-
-                        // Add submit event listener
-                        form.addEventListener('submit', async (e) => {
+                    if (submitBtn) {
+                        submitBtn.addEventListener('click', async (e) => {
                             e.preventDefault();
+                            
+                            const form = document.getElementById('form-create');
+                            console.log(form)
+                            if (!form) return;
 
                             // Prevent double submission
                             if (submitBtn.disabled) {
@@ -672,37 +672,28 @@
                             `;
 
                             try {
-                                // Use self instead of this to reference the correct context
                                 const response = await EventHandlers.makeAjaxRequest(form.action, 'POST', form);
-                                
-                                // Reset button
+
                                 submitBtn.disabled = false;
                                 submitBtn.innerHTML = 'Submit';
-                                
-                                // Handle success based on response type
                                 if (typeof response === 'object' && response.redirect) {
                                     window.location.href = response.redirect;
                                 } else if (typeof response === 'object' && response.message) {
-                                    // Show success message
-                                    alert(response.message); 
+                                    alert(response.message);
                                     form.reset();
                                 } else if (typeof response === 'string') {
                                     console.log('HTML response received');
                                 }
-                                
+
                             } catch (error) {
                                 console.error('Error:', error);
-                                
-                                // Reset button on error
                                 submitBtn.disabled = false;
                                 submitBtn.innerHTML = 'Submit';
-                                
-                                // Show error message
-                                alert('An error occurred: ' + error.message); // Replace with your error handling
+                                alert('An error occurred: ' + error.message);
                             }
                         });
 
-                        // Initialize date picker after form is ready
+                        // Initialize date picker (if needed)
                         this.initCreateDatePicker();
                     }
                 },
@@ -807,7 +798,6 @@
                                     
                                     submitBtn.disabled = false;
                                     submitBtn.innerHTML = 'Update';
-                                    
                                     if (result.redirect) {
                                         window.location.href = result.redirect;
                                     } else if (result.message) {
@@ -854,7 +844,7 @@
                                 if (typeof Utils !== 'undefined' && Utils.initFormCreateHandler) {
                                     Utils.initFormCreateHandler();
                                 }
-                            }, 100);
+                            }, 150);
                         }
                     },
                     '.edit-link': {
@@ -1070,13 +1060,12 @@
 
                     // Handle form data jika link ada di dalam form
                     if (method !== 'GET' && element) {
-                        if (form) {
-                            const form = element.closest('form');
-                            console.log("Form: " + form)
-                            const formData = new FormData(form);
-                            options.body = formData;
-                            delete options.headers['Content-Type']; // Let browser set it for FormData
-                        }
+                        const form = element.closest('form');
+                        console.log("Form: " + form)
+                        const formData = new FormData(form);
+                        options.body = formData;
+                        delete options.headers['Content-Type']; // Let browser set it for FormData
+                    
                     }
 
                     const response = await fetch(url, options);
@@ -1347,6 +1336,38 @@
                     });
                 }
             });
+
+            document.addEventListener('DOMContentLoaded', () => {
+                const selected_outlet = document.getElementById('outlet-select');
+                if (selected_outlet) {
+                    selected_outlet.addEventListener('change', function () {
+                        const outletId = this.value;
+                        fetch('/dashboard/set-outlet', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: JSON.stringify({ selected_outlet_id: outletId })
+                        })
+                        .then(response => {
+                            console.log(outletId)
+                            if (!response.ok) throw new Error(response);
+                            return response.json();
+                        })
+                        .then(data => {
+                            // Reload DataTable jika ada
+                            if ($.fn.DataTable.isDataTable('#data-table')) {
+                                $('#data-table').DataTable().ajax.reload();
+                            }
+                        })
+                        .catch(error => {
+                            alert(error);
+                        });
+                    });
+                }
+            })
         </script>
     </body>
 

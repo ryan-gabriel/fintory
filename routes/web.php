@@ -42,12 +42,23 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    Route::post('/dashboard/set-outlet', function (\Illuminate\Http\Request $request) {
+        $request->validate([
+            'selected_outlet_id' => 'required',
+        ]);
+        session(['selected_outlet_id' => $request->input('selected_outlet_id')]);
+        return response()->json(['status' => 'success']);
+    })->name('dashboard.set-outlet');
+
     // Keuangan Management
     Route::prefix('dashboard/keuangan')->name('keuangan.')->group(function () {
         Route::get('/kas-ledger', [KasLedgerController::class, 'index'])->name('kas-ledger.index');
         Route::get('/kas-ledger/data', [KasLedgerController::class, 'getData'])->name('kas-ledger.data');
         Route::get('/kas-ledger/create', [KasLedgerController::class, 'create'])->name('kas-ledger.create');
         Route::post('/kas-ledger', [KasLedgerController::class, 'store'])->name('kas-ledger.store');
+        Route::get('/kas-ledger/{id}/edit', [KasLedgerController::class, 'edit'])->name('kas-ledger.edit');
+        Route::patch('/kas-ledger/{id}', [KasLedgerController::class, 'update'])->name('kas-ledger.update');
+        Route::delete('/kas-ledger/{id}', [KasLedgerController::class, 'destroy'])->name('kas-ledger.destroy');
         
         Route::get('/hutang', [HutangController::class, 'index'])->name('hutang.index');
         Route::get('/hutang/data', [HutangController::class, 'getData'])->name('hutang.data');
@@ -61,6 +72,9 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
         Route::get('/cicilan/data', [CicilanController::class, 'getData'])->name('cicilan.data');
         Route::get('/cicilan/create', [CicilanController::class, 'create'])->name('cicilan.create');
         Route::post('/cicilan', [CicilanController::class, 'store'])->name('cicilan.store');
+        Route::get('/cicilan/{id}/edit', [CicilanController::class, 'edit'])->name('cicilan.edit');
+        Route::patch('/cicilan/{id}', [CicilanController::class, 'update'])->name('cicilan.update');
+        Route::delete('/cicilan/{id}', [CicilanController::class, 'destroy'])->name('cicilan.destroy');
     });
 
     // Produk Management

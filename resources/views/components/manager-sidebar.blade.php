@@ -7,9 +7,8 @@
             @php
                 $user = auth()->user();
                 $outlets = $user->getCurrentLembaga()->outlets;
-                $activeOutlet = session('active_outlet', 'all');
+                $activeOutlet = session('selected_outlet_id', 'all');
             @endphp
-
             <div class="px-3 pb-4">
                 <label for="outlet-select" class="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Select Outlet</label>
                 <select id="outlet-select"
