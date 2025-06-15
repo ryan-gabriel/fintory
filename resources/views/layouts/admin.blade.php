@@ -1455,7 +1455,8 @@
                             const current_selected_outlet_name = document.getElementById('current_selected_outlet_name');
                             
                             if (current_selected_outlet_name) {
-                                current_selected_outlet_name.innerHTML = this.options[this.selectedIndex].text;
+                                const outletName = this.options[this.selectedIndex].text
+                                current_selected_outlet_name.innerHTML = outletName == "All Outlets" ? "Semua Outlet" : outletName;
                             }
 
                             const totalHutang = document.getElementById('totalHutang')
