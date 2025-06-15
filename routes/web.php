@@ -101,11 +101,14 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
 
     // Penjualan Management
     Route::prefix('dashboard/penjualan')->name('penjualan.')->group(function () {
+        // Rute untuk Riwayat Penjualan
+        Route::get('/data', [SaleController::class, 'getData'])->name('data');
         Route::get('/', [SaleController::class, 'index'])->name('index');
         Route::get('/create', [SaleController::class, 'create'])->name('create');
         Route::post('/', [SaleController::class, 'store'])->name('store');
         Route::get('/produk/search', [SaleController::class, 'getProductsByOutlet'])->name('produk.search');
         Route::get('/{penjualan}', [SaleController::class, 'show'])->name('show');
+        
     });
 
     // Laporan Management

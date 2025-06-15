@@ -43,6 +43,11 @@ class StockMutationController extends Controller
             });
         }
 
+        $activeOutletId = session('selected_outlet_id');
+        if ($activeOutletId && $activeOutletId !== 'all') {
+            $query->where('outlet_id', $activeOutletId);
+        }
+
         $totalFiltered = $query->count();
         $data = $query->latest()->offset($request->start)->limit($request->length)->get();
 
