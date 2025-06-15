@@ -49,18 +49,18 @@ class User extends Authenticatable
 
     /**
      * Many‐to‐many relationship with Role, but scoped by Lembaga.
-     * 
+     *
      * We'll call this "lembagaRoles" for clarity: it returns Role models
-     * with a pivot 'lembaga_id'. 
+     * with a pivot 'lembaga_id'.
      */
     public function lembagaRoles()
     {
         return $this
             ->belongsToMany(
                 Role::class,
-                'lembaga_user_role',   // pivot table name
-                'user_id',             // this model's FK
-                'role_id'              // related model's FK
+                'lembaga_user_role', // pivot table name
+                'user_id', // this model's FK
+                'role_id' // related model's FK
             )
             ->withPivot('lembaga_id')
             ->withTimestamps();
@@ -155,5 +155,30 @@ class User extends Authenticatable
         return $this->lembagaRoles()
             ->wherePivot('lembaga_id', $lembagaId)
             ->first();
+    }
+
+    /**
+     * Get the employee records for the user.
+     */
+    public function employees()
+    {
+        return $this->hasMany(Employee::class);
+    }
+
+    /**
+     * Get employee in specific lembaga
+     */
+    public function getEmployeeInLembaga($lembagaId)
+    {
+        return $this->employees()->where('lembaga_id', $lembagaId)->first();
+    }
+
+    /**
+     * Get employee name in current lembaga
+     */
+    public function getNameInLembaga($lembagaId)
+    {
+        $employee = $this->getEmployeeInLembaga($lembagaId);
+        return $employee ? $employee->name : $this->email;
     }
 }

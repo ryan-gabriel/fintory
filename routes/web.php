@@ -10,6 +10,7 @@ use App\Http\Controllers\MutasiStokController;
 use App\Http\Controllers\Penjualan\SaleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StokProdukController;
+use App\Http\Controllers\UserManagementController; // Tambahkan ini
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -30,7 +31,7 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
 
         // you can retrieve: session('current_lembaga_id'), session('current_role_id')
 
-        // // Get all session data
+        // Get all session data
         // $sessionData = session()->all();
 
         // // Dump and die
@@ -107,7 +108,7 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
         Route::post('/', [SaleController::class, 'store'])->name('store');
         Route::get('/produk/search', [SaleController::class, 'getProductsByOutlet'])->name('produk.search');
         Route::get('/{penjualan}', [SaleController::class, 'show'])->name('show');
-        
+
     });
 
     // Laporan Management
@@ -116,8 +117,10 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
         Route::get('/penjualan/data', [\App\Http\Controllers\Laporan\LaporanPenjualanController::class, 'getData'])->name('penjualan.data');
     });
 
-    // Menu Management (hanya untuk super admin)
+    // Admin Management
     Route::prefix('dashboard/admin')->name('admin.')->group(function () {
+
+        // Menu Management
         Route::resource('menu', MenuController::class);
         Route::patch('menu/{menu}/toggle-status', [MenuController::class, 'toggleStatus'])
             ->name('menu.toggleStatus');
@@ -127,6 +130,20 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
             ->name('menu.manageRoles');
         Route::patch('menu/{menu}/update-roles', [MenuController::class, 'updateRoles'])
             ->name('menu.updateRoles');
+
+        // User Management
+        Route::prefix('user-management')->name('user-management.')->group(function () {
+            Route::get('/', [UserManagementController::class, 'index'])->name('index');
+            Route::get('/data', [UserManagementController::class, 'getData'])->name('data');
+            Route::get('/create', [UserManagementController::class, 'create'])->name('create');
+            Route::post('/', [UserManagementController::class, 'store'])->name('store');
+            Route::get('/{id}/edit', [UserManagementController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [UserManagementController::class, 'update'])->name('update');
+            Route::delete('/{id}', [UserManagementController::class, 'destroy'])->name('destroy');
+            Route::post('/{id}/reset-password', [UserManagementController::class, 'resetPassword'])->name('reset-password');
+            //debug
+            Route::get('/debug', [UserManagementController::class, 'debug'])->name('debug');
+        });
     });
 
     // Produk Management
@@ -142,6 +159,7 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
         Route::get('/keuangan/data', [LaporanKeuanganController::class, 'getData'])->name('keuangan.data');
         Route::get('/keuangan', [LaporanKeuanganController::class, 'index'])->name('keuangan.index');
     });
+
 });
 
 // These two "choose-role" routes must be reachable whenever a user is logged in
