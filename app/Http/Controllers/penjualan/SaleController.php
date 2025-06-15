@@ -20,6 +20,7 @@ class SaleController extends Controller
      */
     public function index(Request $request)
     {
+
         $view = view('penjualan.index'); // <-- HAPUS compact('sales') DARI SINI
 
         if ($request->ajax()) {
@@ -35,62 +36,71 @@ class SaleController extends Controller
 
     public function getData(Request $request)
     {
-        $query = Sale::with(['outlet']); // Relasi yang dibutuhkan
+        // 1. Definisikan kolom untuk sorting
+        $columns = [
+            0 => 'sale_date',
+            1 => 'id',
+            2 => 'outlets.name',
+            3 => 'customer_name',
+            4 => 'total',
+        ];
 
-        // ▼▼▼ LOGIKA FILTER PENCARIAN (SEARCH) ▼▼▼
+        // Memulai query dan langsung memanggil Stored Function
+        $query = Sale::with(['outlet'])->select(
+            'sale.*', // Ambil semua kolom dari tabel sale
+            DB::raw('FormatSaleID(sale.id) as formatted_id')
+        );
+
+        // 2. Gunakan nama session yang konsisten
+        $activeOutletId = session('active_outlet_id');
+        if ($activeOutletId && $activeOutletId !== 'all') {
+            $query->where('sale.outlet_id', $activeOutletId);
+        }
+
+        // Filter Tanggal dari Date Picker
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            try {
+                $startDate = \Carbon\Carbon::createFromFormat('m/d/Y', $request->start_date)->startOfDay();
+                $endDate = \Carbon\Carbon::createFromFormat('m/d/Y', $request->end_date)->endOfDay();
+                $query->whereBetween('sale_date', [$startDate, $endDate]);
+            } catch (\Exception $e) {
+                Log::warning('Invalid date format: ' . $request->start_date . ' or ' . $request->end_date);
+            }
+        }
+
+        // Filter Pencarian Global dari DataTables
         if ($request->filled('search.value')) {
             $search = $request->input('search.value');
             $query->where(function ($q) use ($search) {
                 $q->where('customer_name', 'like', "%{$search}%")
                     ->orWhere('id', 'like', "%{$search}%")
-                    ->orWhere('total', 'like', "%{$search}%")
                     ->orWhereHas('outlet', function ($q2) use ($search) {
                         $q2->where('name', 'like', "%{$search}%");
                     });
             });
         }
 
-        // Logika filter global berdasarkan outlet yang aktif
-        $activeOutletId = session('selected_outlet_id');
-        if ($activeOutletId && $activeOutletId !== 'all') {
-            $query->where('outlet_id', $activeOutletId);
-        }
+        $totalFiltered = $query->clone()->count();
 
-        if ($request->filled('start_date')) {
-            try {
-                // Konversi format dari datepicker ke format database
-                $startDate = \Carbon\Carbon::createFromFormat('m/d/Y', $request->start_date)->startOfDay();
-                if ($request->filled('end_date')) {
-                    $endDate = \Carbon\Carbon::createFromFormat('m/d/Y', $request->end_date)->endOfDay();
-                } else {
-                    $endDate = now()->endOfDay();
-                }
-                $query->whereBetween('sale_date', [$startDate, $endDate]);
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::warning('Invalid date format in Sale report: ' . $request->start_date . ' or ' . $request->end_date);
+        // Logika Pengurutan (Ordering)
+        if ($request->filled('order')) {
+            $order = $request->input('order')[0];
+            $orderColIndex = $order['column'];
+            $orderDir = $order['dir'];
+            $orderColName = $columns[$orderColIndex] ?? 'sale_date';
+
+            if ($orderColName === 'outlets.name') {
+                $query->join('outlet', 'outlet.id', '=', 'sale.outlet_id')
+                    ->orderBy('outlet.name', $orderDir);
+            } else {
+                $query->orderBy($orderColName, $orderDir);
             }
-        }
-
-
-
-        $totalFiltered = $query->count();
-
-        // Ordering
-        $orderColIndex = $request->input('order.0.column', 0);
-        $orderDir = strtolower($request->input('order.0.dir', 'desc')) === 'desc' ? 'desc' : 'asc';
-        $orderColName = $columns[$orderColIndex] ?? 'sale_date';
-
-        if ($orderColName === 'outlet.name') {
-            $query->join('outlet', 'outlet.id', '=', 'sale.outlet_id')
-                ->orderBy('outlet.name', $orderDir)
-                ->select('sale.*');
         } else {
-            $query->orderBy($orderColName, $orderDir);
+            $query->latest('sale_date');
         }
 
         $data = $query->offset($request->start)->limit($request->length)->get();
 
-        // Format data untuk response JSON
         $jsonData = [
             "draw" => intval($request->input('draw')),
             "recordsTotal" => Sale::count(),
@@ -99,14 +109,13 @@ class SaleController extends Controller
         ];
 
         foreach ($data as $sale) {
-            // Data dimasukkan sebagai array, bukan objek dengan key
             $jsonData['data'][] = [
                 \Carbon\Carbon::parse($sale->sale_date)->format('d M Y'),
-                'TRX-' . str_pad($sale->id, 5, '0', STR_PAD_LEFT),
+                $sale->formatted_id,
                 $sale->outlet->name ?? 'N/A',
                 $sale->customer_name,
                 'Rp ' . number_format($sale->total, 0, ',', '.'),
-                '<a href="' . route('penjualan.show', $sale->id) . '" class="text-indigo-600 hover:underline font-medium">Detail</a>'
+                '<a href="' . route('penjualan.show', $sale->id) . '" class="text-indigo-600 dark:text-indigo-400 hover:underline font-medium">Detail</a>'
             ];
         }
 
@@ -187,6 +196,16 @@ class SaleController extends Controller
                 foreach ($cartItemsForInsert as $item) {
                     $sale->items()->create($item);
                 }
+
+                // 3. Cari atau buat baru record saldo untuk outlet ini
+                $outletBalance = \App\Models\OutletBalance::firstOrNew(['outlet_id' => $sale->outlet_id]);
+
+                // 4. Tambahkan saldo dengan total penjualan
+                $outletBalance->saldo += $sale->total;
+                $outletBalance->last_updated = now();
+
+                // 5. Simpan perubahan saldo
+                $outletBalance->save();
             });
 
             return redirect()->route('penjualan.index')->with('success', 'Transaksi berhasil disimpan!');

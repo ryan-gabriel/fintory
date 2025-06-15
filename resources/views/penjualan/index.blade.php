@@ -9,10 +9,6 @@
                         <i class="fas fa-plus mr-2"></i>Buat Transaksi Baru
                     </a>
                 </div>
-                <div class="flex items-center gap-2">
-                    <p class="text-gray-600 text-sm">Filter Tanggal:</p>
-                    <x-date-range-picker />
-                </div>
 
                 @if(session('success'))
                     <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4"
@@ -20,6 +16,11 @@
                         <span class="block sm:inline">{{ session('success') }}</span>
                     </div>
                 @endif
+
+                <div class="flex items-center gap-2">
+                    <p class="text-gray-600 text-sm">Filter Tanggal:</p>
+                    <x-date-range-picker />
+                </div>
 
                 <div class="overflow-x-auto relative sm:rounded-lg">
                     <table id="data-table" class="w-full text-sm text-left text-gray-500">
