@@ -191,7 +191,7 @@ class MenuItemSeeder extends Seeder
         MenuItem::create([
             'menu_name' => 'Laporan Keuangan',
             'icon' => 'fa-solid fa-magnifying-glass-dollar',
-            'route' => '#',
+            'route' => '/dashboard/laporan/keuangan',
             'is_parent' => false,
             'parent_id' => $laporan->id,
             'order' => 3
