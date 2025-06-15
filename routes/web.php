@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\Auth\RoleChoiceController;
 use App\Http\Controllers\LaporanKeuanganController;
+use App\Http\Controllers\MutasiStokController;
+use App\Http\Controllers\StokProdukController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -123,6 +125,14 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
 
     // Produk Management
     Route::prefix('dashboard/laporan')->name('laporan.')->group(function () {
+        
+        Route::prefix('stok')->name('stok.')->group(function () {
+            Route::get('/mutasi-stok/data', [MutasiStokController::class, 'getData'])->name('mutasi-stok.data');
+            Route::get('/mutasi-stok', [MutasiStokController::class, 'index'])->name('mutasi-stok.index');
+            Route::get('/produk/data', [StokProdukController::class, 'getData'])->name('produk.data');
+            Route::get('/produk', [StokProdukController::class, 'index'])->name('produk.index');
+        });
+
         Route::get('/keuangan/data', [LaporanKeuanganController::class, 'getData'])->name('keuangan.data');
         Route::get('/keuangan', [LaporanKeuanganController::class, 'index'])->name('keuangan.index');
     });

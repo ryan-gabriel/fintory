@@ -266,6 +266,62 @@
                         }
                     ]
                 },
+                '/dashboard/laporan/stok/mutasi-stok': {
+                    url: '/dashboard/laporan/stok/mutasi-stok/data',
+                    columns: [{
+                            data: 0,
+                            title: "Tanggal"
+                        },
+                        {
+                            data: 1,
+                            title: "Outlet"
+                        },
+                        {
+                            data: 2,
+                            title: "Produk"
+                        },
+                        {
+                            data: 3,
+                            title: "Tipe"
+                        },
+                        {
+                            data: 4,
+                            title: "Jumlah"
+                        }
+                    ]
+                },
+                '/dashboard/laporan/stok/produk': {
+                    url: '/dashboard/laporan/stok/produk/data',
+                    columns: [{
+                            data: 0,
+                            title: "Tanggal"
+                        },
+                        {
+                            data: 1,
+                            title: "Barang"
+                        },
+                        {
+                            data: 2,
+                            title: "Kategori"
+                        },
+                        {
+                            data: 3,
+                            title: "Outlet"
+                        },
+                        {
+                            data: 4,
+                            title: "Harga Jual"
+                        },
+                        {
+                            data: 5,
+                            title: "Stok"
+                        },
+                        {
+                            data: 6,
+                            title: "Status"
+                        }
+                    ]
+                },
                 '/dashboard/produk-stok/barang': {
                     url: '/dashboard/produk-stok/barang/data',
                     columns: [{

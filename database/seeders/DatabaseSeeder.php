@@ -11,6 +11,9 @@ use App\Models\Role;
 use App\Models\Lembaga;
 use App\Models\SubscriptionStatus;
 use Carbon\Carbon;
+use Database\Factories\BarangFactory;
+use Database\Factories\KategoriFactory;
+use Database\Factories\ProductFactory;
 
 class DatabaseSeeder extends Seeder
 {
@@ -80,6 +83,7 @@ class DatabaseSeeder extends Seeder
 
         // keuangan seeder butuh outlet seeder terlebih dahulu
         $this->call(KeuanganSeeder::class);
+        
     }
 
     /**
