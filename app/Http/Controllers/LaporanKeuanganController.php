@@ -99,6 +99,7 @@ class LaporanKeuanganController extends Controller
                 'Rp ' . number_format($row->amount, 0, ',', '.'),
                 'Rp ' . number_format($row->saldo_setelah, 0, ',', '.'),
                 $row->outlet->name ?? '-',
+                '<a href="' . route('laporan.keuangan.show', $row->id) . '" class="text-indigo-600 hover:underline font-medium menu-link">Detail</a>'
             ];
         }
 
@@ -138,6 +139,23 @@ class LaporanKeuanganController extends Controller
 
         return view('layouts.admin', [
             'slot' => view('laporan.keuangan', $viewData),
+            'title' => 'Laporan Keuangan',
+            'lembaga' => \App\Models\Lembaga::find(session('current_lembaga_id')),
+        ]);
+    }
+
+    public function show(Request $request, $id)
+    {
+        $kasLedger = CashLedger::with('outlet')->findOrFail($id);
+
+        $viewData = compact('kasLedger');
+
+        if ($request->ajax()) {
+            return view('laporan.keuangan-detail', $viewData);
+        }
+
+        return view('layouts.admin', [
+            'slot' => view('laporan.keuangan-detail', $viewData),
             'title' => 'Laporan Keuangan',
             'lembaga' => \App\Models\Lembaga::find(session('current_lembaga_id')),
         ]);

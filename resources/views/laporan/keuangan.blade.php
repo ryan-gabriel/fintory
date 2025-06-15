@@ -38,6 +38,7 @@
                                 <th>Jumlah</th>
                                 <th>Saldo Setelah</th>
                                 <th>Outlet</th>
+                                <th>Detail</th>
                             </tr>
                         </thead>
                         <tfoot>
@@ -49,6 +50,7 @@
                                 <th>Jumlah</th>
                                 <th>Saldo Setelah</th>
                                 <th>Outlet</th>
+                                <th>Detail</th>
                             </tr>
                         </tfoot>
                     </table>

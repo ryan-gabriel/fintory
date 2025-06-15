@@ -124,7 +124,7 @@ class MutasiStokController extends Controller
                 $row->product->barang->nama ?? '-', 
                 ucfirst($row->type ?? ''),
                 $row->quantity ?? 0,
-
+                '<a href="' . route('laporan.stok.mutasi-stok.show', $row->id) . '" class="text-indigo-600 hover:underline font-medium menu-link">Detail</a>'
             ];
         }
 
@@ -152,4 +152,21 @@ class MutasiStokController extends Controller
             'lembaga' => \App\Models\Lembaga::find(session('current_lembaga_id')),
         ]);
     }
+
+    public function show(Request $request, $id)
+    {
+        // Ambil data StockMutation beserta relasi product dan outlet
+        $mutation = \App\Models\StockMutation::with(['product', 'outlet'])->findOrFail($id);
+
+        if ($request->ajax()) {
+            return view('laporan.mutasi-stok-detail', compact('mutation'));
+        }
+
+        return view('layouts.admin', [
+            'slot' => view('laporan.mutasi-stok-detail', compact('mutation')),
+            'title' => 'Detail Mutasi Stok',
+            'lembaga' => \App\Models\Lembaga::find(session('current_lembaga_id')),
+        ]);
+    }
+
 }

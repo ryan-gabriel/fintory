@@ -263,6 +263,10 @@
                         {
                             data: 6,
                             title: "Outlet"
+                        },
+                        {
+                            data: 7,
+                            title: "Detail"
                         }
                     ]
                 },
@@ -287,6 +291,10 @@
                         {
                             data: 4,
                             title: "Jumlah"
+                        },
+                        {
+                            data: 5,
+                            title: "Detail"
                         }
                     ]
                 },
@@ -319,6 +327,10 @@
                         {
                             data: 6,
                             title: "Status"
+                        },
+                        {
+                            data: 7,
+                            title: "Detail"
                         }
                     ]
                 },
@@ -1467,7 +1479,8 @@
                             const current_selected_outlet_name = document.getElementById('current_selected_outlet_name');
                             
                             if (current_selected_outlet_name) {
-                                current_selected_outlet_name.innerHTML = this.options[this.selectedIndex].text;
+                                const outletName = this.options[this.selectedIndex].text
+                                current_selected_outlet_name.innerHTML = outletName == "All Outlets" ? "Semua Outlet" : outletName;
                             }
 
                             const totalHutang = document.getElementById('totalHutang')

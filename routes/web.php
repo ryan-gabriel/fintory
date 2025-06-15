@@ -152,12 +152,15 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
         Route::prefix('stok')->name('stok.')->group(function () {
             Route::get('/mutasi-stok/data', [MutasiStokController::class, 'getData'])->name('mutasi-stok.data');
             Route::get('/mutasi-stok', [MutasiStokController::class, 'index'])->name('mutasi-stok.index');
+            Route::get('/mutasi-stok/{id}', [MutasiStokController::class, 'show'])->name('mutasi-stok.show');
             Route::get('/produk/data', [StokProdukController::class, 'getData'])->name('produk.data');
             Route::get('/produk', [StokProdukController::class, 'index'])->name('produk.index');
+            Route::get('/produk/{id}', [StokProdukController::class, 'show'])->name('produk.show');
         });
 
         Route::get('/keuangan/data', [LaporanKeuanganController::class, 'getData'])->name('keuangan.data');
         Route::get('/keuangan', [LaporanKeuanganController::class, 'index'])->name('keuangan.index');
+        Route::get('/keuangan/{id}', [LaporanKeuanganController::class, 'show'])->name('keuangan.show');
     });
 
 });

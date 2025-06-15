@@ -44,6 +44,7 @@
                                 <th>Harga Jual</th>
                                 <th>Stok</th>
                                 <th>Status</th>
+                                <th>Detail</th>
                             </tr>
                         </thead>
                         <tfoot>
@@ -55,6 +56,7 @@
                                 <th>Harga Jual</th>
                                 <th>Stok</th>
                                 <th>Status</th>
+                                <th>Detail</th>
                             </tr>
                         </tfoot>
                     </table>
