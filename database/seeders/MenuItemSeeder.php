@@ -168,7 +168,7 @@ class MenuItemSeeder extends Seeder
         MenuItem::create([
             'menu_name' => 'Laporan Stok',
             'icon' => 'fa-solid fa-cubes-stacked',
-            'route' => '#',
+            'route' => '/dashboard/laporan/stok/mutasi-stok',
             'is_parent' => false,
             'parent_id' => $laporan->id,
             'order' => 2

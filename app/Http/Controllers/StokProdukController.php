@@ -105,6 +105,7 @@ class StokProdukController extends Controller
                 'Rp ' . number_format($row->harga_jual ?? 0, 0, ',', '.'),
                 number_format($row->stok ?? 0, 0, ',', '.'),
                 $row->is_active ? 'Aktif' : 'Nonaktif',
+                '<a href="' . route('laporan.stok.produk.show', $row->id) . '" class="text-indigo-600 hover:underline font-medium menu-link">Detail</a>'
             ];
         }
 
@@ -132,4 +133,27 @@ class StokProdukController extends Controller
             'lembaga' => \App\Models\Lembaga::find(session('current_lembaga_id')),
         ]);
     }
+
+    public function show(Request $request, $id)
+    {
+        $mutation = \App\Models\StockMutation::with([
+            'product.barang', 
+            'product.kategori', 
+            'product.outlet', 
+            'outlet'
+        ])->findOrFail($id);
+
+        $viewData = compact('mutation');
+
+        if ($request->ajax()) {
+            return view('laporan.produk-detail', $viewData);
+        }
+
+        return view('layouts.admin', [
+            'slot' => view('laporan.produk-detail', $viewData),
+            'title' => 'Detail Mutasi Stok',
+            'lembaga' => \App\Models\Lembaga::find(session('current_lembaga_id')),
+        ]);
+    }
+
 }

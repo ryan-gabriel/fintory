@@ -263,6 +263,10 @@
                         {
                             data: 6,
                             title: "Outlet"
+                        },
+                        {
+                            data: 7,
+                            title: "Detail"
                         }
                     ]
                 },
@@ -287,6 +291,10 @@
                         {
                             data: 4,
                             title: "Jumlah"
+                        },
+                        {
+                            data: 5,
+                            title: "Detail"
                         }
                     ]
                 },
@@ -319,6 +327,10 @@
                         {
                             data: 6,
                             title: "Status"
+                        },
+                        {
+                            data: 7,
+                            title: "Detail"
                         }
                     ]
                 },
