@@ -27,6 +27,7 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
     // Dashboard (now guarded by role.selected)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/api/sales-last-7-days', [DashboardController::class, 'getSalesLast7Days'])->name('api.sales.last7days');
+    Route::get('/api/best-seller-products', [DashboardController::class, 'bestSellerProducts'])->name('api.sales.best-seller');
 
     // Profile Management
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
