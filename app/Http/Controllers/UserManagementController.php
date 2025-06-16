@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\FacadesLog;
 
 class UserManagementController extends Controller
 {
@@ -38,17 +40,17 @@ class UserManagementController extends Controller
         $currentLembagaId = session('current_lembaga_id');
         
         // Debug: Log current lembaga ID
-        \Log::info('Current Lembaga ID: ' . $currentLembagaId);
+        Log::info('Current Lembaga ID: ' . $currentLembagaId);
         
         // Debug: Check if there are any users with employees in this lembaga
         $userCount = User::whereHas('employees', function ($q) use ($currentLembagaId) {
             $q->where('lembaga_id', $currentLembagaId);
         })->count();
-        \Log::info('Users with employees in lembaga ' . $currentLembagaId . ': ' . $userCount);
+        Log::info('Users with employees in lembaga ' . $currentLembagaId . ': ' . $userCount);
         
         // Debug: Check all employees in this lembaga
         $employeeCount = \App\Models\Employee::where('lembaga_id', $currentLembagaId)->count();
-        \Log::info('Total employees in lembaga ' . $currentLembagaId . ': ' . $employeeCount);
+        Log::info('Total employees in lembaga ' . $currentLembagaId . ': ' . $employeeCount);
         
         // Query users yang terhubung dengan lembaga current melalui employee
         $query = User::whereHas('employees', function ($q) use ($currentLembagaId) {
@@ -100,7 +102,7 @@ class UserManagementController extends Controller
         $totalFiltered = $query->count();
 
         // Debug: Log totals
-        \Log::info('Total data: ' . $totalData . ', Total filtered: ' . $totalFiltered);
+        Log::info('Total data: ' . $totalData . ', Total filtered: ' . $totalFiltered);
 
         // Ordering
         $orderColIndex = $request->input('order.0.column', 0);
@@ -125,9 +127,9 @@ class UserManagementController extends Controller
         $data = $query->skip($start)->take($length)->get();
         
         // Debug: Log retrieved data
-        \Log::info('Retrieved users count: ' . $data->count());
+        Log::info('Retrieved users count: ' . $data->count());
         foreach ($data as $user) {
-            \Log::info('User: ' . $user->email . ' - Employee: ' . ($user->employees->first()->name ?? 'No employee'));
+            Log::info('User: ' . $user->email . ' - Employee: ' . ($user->employees->first()->name ?? 'No employee'));
         }
 
         $jsonData = [
