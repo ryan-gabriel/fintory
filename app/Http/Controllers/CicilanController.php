@@ -5,13 +5,15 @@ namespace App\Http\Controllers;
 use App\Models\Cicilan;
 use App\Models\Hutang;
 use App\Models\Lembaga;
+use App\Models\Outlet;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class CicilanController extends Controller
 {
-    public function getData(Request $request){
+    public function getData(Request $request)
+    {
         $columns = [
             0 => 'tanggal_bayar',
             1 => 'hutang.nama_pemberi_hutang',
@@ -20,7 +22,15 @@ class CicilanController extends Controller
             4 => 'metode_pembayaran',
         ];
 
-        $query = Cicilan::with(['hutang.outlet']);
+        $currentLembagaId = session('current_lembaga_id');
+
+        // Ambil ID outlet yang terkait dengan lembaga ini
+        $outletIds = Outlet::where('lembaga_id', $currentLembagaId)->pluck('id');
+
+        // Query dasar: hanya cicilan dari hutang yang outlet-nya termasuk lembaga ini
+        $query = Cicilan::with(['hutang.outlet'])->whereHas('hutang', function ($q) use ($outletIds) {
+            $q->whereIn('outlet_id', $outletIds);
+        });
 
         if ($request->filled('start_date')) {
             try {
@@ -39,7 +49,7 @@ class CicilanController extends Controller
                 Log::warning('Invalid end_date format: ' . $request->end_date);
             }
         }
-        
+
         if (session()->has('selected_outlet_id')) {
             $selectedOutletId = session('selected_outlet_id');
             if (!empty($selectedOutletId) && $selectedOutletId !== 'all') {
@@ -48,17 +58,19 @@ class CicilanController extends Controller
                 });
             }
         }
-        // Total sebelum filter
-        $totalData = Cicilan::count();
 
-        // Search filter
+        // Hitung total (tanpa filter pencarian)
+        $totalData = Cicilan::whereHas('hutang', function ($q) use ($outletIds) {
+            $q->whereIn('outlet_id', $outletIds);
+        })->count();
+
+        // Filter pencarian
         if (!empty($request->input('search.value'))) {
             $search = $request->input('search.value');
             $query->where(function ($q) use ($search) {
                 $q->where('jumlah_bayar', 'like', "%{$search}%")
                 ->orWhere('metode_pembayaran', 'like', "%{$search}%")
                 ->orWhereRaw("DATE_FORMAT(tanggal_bayar, '%d-%m-%Y') like ?", ["%{$search}%"])
-
                 ->orWhereHas('hutang', function ($q2) use ($search) {
                     $q2->where('nama_pemberi_hutang', 'like', "%{$search}%")
                         ->orWhere('sisa_hutang', 'like', "%{$search}%")
@@ -70,7 +82,6 @@ class CicilanController extends Controller
             });
         }
 
-        // Total setelah filter
         $totalFiltered = $query->count();
 
         // Sorting
@@ -78,19 +89,19 @@ class CicilanController extends Controller
         $orderDir = strtolower($request->input('order.0.dir', 'asc')) === 'desc' ? 'desc' : 'asc';
         $orderCol = $columns[$orderColIndex] ?? 'tanggal_bayar';
 
-        if ($orderCol === 'hutang.nama_pemberi_hutang') {
-            $query->join('hutang', 'hutang.id', '=', 'cicilan.hutang_id')
-                ->orderBy('hutang.nama_pemberi_hutang', $orderDir)
-                ->select('cicilan.*');
-        } elseif ($orderCol === 'hutang.sisa_hutang') {
-            $query->join('hutang', 'hutang.id', '=', 'cicilan.hutang_id')
-                ->orderBy('hutang.sisa_hutang', $orderDir)
-                ->select('cicilan.*');
-        } elseif ($orderCol === 'outlet.name') {
-            $query->join('hutang', 'hutang.id', '=', 'cicilan.hutang_id')
-                ->join('outlet', 'outlet.id', '=', 'hutang.outlet_id')
-                ->orderBy('outlet.name', $orderDir)
-                ->select('cicilan.*');
+        if ($orderCol === 'hutang.nama_pemberi_hutang' || $orderCol === 'hutang.sisa_hutang' || $orderCol === 'outlet.name') {
+            $query->join('hutang', 'hutang.id', '=', 'cicilan.hutang_id');
+
+            if ($orderCol === 'outlet.name') {
+                $query->join('outlet', 'outlet.id', '=', 'hutang.outlet_id')
+                    ->orderBy('outlet.name', $orderDir);
+            } elseif ($orderCol === 'hutang.nama_pemberi_hutang') {
+                $query->orderBy('hutang.nama_pemberi_hutang', $orderDir);
+            } elseif ($orderCol === 'hutang.sisa_hutang') {
+                $query->orderBy('hutang.sisa_hutang', $orderDir);
+            }
+
+            $query->select('cicilan.*');
         } else {
             $query->orderBy($orderCol, $orderDir);
         }
@@ -98,9 +109,10 @@ class CicilanController extends Controller
         // Pagination
         $start = max(0, intval($request->input('start', 0)));
         $length = max(1, intval($request->input('length', 10)));
+
         $data = $query->skip($start)->take($length)->get();
 
-        // Format JSON
+        // JSON output
         $jsonData = [
             "draw" => intval($request->input('draw', 1)),
             "recordsTotal" => $totalData,
@@ -109,7 +121,6 @@ class CicilanController extends Controller
         ];
 
         foreach ($data as $row) {
-
             $editUrl = route('keuangan.cicilan.edit', $row->id);
             $deleteUrl = route('keuangan.cicilan.destroy', $row->id);
 
@@ -120,7 +131,6 @@ class CicilanController extends Controller
                 </div>
             <?php
             $actionButtons = ob_get_clean();
-
 
             $jsonData['data'][] = [
                 $row->tanggal_bayar ? date('d-m-Y', strtotime($row->tanggal_bayar)) : '-',

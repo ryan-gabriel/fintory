@@ -15,13 +15,18 @@ class HutangController extends Controller
     {
         $columns = [
             0 => 'tanggal_hutang',
-            1 => 'outlet.name',          // untuk sorting kolom outlet
+            1 => 'outlet.name',
             2 => 'nama_pemberi_hutang',
             3 => 'jumlah',
             4 => 'sisa_hutang',
         ];
 
-        $query = Hutang::with('outlet'); // eager load relasi outlet
+        $currentLembagaId = session('current_lembaga_id');
+
+        // Ambil semua outlet_id dari lembaga ini
+        $outletIds = Outlet::where('lembaga_id', $currentLembagaId)->pluck('id');
+
+        $query = Hutang::with('outlet')->whereIn('outlet_id', $outletIds);
 
         if ($request->filled('start_date')) {
             try {
@@ -48,7 +53,6 @@ class HutangController extends Controller
             }
         }
 
-        // Search filter
         if (!empty($request->input('search.value'))) {
             $search = $request->input('search.value');
             $query->where(function ($q) use ($search) {
@@ -63,32 +67,28 @@ class HutangController extends Controller
             });
         }
 
-        // Get total and filtered count
-        $totalData = Hutang::count();
+        $totalData = Hutang::whereIn('outlet_id', $outletIds)->count();
         $totalFiltered = $query->count();
 
-        // Ordering
         $orderColIndex = $request->input('order.0.column', 0);
         $orderDir = strtolower($request->input('order.0.dir', 'asc')) === 'desc' ? 'desc' : 'asc';
 
         $orderCol = $columns[$orderColIndex] ?? 'tanggal_hutang';
 
-        // Handle sorting by related column (e.g., outlet.nama)
         if ($orderCol === 'outlet.name') {
             $query->join('outlet', 'outlet.id', '=', 'hutang.outlet_id')
+                ->whereIn('hutang.outlet_id', $outletIds)
                 ->orderBy('outlet.name', $orderDir)
-                ->select('hutang.*'); // ensure hutang.* is selected after join
+                ->select('hutang.*'); // pastikan tetap mengambil kolom hutang.*
         } else {
             $query->orderBy($orderCol, $orderDir);
         }
 
-        // Pagination
         $start = max(0, intval($request->input('start', 0)));
         $length = max(1, intval($request->input('length', 10)));
 
         $data = $query->skip($start)->take($length)->get();
 
-        // Format JSON output
         $jsonData = [
             "draw" => intval($request->input('draw', 1)),
             "recordsTotal" => $totalData,
@@ -97,7 +97,6 @@ class HutangController extends Controller
         ];
 
         foreach ($data as $row) {
-            // $modalId = 'popup-modal-' . $row->id;
             $editUrl = route('keuangan.hutang.edit', $row->id);
             $deleteUrl = route('keuangan.hutang.destroy', $row->id);
 
@@ -106,8 +105,6 @@ class HutangController extends Controller
                     <a href="<?= $editUrl ?>" class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition edit-link">Edit</a>
                     <button type="button" class="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition delete-btn confirm-delete" data-id="<?= $row->id ?>" data-url="<?= $deleteUrl ?>">Delete</button>
                 </div>
-
-                
             <?php
             $actionButtons = ob_get_clean();
 
@@ -120,7 +117,6 @@ class HutangController extends Controller
                 $actionButtons
             ];
         }
-
 
         return response()->json($jsonData);
     }

@@ -12,7 +12,14 @@ class StokProdukController extends Controller
 {
     public function getData(Request $request)
     {
-        $query = Product::with(['barang', 'kategori', 'outlet']);
+        $currentLembagaId = session('current_lembaga_id');
+
+        // Ambil semua outlet_id milik lembaga ini
+        $outletIds = \App\Models\Outlet::where('lembaga_id', $currentLembagaId)->pluck('id');
+
+        // Query dasar + filter lembaga (via outlet_id)
+        $query = Product::with(['barang', 'kategori', 'outlet'])
+            ->whereIn('outlet_id', $outletIds);
 
         // Filter tanggal dibuat
         if ($request->filled('start_date')) {
@@ -33,7 +40,7 @@ class StokProdukController extends Controller
             }
         }
 
-        // Filter outlet
+        // Filter outlet aktif jika dipilih
         if (session()->has('selected_outlet_id')) {
             $selectedOutletId = session('selected_outlet_id');
             if (!empty($selectedOutletId) && $selectedOutletId !== 'all') {
@@ -42,7 +49,7 @@ class StokProdukController extends Controller
         }
 
         // Total data sebelum filter
-        $totalData = Product::count();
+        $totalData = Product::whereIn('outlet_id', $outletIds)->count();
 
         // Global search
         if (!empty($request->input('search.value'))) {
@@ -111,6 +118,7 @@ class StokProdukController extends Controller
 
         return response()->json($jsonData);
     }
+
 
     public function index(Request $request)
     {

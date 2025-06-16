@@ -15,12 +15,19 @@ class MutasiStokController extends Controller
         $columns = [
             0 => 'created_at',
             1 => 'outlet.name',
-            2 => 'product.nama', // Perhatikan: field ini tidak ada di model Product
+            2 => 'product.nama', // dari relasi barang
             3 => 'type',
             4 => 'quantity',
         ];
 
-        $query = StockMutation::with(['product.barang', 'product.kategori', 'product.outlet', 'outlet']);
+        $currentLembagaId = session('current_lembaga_id');
+
+        // Ambil semua outlet_id milik lembaga aktif
+        $outletIds = \App\Models\Outlet::where('lembaga_id', $currentLembagaId)->pluck('id');
+
+        // Filter awal berdasarkan outlet lembaga
+        $query = StockMutation::with(['product.barang', 'product.kategori', 'product.outlet', 'outlet'])
+            ->whereIn('outlet_id', $outletIds);
 
         // Filter tanggal menggunakan created_at
         if ($request->filled('start_date')) {
@@ -41,7 +48,7 @@ class MutasiStokController extends Controller
             }
         }
 
-        // Filter outlet
+        // Filter outlet tertentu (jika dipilih)
         if (session()->has('selected_outlet_id')) {
             $selectedOutletId = session('selected_outlet_id');
             if (!empty($selectedOutletId) && $selectedOutletId !== 'all') {
@@ -49,8 +56,7 @@ class MutasiStokController extends Controller
             }
         }
 
-        // Hitung total data sebelum filter (untuk recordsTotal)
-        $totalData = StockMutation::count();
+        $totalData = StockMutation::whereIn('outlet_id', $outletIds)->count(); // total untuk lembaga ini
 
         // Global Search
         if (!empty($request->input('search.value'))) {
@@ -60,34 +66,30 @@ class MutasiStokController extends Controller
                     ->orWhere('quantity', 'like', "%{$search}%")
                     ->orWhereRaw("DATE_FORMAT(created_at, '%d-%m-%Y') like ?", ["%{$search}%"])
                     ->orWhereHas('product', function ($p) use ($search) {
-                        // Ganti 'nama' dengan field yang benar dari model Product
-                        // Atau gunakan relasi barang untuk mengakses nama barang
                         $p->whereHas('barang', fn ($b) => $b->where('nama', 'like', "%{$search}%"))
-                        ->orWhereHas('kategori', fn ($k) => $k->where('nama', 'like', "%{$search}%"))
-                        ->orWhereHas('outlet', fn ($o) => $o->where('name', 'like', "%{$search}%"));
+                            ->orWhereHas('kategori', fn ($k) => $k->where('nama', 'like', "%{$search}%"))
+                            ->orWhereHas('outlet', fn ($o) => $o->where('name', 'like', "%{$search}%"));
                     })
                     ->orWhereHas('outlet', fn ($o) => $o->where('name', 'like', "%{$search}%"));
             });
         }
 
-        // Hitung total data setelah filter (untuk recordsFiltered)
         $totalFiltered = $query->count();
 
         // Ordering
         $orderColIndex = $request->input('order.0.column', 0);
         $orderDir = strtolower($request->input('order.0.dir', 'asc')) === 'desc' ? 'desc' : 'asc';
-        
-        // Handle ordering berdasarkan kolom
+
         switch ($orderColIndex) {
             case 0: // created_at
                 $query->orderBy('created_at', $orderDir);
                 break;
-            case 1: // outlet name
+            case 1: // outlet.name
                 $query->join('outlet', 'stockmutation.outlet_id', '=', 'outlet.id')
                     ->orderBy('outlet.name', $orderDir)
-                    ->select('stockmutation.*'); // Pastikan hanya select data stockmutation
+                    ->select('stockmutation.*');
                 break;
-            case 2: // product name (nama barang)
+            case 2: // product.barang.nama
                 $query->join('product', 'stockmutation.product_id', '=', 'product.id')
                     ->join('barang', 'product.barang_id', '=', 'barang.kode_barang')
                     ->orderBy('barang.nama', $orderDir)
@@ -103,7 +105,6 @@ class MutasiStokController extends Controller
                 $query->orderBy('created_at', $orderDir);
         }
 
-        // Pagination
         $start = max(0, intval($request->input('start', 0)));
         $length = max(1, intval($request->input('length', 10)));
 
@@ -120,11 +121,10 @@ class MutasiStokController extends Controller
             $jsonData['data'][] = [
                 $row->created_at ? $row->created_at->format('d-m-Y') : '-',
                 $row->outlet->name ?? '-',
-                // Gunakan nama barang dari relasi barang, bukan dari product
-                $row->product->barang->nama ?? '-', 
+                $row->product->barang->nama ?? '-',
                 ucfirst($row->type ?? ''),
                 $row->quantity ?? 0,
-                '<a href="' . route('laporan.stok.mutasi-stok.show', $row->id) . '" class="text-indigo-600 hover:underline font-medium menu-link">Detail</a>'
+                '<a href="' . route('laporan.stok.mutasi-stok.show', $row->id) . '" class="text-indigo-600 hover:underline font-medium menu-link">Detail</a>',
             ];
         }
 

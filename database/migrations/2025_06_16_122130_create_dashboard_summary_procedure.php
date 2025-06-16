@@ -9,6 +9,7 @@ return new class extends Migration {
      */
     public function up(): void
     {
+        DB::unprepared('DROP PROCEDURE IF EXISTS GetDashboardSummary');
         DB::unprepared('
             CREATE PROCEDURE `GetDashboardSummary`(
                 IN p_outlet_id_param VARCHAR(10) -- Bisa "all" atau ID outlet

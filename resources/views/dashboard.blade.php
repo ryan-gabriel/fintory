@@ -46,11 +46,19 @@
             <div class="w-full max-w-lg bg-white rounded-lg shadow-sm dark:bg-gray-800 p-6">
                 <div class="border-b border-gray-200 dark:border-gray-700 pb-3 mb-4">
                     <h5 class="text-xl font-bold text-gray-900 dark:text-white">
-                        5 Produk Terlaris Bulan Ini
+                        Produk Terlaris Bulan Ini
                     </h5>
                 </div>
+
+                {{-- Info jika tidak ada produk --}}
+                <div id="no-product-info" class="hidden text-center text-gray-600 dark:text-gray-300 py-4">
+                    Tidak Ada Produk
+                </div>
+
+                {{-- Container chart --}}
                 <div id="bar-chart" class="w-full h-full"></div>
             </div>
+
         </div>
 
     </div>

@@ -447,27 +447,75 @@
                         }
                     ]
                 },
-                
+
                 '/dashboard/laporan/penjualan': {
-                    url: '{{ route("laporan.penjualan.data") }}',
-                    columns: [
-                        { data: 0, title: "Tanggal" },
-                        { data: 1, title: "No. Transaksi" },
-                        { data: 2, title: "Outlet" },
-                        { data: 3, title: "Pelanggan" },
-                        { data: 4, title: "Total", className: "text-right" },
-                        { data: 5, title: "Aksi", className: "text-center", orderable: false, searchable: false }
+                    url: '{{ route('laporan.penjualan.data') }}',
+                    columns: [{
+                            data: 0,
+                            title: "Tanggal"
+                        },
+                        {
+                            data: 1,
+                            title: "No. Transaksi"
+                        },
+                        {
+                            data: 2,
+                            title: "Outlet"
+                        },
+                        {
+                            data: 3,
+                            title: "Pelanggan"
+                        },
+                        {
+                            data: 4,
+                            title: "Total",
+                            className: "text-right"
+                        },
+                        {
+                            data: 5,
+                            title: "Aksi",
+                            className: "text-center",
+                            orderable: false,
+                            searchable: false
+                        }
                     ]
                 },
                 '/dashboard/penjualan': {
-                    url: '{{ route("penjualan.data") }}',
-                    columns: [
-                        { data: 0, name: 'sale_date', title: "Tanggal" },
-                        { data: 1, name: 'id', title: "No. Transaksi" },
-                        { data: 2, name: 'outlet.name', title: "Outlet" },
-                        { data: 3, name: 'customer_name', title: "Pelanggan" },
-                        { data: 4, name: 'total', title: "Total", className: "text-right" },
-                        { data: 5, name: 'action', title: "Aksi", className: "text-center", orderable: false, searchable: false }
+                    url: '{{ route('penjualan.data') }}',
+                    columns: [{
+                            data: 0,
+                            name: 'sale_date',
+                            title: "Tanggal"
+                        },
+                        {
+                            data: 1,
+                            name: 'id',
+                            title: "No. Transaksi"
+                        },
+                        {
+                            data: 2,
+                            name: 'outlet.name',
+                            title: "Outlet"
+                        },
+                        {
+                            data: 3,
+                            name: 'customer_name',
+                            title: "Pelanggan"
+                        },
+                        {
+                            data: 4,
+                            name: 'total',
+                            title: "Total",
+                            className: "text-right"
+                        },
+                        {
+                            data: 5,
+                            name: 'action',
+                            title: "Aksi",
+                            className: "text-center",
+                            orderable: false,
+                            searchable: false
+                        }
                     ]
                 }
             };
@@ -735,7 +783,7 @@
                     if (form) {
                         // Clean up datepicker first
                         this.cleanCreateDatePicker();
-                        
+
                         // Remove existing event listeners by cloning
                         const newForm = form.cloneNode(true);
                         form.parentNode.replaceChild(newForm, form);
@@ -768,7 +816,7 @@
                     if (submitBtn) {
                         submitBtn.addEventListener('click', async (e) => {
                             e.preventDefault();
-                            
+
                             const form = document.getElementById('form-create');
                             console.log(form)
                             if (!form) return;
@@ -788,7 +836,8 @@
                             `;
 
                             try {
-                                const response = await EventHandlers.makeAjaxRequest(form.action, 'POST', form);
+                                const response = await EventHandlers.makeAjaxRequest(form.action, 'POST',
+                                    form);
 
                                 submitBtn.disabled = false;
                                 submitBtn.innerHTML = 'Submit';
@@ -882,14 +931,14 @@
                         if (form) {
                             // Set form attributes
                             form.method = 'POST';
-                            
+
                             const submitBtn = form.querySelector('#btn-submit');
-                            
+
                             form.addEventListener('submit', async (e) => {
                                 e.preventDefault();
-                                
+
                                 if (submitBtn.disabled) return;
-                                
+
                                 submitBtn.disabled = true;
                                 submitBtn.innerHTML = `
                                     <svg aria-hidden="true" role="status" class="inline w-4 h-4 me-3 text-white animate-spin" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -903,7 +952,8 @@
                                     const response = await fetch(form.action, {
                                         method: 'POST',
                                         headers: {
-                                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                            'X-CSRF-TOKEN': document.querySelector(
+                                                'meta[name="csrf-token"]').content,
                                             'Accept': 'application/json',
                                             'X-Requested-With': 'XMLHttpRequest'
                                         },
@@ -911,7 +961,7 @@
                                     });
 
                                     const result = await response.json();
-                                    
+
                                     submitBtn.disabled = false;
                                     submitBtn.innerHTML = 'Update';
                                     if (result.redirect) {
@@ -919,7 +969,7 @@
                                     } else if (result.message) {
                                         alert(result.message);
                                     }
-                                    
+
                                 } catch (error) {
                                     console.error('Error:', error);
                                     submitBtn.disabled = false;
@@ -932,7 +982,7 @@
                             setTimeout(waitForForm, 100);
                         }
                     };
-                    
+
                     waitForForm();
                 }
             };
@@ -946,8 +996,8 @@
                         loadIntoContainer: '#main-content',
                         showLoader: true,
                         updateHistory: true,
-                        updateTitle: true
-                        ,onSuccess: (response, element) => {
+                        updateTitle: true,
+                        onSuccess: (response, element) => {
                             // Jika masuk ke /dashboard, lakukan refresh
                             const url = element.href || element.getAttribute('data-url');
                             if (url) {
@@ -985,25 +1035,25 @@
                                 const form = document.getElementById('form-edit');
                                 if (form) {
                                     Utils.initFormEditHandler();
-                                    
+
                                     // Initialize datepicker
                                     const tanggalInput = document.getElementById('tanggal');
                                     if (tanggalInput) {
                                         if (tanggalInput._datepicker) {
                                             tanggalInput._datepicker.destroy();
                                         }
-                                        
+
                                         const datepickerInstance = new Datepicker(tanggalInput, {
                                             format: "yyyy/mm/dd",
                                             autohide: true,
                                             buttons: true
                                         });
-                                        
+
                                         if (tanggalInput.value) {
                                             datepickerInstance.setDate(new Date(tanggalInput.value));
                                         }
                                     }
-                                    
+
                                     obs.disconnect(); // Stop observing once done
                                 }
                             });
@@ -1063,7 +1113,7 @@
 
                 // Enhanced handle click untuk semua jenis link
                 async handleLinkClick(e) {
-                    
+
                     // If the clicked link is a hash-only navigation, just scroll to the section without AJAX
                     const nextUrl = e.target.closest('a')?.href || e.target.getAttribute('data-url');
                     if (nextUrl && Utils.isHashOnlyChange(nextUrl, window.location.href)) {
@@ -1082,7 +1132,7 @@
                     let linkElement = null;
                     let config = null;
 
-                    
+
                     // Cari link element dan konfigurasinya
                     for (const selector of Object.keys(this.linkConfigs)) {
                         const found = clickedElement.closest(selector);
@@ -1191,7 +1241,7 @@
                         const formData = new FormData(form);
                         options.body = formData;
                         delete options.headers['Content-Type']; // Let browser set it for FormData
-                    
+
                     }
 
                     const response = await fetch(url, options);
@@ -1434,95 +1484,102 @@
                     button.innerHTML = `<span class="loading-spinner">Deleting...</span>`;
 
                     fetch(url, {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Accept': 'application/json',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        // Close modal
-                        const modal = document.getElementById(modalId);
-                        if (modal) modal.classList.add('hidden');
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            // Close modal
+                            const modal = document.getElementById(modalId);
+                            if (modal) modal.classList.add('hidden');
 
-                        // Reload DataTable
-                        if ($.fn.DataTable.isDataTable('#data-table')) {
-                            $('#data-table').DataTable().ajax.reload(null, false);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Terjadi kesalahan saat menghapus data.');
-                    })
-                    .finally(() => {
-                        button.disabled = false;
-                        button.innerHTML = originalText;
-                    });
+                            // Reload DataTable
+                            if ($.fn.DataTable.isDataTable('#data-table')) {
+                                $('#data-table').DataTable().ajax.reload(null, false);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Terjadi kesalahan saat menghapus data.');
+                        })
+                        .finally(() => {
+                            button.disabled = false;
+                            button.innerHTML = originalText;
+                        });
                 }
             });
 
             document.addEventListener('DOMContentLoaded', () => {
                 const selected_outlet = document.getElementById('outlet-select');
                 if (selected_outlet) {
-                    selected_outlet.addEventListener('change', function () {
+                    selected_outlet.addEventListener('change', function() {
                         const outletId = this.value;
                         fetch('/dashboard/set-outlet', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                'X-Requested-With': 'XMLHttpRequest'
-                            },
-                            body: JSON.stringify({ selected_outlet_id: outletId })
-                        })
-                        .then(response => {
-                            console.log(response)
-                            if (!response.ok) throw new Error(response);
-                            return response.json();
-                        })
-                        .then(data => {
-                            // Reload DataTable jika ada
-                            if ($.fn.DataTable.isDataTable('#data-table')) {
-                                $('#data-table').DataTable().ajax.reload();
-                            }
-                            const current_selected_outlet_name = document.getElementById('current_selected_outlet_name');
-                            
-                            if (current_selected_outlet_name) {
-                                const outletName = this.options[this.selectedIndex].text
-                                current_selected_outlet_name.innerHTML = outletName == "All Outlets" ? "Semua Outlet" : outletName;
-                            }
-
-                            const totalHutang = document.getElementById('totalHutang')
-                            const totalSaldo = document.getElementById('totalSaldo')
-
-                            // Jika kedua elemen ada, lakukan AJAX request ke URL saat ini
-                            if (totalHutang && totalSaldo) {
-                                fetch(window.location.href, {
-                                    headers: {
-                                        'X-Requested-With': 'XMLHttpRequest'
-                                    }
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                        .content,
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                },
+                                body: JSON.stringify({
+                                    selected_outlet_id: outletId
                                 })
-                                .then(response => response.text())
-                                .then(html => {
-                                    // Buat elemen dummy untuk parsing HTML
-                                    const parser = new DOMParser();
-                                    const doc = parser.parseFromString(html, 'text/html');
-                                    // Ambil nilai terbaru dari response
-                                    const newTotalHutang = doc.getElementById('totalHutang');
-                                    const newTotalSaldo = doc.getElementById('totalSaldo');
-                                    if (newTotalHutang) totalHutang.innerHTML = newTotalHutang.innerHTML;
-                                    if (newTotalSaldo) totalSaldo.innerHTML = newTotalSaldo.innerHTML;
-                                })
-                                .catch(error => {
-                                    console.error('Gagal update total hutang/saldo:', error);
-                                });
-                            }
-                        })
-                        .catch(error => {
-                            alert(error);
-                        });
+                            })
+                            .then(response => {
+                                console.log(response)
+                                if (!response.ok) throw new Error(response);
+                                return response.json();
+                            })
+                            .then(data => {
+                                // Reload DataTable jika ada
+                                if ($.fn.DataTable.isDataTable('#data-table')) {
+                                    $('#data-table').DataTable().ajax.reload();
+                                }
+                                const current_selected_outlet_name = document.getElementById(
+                                    'current_selected_outlet_name');
+
+                                if (current_selected_outlet_name) {
+                                    const outletName = this.options[this.selectedIndex].text
+                                    current_selected_outlet_name.innerHTML = outletName == "All Outlets" ?
+                                        "Semua Outlet" : outletName;
+                                }
+
+                                const totalHutang = document.getElementById('totalHutang')
+                                const totalSaldo = document.getElementById('totalSaldo')
+
+                                // Jika kedua elemen ada, lakukan AJAX request ke URL saat ini
+                                if (totalHutang && totalSaldo) {
+                                    fetch(window.location.href, {
+                                            headers: {
+                                                'X-Requested-With': 'XMLHttpRequest'
+                                            }
+                                        })
+                                        .then(response => response.text())
+                                        .then(html => {
+                                            // Buat elemen dummy untuk parsing HTML
+                                            const parser = new DOMParser();
+                                            const doc = parser.parseFromString(html, 'text/html');
+                                            // Ambil nilai terbaru dari response
+                                            const newTotalHutang = doc.getElementById('totalHutang');
+                                            const newTotalSaldo = doc.getElementById('totalSaldo');
+                                            if (newTotalHutang) totalHutang.innerHTML = newTotalHutang
+                                                .innerHTML;
+                                            if (newTotalSaldo) totalSaldo.innerHTML = newTotalSaldo
+                                                .innerHTML;
+                                        })
+                                        .catch(error => {
+                                            console.error('Gagal update total hutang/saldo:', error);
+                                        });
+                                }
+                            })
+                            .catch(error => {
+                                alert(error);
+                            });
                     });
                 }
             })
@@ -1543,12 +1600,18 @@
                                     width: "100%",
                                     type: "area",
                                     fontFamily: "Inter, sans-serif",
-                                    toolbar: { show: false },
-                                    dropShadow: { enabled: false },
+                                    toolbar: {
+                                        show: false
+                                    },
+                                    dropShadow: {
+                                        enabled: false
+                                    },
                                 },
                                 tooltip: {
                                     enabled: true,
-                                    x: { show: true },
+                                    x: {
+                                        show: true
+                                    },
                                 },
                                 fill: {
                                     type: "gradient",
@@ -1559,12 +1622,20 @@
                                         gradientToColors: ["#1C64F2"],
                                     },
                                 },
-                                dataLabels: { enabled: false },
-                                stroke: { width: 6 },
+                                dataLabels: {
+                                    enabled: false
+                                },
+                                stroke: {
+                                    width: 6
+                                },
                                 grid: {
                                     show: false,
                                     strokeDashArray: 4,
-                                    padding: { left: 2, right: 2, top: 0 },
+                                    padding: {
+                                        left: 2,
+                                        right: 2,
+                                        top: 0
+                                    },
                                 },
                                 series: [{
                                     name: "Sales",
@@ -1573,11 +1644,19 @@
                                 }],
                                 xaxis: {
                                     categories: dates,
-                                    labels: { show: true },
-                                    axisBorder: { show: false },
-                                    axisTicks: { show: true },
+                                    labels: {
+                                        show: true
+                                    },
+                                    axisBorder: {
+                                        show: false
+                                    },
+                                    axisTicks: {
+                                        show: true
+                                    },
                                 },
-                                yaxis: { show: true },
+                                yaxis: {
+                                    show: true
+                                },
                             };
 
                             const el = document.getElementById("area-chart");
@@ -1594,7 +1673,13 @@
                     fetch('/api/best-seller-products')
                         .then(response => response.json())
                         .then(data => {
-                            const products = data.products;
+                            const products = data.products || [];
+
+                            if (products.length === 0) {
+                                document.getElementById('no-product-info').classList.remove('hidden');
+                                return;
+                            }
+
                             const categories = products.map(p => p.name);
                             const quantities = products.map(p => p.qty);
 
@@ -1606,7 +1691,9 @@
                                 chart: {
                                     type: "bar",
                                     height: 400,
-                                    toolbar: { show: false }
+                                    toolbar: {
+                                        show: false
+                                    }
                                 },
                                 plotOptions: {
                                     bar: {
@@ -1616,8 +1703,10 @@
                                         distributed: true
                                     }
                                 },
-                                dataLabels: { enabled: false },
-                                colors: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'], // Warna berbeda
+                                dataLabels: {
+                                    enabled: false
+                                },
+                                colors: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'],
                                 xaxis: {
                                     categories: categories,
                                     labels: {
@@ -1647,7 +1736,7 @@
                                 },
                                 tooltip: {
                                     y: {
-                                        formatter: function (val) {
+                                        formatter: function(val) {
                                             return val + " unit";
                                         }
                                     }
@@ -1658,12 +1747,12 @@
                                 }
                             };
 
-
                             const chart = new ApexCharts(document.querySelector("#bar-chart"), options);
                             chart.render();
                         })
                         .catch(error => {
                             console.error('Gagal mengambil data produk terlaris:', error);
+                            document.getElementById('no-product-info').classList.remove('hidden');
                         });
                 }
             });

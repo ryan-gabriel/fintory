@@ -18,18 +18,19 @@ return new class extends Migration
             SELECT
                 si.product_id,
                 COALESCE(b.nama, "Produk Tidak Diketahui") AS product_name,
+                o.lembaga_id as lembaga_id,
                 SUM(si.quantity) AS total_qty,
-                RANK() OVER (ORDER BY SUM(si.quantity) DESC) AS rank_num
+                RANK() OVER (PARTITION BY o.lembaga_id ORDER BY SUM(si.quantity) DESC) AS rank_num
             FROM saleitem si
             JOIN sale s ON s.id = si.sale_id
             LEFT JOIN product p ON p.id = si.product_id
             LEFT JOIN barang b ON b.kode_barang = p.barang_id
+            LEFT JOIN outlet o ON o.id = p.outlet_id
             WHERE s.sale_date BETWEEN DATE_FORMAT(CURDATE(), "%Y-%m-01") AND LAST_DAY(CURDATE())
-            GROUP BY si.product_id, b.nama
-            ORDER BY total_qty DESC
-            LIMIT 5;
+            GROUP BY si.product_id, b.nama, o.lembaga_id
         ');
     }
+
 
     /**
      * Reverse the migrations.

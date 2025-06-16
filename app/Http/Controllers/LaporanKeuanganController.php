@@ -3,14 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\CashLedger;
+use App\Models\Outlet;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class LaporanKeuanganController extends Controller
 {
-    public function getData(Request $request){
-
+    public function getData(Request $request)
+    {
         $columns = [
             0 => 'tanggal',
             1 => 'outlet.name',
@@ -20,8 +21,14 @@ class LaporanKeuanganController extends Controller
             5 => 'amount',
             6 => 'saldo_setelah',
         ];
-        
-        $query = CashLedger::with('outlet');
+
+        $currentLembagaId = session('current_lembaga_id');
+
+        // Ambil semua outlet_id milik lembaga aktif
+        $outletIds = Outlet::where('lembaga_id', $currentLembagaId)->pluck('id');
+
+        // Query dasar
+        $query = CashLedger::with('outlet')->whereIn('outlet_id', $outletIds);
 
         if ($request->filled('start_date')) {
             try {
@@ -61,7 +68,7 @@ class LaporanKeuanganController extends Controller
             });
         }
 
-        $totalData = CashLedger::count();
+        $totalData = CashLedger::whereIn('outlet_id', $outletIds)->count();
         $totalFiltered = $query->count();
 
         // Ordering
@@ -83,6 +90,7 @@ class LaporanKeuanganController extends Controller
 
         $data = $query->skip($start)->take($length)->get();
 
+        // JSON output
         $jsonData = [
             "draw" => intval($request->input('draw', 1)),
             "recordsTotal" => $totalData,
@@ -93,12 +101,12 @@ class LaporanKeuanganController extends Controller
         foreach ($data as $row) {
             $jsonData['data'][] = [
                 $row->tanggal ? date('d-m-Y', strtotime($row->tanggal)) : '-',
+                $row->outlet->name ?? '-',
                 ucfirst($row->tipe),
                 $row->sumber ?? '-',
                 $row->deskripsi ?? '-',
                 'Rp ' . number_format($row->amount, 0, ',', '.'),
                 'Rp ' . number_format($row->saldo_setelah, 0, ',', '.'),
-                $row->outlet->name ?? '-',
                 '<a href="' . route('laporan.keuangan.show', $row->id) . '" class="text-indigo-600 hover:underline font-medium menu-link">Detail</a>'
             ];
         }
@@ -106,10 +114,12 @@ class LaporanKeuanganController extends Controller
         return response()->json($jsonData);
     }
     
-    
     public function index(Request $request)
     {
-        $outlets = \App\Models\Outlet::all();
+        $currentLembagaId = session('current_lembaga_id');
+
+        // Ambil semua outlet milik lembaga aktif
+        $outlets = \App\Models\Outlet::where('lembaga_id', $currentLembagaId)->get();
         $selectedOutletId = session('selected_outlet_id', 'all');
 
         $selectedOutletName = $selectedOutletId === 'all'
@@ -123,12 +133,17 @@ class LaporanKeuanganController extends Controller
 
             $totalSaldo = \App\Models\OutletBalance::where('outlet_id', $selectedOutletId)->value('saldo') ?? 0;
         } else {
-            $latestHutangIds = \App\Models\Hutang::selectRaw('MAX(id) as id')
+            // Ambil semua outlet_id dari lembaga aktif
+            $outletIds = $outlets->pluck('id');
+
+            // Ambil hutang terbaru per outlet
+            $latestHutangIds = \App\Models\Hutang::whereIn('outlet_id', $outletIds)
+                ->selectRaw('MAX(id) as id')
                 ->groupBy('outlet_id')
                 ->pluck('id');
 
             $totalHutang = \App\Models\Hutang::whereIn('id', $latestHutangIds)->sum('sisa_hutang');
-            $totalSaldo = \App\Models\OutletBalance::sum('saldo');
+            $totalSaldo = \App\Models\OutletBalance::whereIn('outlet_id', $outletIds)->sum('saldo');
         }
 
         $viewData = compact('outlets', 'selectedOutletId', 'selectedOutletName', 'totalHutang', 'totalSaldo');
@@ -140,9 +155,10 @@ class LaporanKeuanganController extends Controller
         return view('layouts.admin', [
             'slot' => view('laporan.keuangan', $viewData),
             'title' => 'Laporan Keuangan',
-            'lembaga' => \App\Models\Lembaga::find(session('current_lembaga_id')),
+            'lembaga' => \App\Models\Lembaga::find($currentLembagaId),
         ]);
     }
+
 
     public function show(Request $request, $id)
     {

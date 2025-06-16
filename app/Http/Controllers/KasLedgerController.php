@@ -23,10 +23,15 @@ class KasLedgerController extends Controller
             4 => 'saldo_setelah',
         ];
 
-        $query = CashLedger::query();
+        $currentLembagaId = session('current_lembaga_id');
 
+        // Ambil semua outlet_id yang termasuk dalam lembaga ini
+        $outletIds = Outlet::where('lembaga_id', $currentLembagaId)->pluck('id');
 
-        // Date range filter
+        // Filter awal: hanya ambil kas dari outlet yang masuk lembaga
+        $query = CashLedger::whereIn('outlet_id', $outletIds);
+
+        // Filter tanggal
         if ($request->filled('start_date')) {
             try {
                 $startDate = Carbon::createFromFormat('m/d/Y', $request->start_date)->startOfDay();
@@ -45,6 +50,7 @@ class KasLedgerController extends Controller
             }
         }
 
+        // Jika user memilih outlet tertentu
         if (session()->has('selected_outlet_id')) {
             $selectedOutletId = session('selected_outlet_id');
             if (!empty($selectedOutletId) && $selectedOutletId !== 'all') {
@@ -52,7 +58,7 @@ class KasLedgerController extends Controller
             }
         }
 
-        // Search filter
+        // Search global
         if ($request->filled('search.value')) {
             $search = $request->input('search.value');
             $query->where(function ($q) use ($search) {
@@ -63,28 +69,18 @@ class KasLedgerController extends Controller
             });
         }
 
-
-
-        // Total data (tanpa filter)
-        $totalData = CashLedger::count();
-
-        // Total data (dengan filter)
+        $totalData = CashLedger::whereIn('outlet_id', $outletIds)->count();
         $totalFiltered = $query->count();
 
-        // Ordering
         $orderColIndex = intval($request->input('order.0.column', 0));
         $orderDir = strtolower($request->input('order.0.dir', 'asc')) === 'desc' ? 'desc' : 'asc';
-
         $orderCol = $columns[$orderColIndex] ?? 'tanggal';
         $query->orderBy($orderCol, $orderDir);
 
-        // Pagination
         $start = max(0, intval($request->input('start', 0)));
         $length = max(1, intval($request->input('length', 10)));
-
         $data = $query->offset($start)->limit($length)->get();
 
-        // Format response
         $jsonData = [
             'draw' => intval($request->input('draw', 1)),
             'recordsTotal' => $totalData,
@@ -93,7 +89,6 @@ class KasLedgerController extends Controller
         ];
 
         foreach ($data as $row) {
-
             $editUrl = route('keuangan.kas-ledger.edit', $row->id);
             $deleteUrl = route('keuangan.kas-ledger.destroy', $row->id);
 
@@ -102,11 +97,9 @@ class KasLedgerController extends Controller
                     <a href="<?= $editUrl ?>" class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition edit-link">Edit</a>
                     <button type="button" class="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition delete-btn confirm-delete" data-id="<?= $row->id ?>" data-url="<?= $deleteUrl ?>">Delete</button>
                 </div>
-
-                
             <?php
             $actionButtons = ob_get_clean();
-            
+
             $jsonData['data'][] = [
                 $row->tanggal ? Carbon::parse($row->tanggal)->format('d-m-Y') : '-',
                 $row->tipe ? ucfirst($row->tipe) : '-',
