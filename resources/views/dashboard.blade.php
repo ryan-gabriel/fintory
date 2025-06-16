@@ -8,22 +8,19 @@
         </div>
 
         {{-- Info Box --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 bg-white p-4 rounded-xl">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div class="bg-emerald-500/90 text-white rounded-2xl shadow-lg p-6">
                 <h3 class="text-lg font-semibold">Penjualan Hari Ini</h3>
                 <p class="text-2xl mt-2 font-bold">Rp {{ number_format($totalSales, 0, ',', '.') }}</p>
             </div>
-
             <div class="bg-sky-500/90 text-white rounded-2xl shadow-lg p-6">
                 <h3 class="text-lg font-semibold">Transaksi Hari Ini</h3>
                 <p class="text-2xl mt-2 font-bold">{{ $totalTransaction }}</p>
             </div>
-
             <div class="bg-indigo-500/90 text-white rounded-2xl shadow-lg p-6">
                 <h3 class="text-lg font-semibold">Produk Aktif</h3>
                 <p class="text-2xl mt-2 font-bold">{{ $activeProductTotal }}</p>
             </div>
-
             <div class="bg-rose-500/90 text-white rounded-2xl shadow-lg p-6">
                 <h3 class="text-lg font-semibold">Stok Kritis (&lt;10)</h3>
                 <p class="text-2xl mt-2 font-bold">{{ $lowProductTotal }}</p>

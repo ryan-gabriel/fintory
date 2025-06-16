@@ -18,23 +18,29 @@ class DashboardController extends Controller
             return redirect()->route('auth.setup.lembaga');
         }
 
-        // Ringkasan harian
-        $sales = Sale::whereDate('sale_date', now()->toDateString())->get();
-        $totalSales = $sales->sum(fn($sale) => $sale->total ?? 0);
-        $totalTransaction = $sales->count();
-        $lowProductTotal = Product::where('stok', '<', 10)->count();
-        $activeProductTotal = Product::where('is_active', 1)->count();
+        // Ambil outlet_id yang aktif dari session, defaultnya 'all'
+        $activeOutletId = session('active_outlet_id', 'all');
+        $lembaga_id = session('current_lembaga_id');
 
-        $totalSalesLast7Days = Sale::where('sale_date', '>=', now()->subDays(6)->startOfDay())
-            ->sum('total');
+        // Panggil Stored Procedure dengan satu panggilan database
+        $summary = DB::select('CALL GetDashboardSummary(?)', [$activeOutletId]);
+        
+        // Ambil hasil dari baris pertama result set
+        $dashboardData = $summary[0] ?? null;
 
-        return view('dashboard', compact(
-            'totalSales',
-            'totalTransaction',
-            'lowProductTotal',
-            'activeProductTotal',
-            'totalSalesLast7Days'
-        ));
+        // Siapkan data untuk dikirim ke view, dengan nilai default 0 jika data tidak ada
+        $viewData = [
+            'totalSales' => $dashboardData->total_sales_today ?? 0,
+            'totalTransaction' => $dashboardData->total_transactions_today ?? 0,
+            'activeProductTotal' => $dashboardData->active_products ?? 0,
+            'lowProductTotal' => $dashboardData->low_stock_products ?? 0,
+        ];
+        
+        // Method lain untuk chart bisa dipanggil terpisah jika diperlukan
+        $totalSalesLast7Days = Sale::where('sale_date', '>=', now()->subDays(6)->startOfDay())->sum('total');
+        $viewData['totalSalesLast7Days'] = $totalSalesLast7Days;
+
+        return view('dashboard', $viewData);
     }
 
     public function getSalesLast7Days()
