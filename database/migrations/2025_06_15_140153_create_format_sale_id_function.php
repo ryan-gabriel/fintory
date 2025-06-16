@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        DB::unprepared('DROP FUNCTION IF EXISTS `FormatSaleID`');
         DB::unprepared('
             CREATE FUNCTION `FormatSaleID` (sale_id INT)
             RETURNS VARCHAR(15)

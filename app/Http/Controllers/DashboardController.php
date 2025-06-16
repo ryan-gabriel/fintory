@@ -66,57 +66,40 @@ class DashboardController extends Controller
     }
 
     public function bestSellerProducts()
-    {
-        $startOfMonth = now()->startOfMonth();
-        $endOfMonth = now()->endOfMonth();
+{
+    $startOfMonth = now()->startOfMonth();
+    $endOfMonth = now()->endOfMonth();
 
-        // Get total sales for this month
-        $totalSales = Sale::whereBetween('sale_date', [$startOfMonth, $endOfMonth])
-            ->sum('total');
+    $totalSales = Sale::whereBetween('sale_date', [$startOfMonth, $endOfMonth])
+        ->sum('total');
 
-        // Get product sales using Eloquent with relationships
-        $productSales = SaleItem::whereHas('sale', function ($query) use ($startOfMonth, $endOfMonth) {
-                $query->whereBetween('sale_date', [$startOfMonth, $endOfMonth]);
-            })
-            ->with(['product.barang'])
-            ->select('product_id', DB::raw('SUM(quantity) as total_qty'))
-            ->groupBy('product_id')
-            ->orderByDesc('total_qty')
-            ->get();
+    // Ambil data dari view
+    $topProducts = DB::table('best_seller_products_monthly')->get();
 
-        // Transform data to include product names
-        $productSalesWithNames = $productSales->map(function ($item) {
-            return [
-                'product_id' => $item->product_id,
-                'product_name' => $item->product->barang->nama ?? 'Produk Tidak Diketahui',
-                'total_qty' => $item->total_qty
-            ];
-        });
+    $allTotalQty = $topProducts->sum('total_qty');
 
-        $topProducts = $productSalesWithNames->take(5);
-        $allTotalQty = $productSalesWithNames->sum('total_qty');
+    $result = $topProducts->map(function ($product) use ($allTotalQty) {
+        $percentage = $allTotalQty > 0 ? round(($product->total_qty / $allTotalQty) * 100, 2) : 0;
 
-        $result = [];
-        foreach ($topProducts as $product) {
-            $percentage = $allTotalQty > 0 ? round(($product['total_qty'] / $allTotalQty) * 100, 2) : 0;
-            $result[] = [
-                'name' => $product['product_name'],
-                'qty' => (int) $product['total_qty'],
-                'percentage' => $percentage,
-            ];
-        }
+        return [
+            'name' => $product->product_name,
+            'qty' => (int) $product->total_qty,
+            'percentage' => $percentage,
+        ];
+    });
 
-        return response()->json([
-            'products' => $result,
-            'total_sales' => number_format($totalSales, 0, ',', '.'),
-            'period' => [
-                'start' => $startOfMonth->format('d-m-Y'),
-                'end' => $endOfMonth->format('d-m-Y')
-            ],
-            'summary' => [
-                'total_products_sold' => $topProducts->count(),
-                'total_quantity_sold' => $allTotalQty
-            ]
-        ]);
-    }
+    return response()->json([
+        'products' => $result,
+        'total_sales' => number_format($totalSales, 0, ',', '.'),
+        'period' => [
+            'start' => $startOfMonth->format('d-m-Y'),
+            'end' => $endOfMonth->format('d-m-Y')
+        ],
+        'summary' => [
+            'total_products_sold' => count($result),
+            'total_quantity_sold' => $allTotalQty
+        ]
+    ]);
+}
+
 }
