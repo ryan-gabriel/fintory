@@ -820,9 +820,9 @@
                     if (tanggalPicker) {
                         try {
                             // Remove event listener if exists
-                            if (this.dateChangeHandlers?.tanggalHutang) {
-                                tanggalPicker.removeEventListener('changeDate', this.dateChangeHandlers.tanggalHutang);
-                                delete this.dateChangeHandlers.tanggalHutang;
+                            if (this.dateChangeHandlers?.tanggal) {
+                                tanggalPicker.removeEventListener('changeDate', this.dateChangeHandlers.tanggal);
+                                delete this.dateChangeHandlers.tanggal;
                             }
 
                             // Destroy datepicker instance if exists
@@ -866,11 +866,11 @@
                                 this.dateChangeHandlers = {};
                             }
 
-                            this.dateChangeHandlers.tanggalHutang = (e) => {
-                                this.selectedTanggalHutang = e.detail.date;
+                            this.dateChangeHandlers.tanggal = (e) => {
+                                this.selectedtanggal = e.detail.date;
                             };
 
-                            tanggalPicker.addEventListener('changeDate', this.dateChangeHandlers.tanggalHutang);
+                            tanggalPicker.addEventListener('changeDate', this.dateChangeHandlers.tanggal);
                         }, 100);
                     }
                 },
