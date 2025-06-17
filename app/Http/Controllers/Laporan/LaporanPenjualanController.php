@@ -42,15 +42,15 @@ class LaporanPenjualanController extends Controller
 
         // Terapkan filter rentang tanggal jika ada
         if ($request->filled('start_date')) {
-            $startDate = Carbon::createFromFormat('d/m/Y', $request->start_date)->startOfDay();
+            $startDate = Carbon::createFromFormat('d-m-Y', $request->start_date)->startOfDay();
             if ($request->filled('end_date')) {
-                $endDate = Carbon::createFromFormat('d/m/Y', $request->end_date)->endOfDay();
+                $endDate = Carbon::createFromFormat('d-m-Y', $request->end_date)->endOfDay();
             } else {
                 $endDate = now()->endOfDay();
             }
             $query->whereBetween('sale_date', [$startDate, $endDate]);
         } elseif ($request->filled('end_date')) {
-            $endDate = Carbon::createFromFormat('d/m/Y', $request->end_date)->endOfDay();
+            $endDate = Carbon::createFromFormat('d-m-Y', $request->end_date)->endOfDay();
             $query->where('sale_date', '<=', $endDate);
         }
 

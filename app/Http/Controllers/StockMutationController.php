@@ -29,7 +29,7 @@ class StockMutationController extends Controller
     // Filter tanggal
     if ($request->filled('start_date')) {
         try {
-            $startDate = \Carbon\Carbon::createFromFormat('d/m/Y', $request->start_date)->startOfDay();
+            $startDate = \Carbon\Carbon::createFromFormat('d-m-Y', $request->start_date)->startOfDay();
             $query->where('created_at', '>=', $startDate);
         } catch (\Exception $e) {
             Log::warning('Invalid start_date format in Stock Mutation: ' . $request->start_date);
@@ -38,7 +38,7 @@ class StockMutationController extends Controller
 
     if ($request->filled('end_date')) {
         try {
-            $endDate = \Carbon\Carbon::createFromFormat('d/m/Y', $request->end_date)->endOfDay();
+            $endDate = \Carbon\Carbon::createFromFormat('d-m-Y', $request->end_date)->endOfDay();
             $query->where('created_at', '<=', $endDate);
         } catch (\Exception $e) {
             Log::warning('Invalid end_date format in Stock Mutation: ' . $request->end_date);
