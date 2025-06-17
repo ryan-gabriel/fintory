@@ -447,6 +447,36 @@ export const Utils = {
         waitForForm();
     },
 
+    initCicilanForm() {
+        function updateSisaHutangDisplay() {
+            const selectedOption = $("#hutang option:selected");
+            const sisaHutang = selectedOption.data("sisa-hutang") ?? 0;
+
+            $("#sisa-hutang-info").text(
+                `Sisa hutang: Rp${parseInt(sisaHutang).toLocaleString()}`
+            );
+
+            // Set max attribute input jumlah_bayar
+            $("#jumlah_bayar").attr("max", sisaHutang);
+
+            return sisaHutang;
+        }
+
+        let sisaHutangSaatIni = updateSisaHutangDisplay();
+
+        // Saat dropdown hutang diubah
+        $("#hutang").on("change", function () {
+            sisaHutangSaatIni = updateSisaHutangDisplay();
+        });
+
+        // Saat tombol "Bayar Full" diklik
+        $("#btn-bayar-full").on("click", function () {
+            if (sisaHutangSaatIni > 0) {
+                $("#jumlah_bayar").val(sisaHutangSaatIni);
+            }
+        });
+    },
+
     initSalesChart() {
         fetch("/api/sales-last-7-days")
             .then((response) => response.json())

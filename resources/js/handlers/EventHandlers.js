@@ -1,3 +1,5 @@
+import { Utils } from "../utils";
+
 let previousUrl = window.location.href;
 
 export const EventHandlers = {
@@ -36,7 +38,7 @@ export const EventHandlers = {
                     ) {
                         Utils.initFormCreateHandler();
                     }
-                }, 150);
+                }, 100);
             },
         },
         ".edit-link": {
@@ -45,40 +47,18 @@ export const EventHandlers = {
             showLoader: true,
             updateHistory: true,
             updateTitle: true,
-            afterLoad: (response, element) => {
-                // Use MutationObserver to wait for dynamic content
-                const observer = new MutationObserver((mutations, obs) => {
-                    const form = document.getElementById("form-edit");
-                    if (form) {
-                        Utils.initFormEditHandler();
-
-                        // Initialize datepicker
-                        const tanggalInput = document.getElementById("tanggal");
-                        if (tanggalInput) {
-                            const datepickerInstance = new Datepicker(
-                                tanggalInput,
-                                {
-                                    format: "yyyy/mm/dd",
-                                    autohide: true,
-                                    buttons: true,
-                                }
-                            );
-
-                            if (tanggalInput.value) {
-                                datepickerInstance.setDate(
-                                    new Date(tanggalInput.value)
-                                );
-                            }
-                        }
-
-                        obs.disconnect(); // Stop observing once done
+            onSuccess: (response, element) => {
+                const url = element.href || element.getAttribute("data-url");
+                Utils.initFormEditHandler();
+                if (url) {
+                    const pathname = new URL(url, window.location.origin).pathname;
+                    if (
+                        pathname === '/dashboard/keuangan/cicilan/create' ||
+                        (pathname.startsWith('/dashboard/keuangan/cicilan/') && pathname.endsWith('/edit'))
+                    ) {
+                        Utils.initEditCicilanForm();
                     }
-                });
-
-                observer.observe(document.getElementById("main-content"), {
-                    childList: true,
-                    subtree: true,
-                });
+                }
             },
         },
         ".ajax-link": {

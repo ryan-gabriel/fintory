@@ -12,12 +12,13 @@
                         <option value="" disabled hidden>--Pilih Hutang--</option>
                         @foreach ($hutangs as $hutang)
                             <option value="{{ $hutang->id }}"
+                                data-sisa-hutang="{{ $hutang->sisa_hutang }}"
                                 {{ $hutang->id == old('hutang', $cicilan->hutang_id) ? 'selected' : '' }}>
                                 {{ $hutang->nama_pemberi_hutang }} - {{ $hutang->deskripsi }}
                             </option>
                         @endforeach
                     </select>
-
+                    <p id="sisa-hutang-info" class="text-sm text-gray-600 mt-2"></p>
                 </div>
 
                 <div>
@@ -38,11 +39,15 @@
 
 
                 <div>
-                    <label for="jumlah_bayar" class="block mb-2 text-gray-900 dark:text-white">Jumlah Bayar
-                        Cicilan</label>
-                    <input type="number" id="jumlah_bayar" name="jumlah_bayar" min="1" step="1"
-                        class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                        required value="{{ old('jumlah_bayar', $cicilan->jumlah_bayar) }}">
+                    <label for="jumlah_bayar" class="block mb-2 text-gray-900 dark:text-white">Jumlah Bayar Cicilan</label>
+                    <div class="flex items-center gap-2">
+                        <input type="number" id="jumlah_bayar" name="jumlah_bayar" min="1" step="1"
+                            class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                            required value="{{ old('jumlah_bayar', $cicilan->jumlah_bayar) }}">
+                        <button type="button" id="btn-bayar-full"
+                            class="px-3 py-2 text-sm text-nowrap bg-blue-600 text-white rounded-md">Bayar Full
+                        </button>
+                    </div>
                 </div>
 
                 <div>
@@ -79,3 +84,11 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    $(document).ready(function () {
+        Utils.initCicilanForm();
+    });
+</script>
+@endpush
