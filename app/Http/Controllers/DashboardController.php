@@ -29,7 +29,7 @@ class DashboardController extends Controller
         }
 
         // Panggil stored procedure dengan outlet ID
-        $summary = DB::select('CALL GetDashboardSummary(?)', [$activeOutletId]);
+        $summary = DB::select('CALL GetDashboardSummary(?, ?)', [$lembaga_id, $activeOutletId]);
 
         $dashboardData = $summary[0] ?? null;
 
