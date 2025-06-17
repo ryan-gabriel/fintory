@@ -209,37 +209,42 @@ class HutangController extends Controller
     {
         $currentLembagaId = session('current_lembaga_id');
 
+        // Cek session lembaga
         if (!$currentLembagaId) {
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Lembaga tidak ditemukan dalam sesi.'
-                ], 403);
-            }
-            return redirect()->back()->withErrors(['Lembaga tidak ditemukan dalam session.']);
+            return $request->ajax()
+                ? response()->json(['success' => false, 'message' => 'Lembaga tidak ditemukan dalam sesi.'], 403)
+                : redirect()->back()->withErrors(['Lembaga tidak ditemukan dalam sesi.']);
         }
 
-        $hutang = Hutang::with('outlet')->where('id', $id)->first();
+        // Ambil hutang dan outlet
+        $hutang = Hutang::with('outlet')->find($id);
 
-        if (!$hutang || $hutang->outlet->lembaga_id != $currentLembagaId) {
-            if ($request->ajax()) {
-                return response()->json([
+        // Validasi keberadaan dan kepemilikan hutang
+        if (!$hutang || !$hutang->outlet || $hutang->outlet->lembaga_id != $currentLembagaId) {
+            return $request->ajax()
+                ? response()->json(['success' => false, 'message' => 'Hutang tidak ditemukan atau bukan milik lembaga Anda.'], 403)
+                : redirect()->back()->withErrors(['Hutang tidak ditemukan atau bukan milik lembaga Anda.']);
+        }
+
+        // Cek apakah masih ada sisa hutang
+        $isNotPaid = $hutang->sisa_hutang > 0;
+        $force = $request->boolean('force');
+
+        if ($isNotPaid && !$force) {
+            // Jika masih ada sisa hutang dan tidak ada flag force, minta konfirmasi
+            return $request->ajax()
+                ? response()->json([
                     'success' => false,
-                    'message' => 'Data hutang tidak ditemukan atau tidak milik lembaga Anda.'
-                ], 403);
-            }
-            return redirect()->back()->withErrors(['Data hutang tidak ditemukan atau tidak milik lembaga Anda.']);
+                    'requiresConfirmation' => true,
+                    'message' => 'Hutang masih memiliki sisa pembayaran. Yakin ingin menghapus?'
+                ])
+                : redirect()->back()->withErrors(['Hutang masih memiliki sisa pembayaran.']);
         }
 
         $hutang->delete();
 
-        if ($request->ajax()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Hutang berhasil dihapus.'
-            ]);
-        }
-
-        return redirect()->route('keuangan.hutang.index')->with('success', 'Hutang berhasil dihapus.');
+        return $request->ajax()
+            ? response()->json(['success' => true, 'message' => 'Hutang berhasil dihapus.'])
+            : redirect()->route('keuangan.hutang.index')->with('success', 'Hutang berhasil dihapus.');
     }
 }
