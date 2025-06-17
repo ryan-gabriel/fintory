@@ -1111,38 +1111,6 @@
                             });
                         }
                     },
-                    '.confirm-delete': {
-                        method: 'DELETE',
-                        requireConfirmation: true, // Ini akan memicu dialog konfirmasi
-                        confirmMessage: 'Apakah Anda yakin ingin menghapus data ini?',
-                        showLoader: false, // Tidak perlu loader besar untuk aksi cepat
-                        onSuccess: (response, element) => {
-                            if (typeof $ !== 'undefined' && $.fn.DataTable.isDataTable('#data-table')) {
-                                $('#data-table').DataTable().ajax.reload(null, false);
-                            }
-                            if (typeof Swal !== 'undefined') {
-                                Swal.fire('Berhasil!', response.message || 'Data berhasil dihapus.', 'success');
-                            } else {
-                                alert(response.message || 'Data berhasil dihapus.');
-                            }
-                        },
-                        onError: (error, element) => {
-                            let message = 'Terjadi kesalahan saat menghapus data.';
-                            if (error.response && typeof error.response.json === 'function') {
-                                error.response.json().then(json => {
-                                    if (json.message) message = json.message;
-                                    if (typeof Swal !== 'undefined') Swal.fire('Gagal!', message, 'error');
-                                    else alert(message);
-                                }).catch(() => {
-                                    if (typeof Swal !== 'undefined') Swal.fire('Gagal!', message, 'error');
-                                    else alert(message);
-                                });
-                            } else {
-                                if (typeof Swal !== 'undefined') Swal.fire('Gagal!', message, 'error');
-                                else alert(message);
-                            }
-                        }
-                    },
                     '.ajax-link': {
                         method: 'GET',
                         loadIntoContainer: '#main-content',
