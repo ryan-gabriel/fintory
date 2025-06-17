@@ -24,7 +24,7 @@ class MenuItemSeeder extends Seeder
         $dashboard = MenuItem::create([
             'menu_name' => 'Dashboard',
             'icon' => 'fas fa-tachometer-alt',
-            'route' => '#',
+            'route' => '/dashboard',
             'is_parent' => false,
             'order' => 1,
         ]);
