@@ -29,18 +29,31 @@ export const EventHandlers = {
             showLoader: true,
             updateHistory: true,
             updateTitle: true,
-            afterLoad: () => {
-                // Pastikan DOM sudah siap sebelum inisialisasi
-                setTimeout(() => {
+            onSuccess: (response, element) => {
+                const url = element.href || element.getAttribute("data-url");
+                Utils.initFormCreateHandler();
+                if (url) {
+                    const pathname = new URL(url, window.location.origin).pathname;
+
+                    // Cicilan
                     if (
-                        typeof Utils !== "undefined" &&
-                        Utils.initFormCreateHandler
+                        pathname === '/dashboard/keuangan/cicilan/create' ||
+                        (pathname.startsWith('/dashboard/keuangan/cicilan/') && pathname.endsWith('/edit'))
                     ) {
-                        Utils.initFormCreateHandler();
+                        Utils.initCicilanForm();
                     }
-                }, 100);
+
+                    // Kas Ledger
+                    if (
+                        pathname === '/dashboard/keuangan/kas-ledger/create' ||
+                        (pathname.startsWith('/dashboard/keuangan/kas-ledger/') && pathname.endsWith('/edit'))
+                    ) {
+                        Utils.initKasLedgerForm();
+                    }
+                }
             },
         },
+
         ".edit-link": {
             method: "GET",
             loadIntoContainer: "#main-content",
@@ -52,11 +65,21 @@ export const EventHandlers = {
                 Utils.initFormEditHandler();
                 if (url) {
                     const pathname = new URL(url, window.location.origin).pathname;
+
+                    // Cicilan
                     if (
                         pathname === '/dashboard/keuangan/cicilan/create' ||
                         (pathname.startsWith('/dashboard/keuangan/cicilan/') && pathname.endsWith('/edit'))
                     ) {
-                        Utils.initEditCicilanForm();
+                        Utils.initCicilanForm();
+                    }
+
+                    // Kas Ledger
+                    if (
+                        pathname === '/dashboard/keuangan/kas-ledger/create' ||
+                        (pathname.startsWith('/dashboard/keuangan/kas-ledger/') && pathname.endsWith('/edit'))
+                    ) {
+                        Utils.initKasLedgerForm();
                     }
                 }
             },

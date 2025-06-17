@@ -456,9 +456,6 @@ export const Utils = {
                 `Sisa hutang: Rp${parseInt(sisaHutang).toLocaleString()}`
             );
 
-            // Set max attribute input jumlah_bayar
-            $("#jumlah_bayar").attr("max", sisaHutang);
-
             return sisaHutang;
         }
 
@@ -476,6 +473,26 @@ export const Utils = {
             }
         });
     },
+
+    initKasLedgerForm() {
+        function updateSaldoDisplay() {
+            const selectedOption = $("#outlet option:selected");
+            const saldoOutlet = selectedOption.data("saldo") ?? 0;
+
+            $("#saldo-info").text(
+                `Saldo Outlet: Rp${parseInt(saldoOutlet).toLocaleString()}`
+            );
+
+            return saldoOutlet;
+        }
+
+        let saldoOutlet = updateSaldoDisplay();
+
+        $("#outlet").on("change", function () {
+            saldoOutlet = updateSaldoDisplay();
+        });
+    },
+
 
     initSalesChart() {
         fetch("/api/sales-last-7-days")

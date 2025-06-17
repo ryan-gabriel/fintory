@@ -34,9 +34,10 @@ class Outlet extends Model
     {
         return $this->hasOne(OutletBalance::class, 'outlet_id', 'id')->withDefault([
             'saldo' => 0,
-            'last_updated' => now(), // Memberikan nilai default untuk last_updated
+            'last_updated' => now(),
         ]);
     }
+
 
     /**
      * Produk yang dimiliki outlet ini.

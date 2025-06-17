@@ -6,27 +6,30 @@
                 @csrf
                 <div>
                     <label for="tipe_transaksi" class="block mb-2 text-gray-900 dark:text-white">Tipe Transaksi</label>
-                    <select id="tipe_transaksi" name="tipe"
-                        class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                        required>
-                        <option value="" selected disabled hidden>--Pilih Tipe Transaksi--</option>
-                        <option value="INCOME">INCOME</option>
-                        <option value="EXPENSE">EXPENSE</option>
-                        <option value="TRANSFER_IN">TRANSFER_IN</option>
-                        <option value="TRANSFER_OUT">TRANSFER_OUT</option>
+                    <select id="tipe_transaksi" name="tipe" ... required>
+                        <option value="" disabled hidden>--Pilih Tipe Transaksi--</option>
+                        <option value="INCOME" {{ old('tipe') == 'INCOME' ? 'selected' : '' }}>INCOME</option>
+                        <option value="EXPENSE" {{ old('tipe') == 'EXPENSE' ? 'selected' : '' }}>EXPENSE</option>
+                        <option value="TRANSFER_IN" {{ old('tipe') == 'TRANSFER_IN' ? 'selected' : '' }}>TRANSFER_IN
+                        </option>
+                        <option value="TRANSFER_OUT" {{ old('tipe') == 'TRANSFER_OUT' ? 'selected' : '' }}>TRANSFER_OUT
+                        </option>
                     </select>
                 </div>
 
                 <div>
                     <label for="outlet_id" class="block mb-2 text-gray-900 dark:text-white">Pilih Outlet</label>
-                    <select id="outlet" name="outlet_id"
-                        class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                        required>
-                        <option value="" selected disabled hidden>--Pilih Outlet--</option>
+                    <select id="outlet" name="outlet_id" ... required>
+                        <option value="" disabled hidden>--Pilih Outlet--</option>
                         @foreach ($outlets as $outlet)
-                            <option value="{{ $outlet->id }}">{{ $outlet->name }}</option>
+                            <option
+                            data-saldo="{{ $outlet->balance->saldo}}"
+                            value="{{ $outlet->id }}" {{ old('outlet_id') == $outlet->id ? 'selected' : '' }}>
+                                {{ $outlet->name }}
+                            </option>
                         @endforeach
                     </select>
+                    <p id="saldo-info" class="text-sm text-gray-600 mt-2"></p>
                 </div>
 
                 <div>
@@ -35,7 +38,7 @@
                         class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                         required>
                 </div>
-                
+
 
                 <div>
                     <label for="sumber" class="block mb-2 text-gray-900 dark:text-white">Sumber</label>
@@ -55,8 +58,8 @@
                                     d="M20 4a2 2 0 0 0-2-2h-2V1a1 1 0 0 0-2 0v1h-3V1a1 1 0 0 0-2 0v1H6V1a1 1 0 0 0-2 0v1H2a2 2 0 0 0-2 2v2h20V4ZM0 18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8H0v10Zm5-8h10a1 1 0 0 1 0 2H5a1 1 0 0 1 0-2Z" />
                             </svg>
                         </div>
-                        <input id="tanggal" name="tanggal" datepicker datepicker-autohide datepicker datepicker-buttons
-                            datepicker-autoselect-today type="text" datepicker-format="dd-mm-yyyy"
+                        <input id="tanggal" name="tanggal" datepicker datepicker-autohide datepicker
+                            datepicker-buttons datepicker-autoselect-today type="text" datepicker-format="dd-mm-yyyy"
                             class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                             placeholder="Select date" required>
                     </div>
@@ -80,6 +83,11 @@
 </div>
 
 @push('scripts')
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            Utils.initKasLedgerForm();
+        });
+    </script>
     @if ($errors->has('jumlah'))
         <script>
             Swal.fire({
