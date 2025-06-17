@@ -10,20 +10,37 @@ class OutletBalance extends Model
     use HasFactory;
 
     protected $table = 'outletbalance';
-    protected $guarded = ['id'];
-    
-    // Primary key tabel ini adalah 'id', bukan 'outlet_id'
-    protected $primaryKey = 'id';
-    public $incrementing = true;
 
     /**
-     * Mendefinisikan relasi ke model Outlet. (VERSI PERBAIKAN)
+     * Primary key untuk tabel ini adalah 'outlet_id'.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'outlet_id';
+
+    /**
+     * Karena primary key bukan auto-incrementing, set properti ini ke false.
+     *
+     * @var bool
+     */
+    public $incrementing = false;
+
+    /**
+     * Atribut yang dapat diisi secara massal.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'outlet_id',
+        'saldo',
+        'last_updated',
+    ];
+
+    /**
+     * Mendefinisikan relasi ke model Outlet.
      */
     public function outlet()
     {
-        // Secara eksplisit mendefinisikan foreign key dan owner key
-        // Foreign Key: 'outlet_id' di tabel ini
-        // Owner Key: 'id' di tabel outlet
         return $this->belongsTo(Outlet::class, 'outlet_id', 'id');
     }
 }

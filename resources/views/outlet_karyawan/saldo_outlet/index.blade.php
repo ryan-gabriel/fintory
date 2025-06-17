@@ -12,8 +12,11 @@
                         <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                             <tr>
                                 <th scope="col" class="px-6 py-3">Nama Outlet</th>
-                                <th scope="col" class="px-6 py-3">Alamat</th>
-                                <th scope="col" class="px-6 py-3 text-right">Saldo</th>
+                                
+                                {{-- PERUBAHAN DI SINI: Menggunakan inline style --}}
+                                <th scope="col" class="px-6 py-3" style="text-align: center;">Saldo Saat Ini</th>
+                                
+                                <th scope="col" class="px-6 py-3">Terakhir Diperbarui</th>
                             </tr>
                         </thead>
                     </table>

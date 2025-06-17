@@ -13,28 +13,20 @@ class Outlet extends Model
     protected $table = 'outlet';
     protected $guarded = ['id'];
 
-    /**
-     * Relasi ke Lembaga.
-     */
-    public function lembaga()
-    {
-        return $this->belongsTo(Lembaga::class);
-    }
+    // ... relasi lain ...
 
     /**
-     * Relasi one-to-one ke OutletBalance. (VERSI PERBAIKAN)
+     * Relasi one-to-one ke OutletBalance.
      */
     public function balance()
     {
-        // Secara eksplisit mendefinisikan foreign key dan local key
-        // Foreign Key: 'outlet_id' di tabel outletbalance
-        // Local Key: 'id' di tabel outlet ini sendiri
         return $this->hasOne(OutletBalance::class, 'outlet_id', 'id')->withDefault([
-            'balance' => 0
+            'saldo' => 0,
+            'last_updated' => now(), // Memberikan nilai default untuk last_updated
         ]);
     }
-
-    // Relasi lain yang dibutuhkan (biarkan seperti ini)
+    
+    // ... relasi lain seperti products, sales, dll. ...
     public function products(): HasMany { return $this->hasMany(Product::class); }
     public function sales(): HasMany { return $this->hasMany(Sale::class); }
     public function stockMutations(): HasMany { return $this->hasMany(StockMutation::class); }

@@ -7,6 +7,7 @@ use App\Models\Outlet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\QueryException;
+use Carbon\Carbon; // Import Carbon
 
 class OutletController extends Controller
 {
@@ -15,22 +16,13 @@ class OutletController extends Controller
      */
     public function index(Request $request)
     {
-        $currentLembagaId = session('current_lembaga_id');
-        if (!$currentLembagaId) {
-            return redirect()->route('dashboard')->with('error', 'Sesi lembaga tidak valid. Silakan pilih lembaga kembali.');
-        }
-        $lembaga = Lembaga::find($currentLembagaId);
-        if (!$lembaga) {
-            return redirect()->route('dashboard')->with('error', 'Lembaga tidak ditemukan. Silakan login ulang.');
-        }
-
         if ($request->ajax()) {
             return view('outlet.index');
         }
         return view('layouts.admin', [
             'slot' => view('outlet.index'),
             'title' => 'Manajemen Outlet',
-            'lembaga' => $lembaga,
+            'lembaga' => Lembaga::find(session('current_lembaga_id')),
         ]);
     }
 
@@ -65,6 +57,7 @@ class OutletController extends Controller
             $editUrl = route('outlet.edit', $outlet->id);
             $deleteUrl = route('outlet.destroy', $outlet->id);
 
+            // Tombol aksi dengan tampilan sesuai permintaan
             $actionButtons = '
                 <div class="flex space-x-2 justify-center">
                     <a href="' . $editUrl . '" class="edit-link px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition">Edit</a>
@@ -96,10 +89,11 @@ class OutletController extends Controller
         if (!$lembaga) {
             return redirect()->route('dashboard')->with('error', 'Lembaga tidak ditemukan. Silakan login ulang.');
         }
-        
+
         if ($request->ajax()) {
             return view('outlet_karyawan.saldo_outlet.index');
         }
+        
         return view('layouts.admin', [
             'slot' => view('outlet_karyawan.saldo_outlet.index'),
             'title' => 'Saldo Outlet',
@@ -113,6 +107,8 @@ class OutletController extends Controller
     public function getSaldoData(Request $request)
     {
         $currentLembagaId = session('current_lembaga_id');
+        
+        // Eager load relasi 'balance' untuk efisiensi query
         $query = Outlet::where('lembaga_id', $currentLembagaId)->with('balance');
 
         if ($request->filled('search.value')) {
@@ -120,9 +116,12 @@ class OutletController extends Controller
             $query->where('name', 'like', "%{$search}%")
                   ->orWhere('address', 'like', "%{$search}%");
         }
+        
+        // Sorting berdasarkan nama outlet
+        $query->orderBy('name', 'asc');
 
         $totalFiltered = $query->count();
-        $data = $query->latest()->offset($request->start)->limit($request->length)->get();
+        $data = $query->offset($request->start)->limit($request->length)->get();
 
         $jsonData = [
             "draw" => intval($request->input('draw')),
@@ -133,17 +132,14 @@ class OutletController extends Controller
 
         foreach ($data as $outlet) {
             $jsonData['data'][] = [
-                $outlet->name,
-                $outlet->address,
-                // 2. Mengambil nilai 'balance' dari relasi yang sudah dimuat
-                //    dan memformatnya sebagai mata uang Rupiah.
-                'Rp ' . number_format($outlet->balance->balance, 0, ',', '.')
+                $outlet->name, // Kolom 0: Nama Outlet
+                'Rp ' . number_format($outlet->balance->saldo, 0, ',', '.'), // Kolom 1: Saldo
+                Carbon::parse($outlet->balance->last_updated)->format('d F Y, H:i') // Kolom 2: Terakhir Diperbarui
             ];
         }
 
         return response()->json($jsonData);
-    }
-    
+    }    
     /**
      * Menampilkan form untuk membuat outlet baru.
      */
