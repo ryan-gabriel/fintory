@@ -95,7 +95,7 @@ class KasLedgerController extends Controller
             ob_start(); ?>
                 <div class="flex space-x-2">
                     <a href="<?= $editUrl ?>" class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition edit-link">Edit</a>
-                    <button type="button" class="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition delete-btn confirm-delete" data-id="<?= $row->id ?>" data-url="<?= $deleteUrl ?>">Delete</button>
+                    <button type="button" class="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition delete-btn" data-id="<?= $row->id ?>" data-url="<?= $deleteUrl ?>">Delete</button>
                 </div>
             <?php
             $actionButtons = ob_get_clean();
@@ -122,6 +122,7 @@ class KasLedgerController extends Controller
         if ($request->ajax()) {
             return view('keuangan.kas-ledger', compact('cashLedger'));
         }
+
         return view('layouts.admin', [
             'slot' => view('keuangan.kas-ledger', compact('cashLedger')),
             'title' => 'Kas & Ledger',

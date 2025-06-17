@@ -84,18 +84,41 @@ class ProductController extends Controller
         ];
 
         foreach ($data as $product) {
+            $editUrl = route('produk-stok.produk.edit', $product->id);
+            $toggleStatusUrl = $product->is_active
+                ? route('produk-stok.produk.non-active')
+                : route('produk-stok.produk.active');
+
+            $toggleLabel = $product->is_active ? 'Nonaktifkan' : 'Aktifkan';
+            $toggleColor = $product->is_active ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-green-600 hover:bg-green-700';
+            $dataAction = $product->is_active ? 'non-active' : 'active';
+
+            ob_start(); ?>
+                <div class="flex space-x-2">
+                    <a href="<?= $editUrl ?>" class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition edit-link">Edit</a>
+
+                    <button type="button"
+                        class="px-3 py-1 <?= $toggleColor ?> text-white rounded text-sm transition toggle-status-product-btn"
+                        data-id="<?= $product->id ?>"
+                        data-url="<?= $toggleStatusUrl ?>"
+                        data-action=<?= $dataAction ?>
+                        >
+                        <?= $toggleLabel ?>
+                    </button>
+                </div>
+            <?php
+            $actionButtons = ob_get_clean();
+
             $jsonData['data'][] = [
                 $product->barang->nama ?? 'N/A',
-                $product->kategori->nama ?? 'N/A',
+                optional($product->kategori)->nama ?? 'N/A',
                 $product->outlet->name ?? 'N/A',
-                'Rp ' . number_format($product->harga_jual, 0, ',', '.'),
-                $product->stok,
-                '<div class="text-center">' .
-                    '<a href="'.route('produk-stok.produk.edit', $product->id).'" class="edit-link inline-block px-3 py-1 bg-blue-500 text-white rounded font-semibold hover:bg-blue-600 transition">Edit</a> ' .
-                    '<a href="'.route('produk-stok.produk.destroy', $product->id).'" class="delete-link inline-block px-3 py-1 bg-red-500 text-white rounded font-semibold hover:bg-red-600 transition" data-id="'.$product->id.'">Hapus</a>' .
-                '</div>'
+                'Rp ' . number_format($product->harga_jual ?? 0, 0, ',', '.'),
+                $product->stok ?? 0,
+                $actionButtons
             ];
         }
+
 
         return response()->json($jsonData);
     }
@@ -167,14 +190,71 @@ class ProductController extends Controller
         return response()->json(['success' => true, 'message' => 'Produk berhasil diperbarui!', 'redirect' => route('produk-stok.produk.index')]);
     }
 
-    public function destroy(Product $produk)
+    public function destroy($id)
     {
         try {
+            $produk = Product::findOrFail($id);
             $produk->delete();
-            return response()->json(['success' => true, 'message' => 'Produk berhasil dihapus.']);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Produk berhasil dihapus.'
+            ]);
         } catch (\Exception $e) {
             Log::error('Gagal menghapus produk: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Gagal menghapus produk.'], 500);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghapus produk. ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function nonActive(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:product,id',
+        ]);
+
+        try {
+            $product = Product::findOrFail($request->id);
+            $product->is_active = false;
+            $product->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Produk berhasil dinonaktifkan.',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Gagal nonaktifkan produk: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat menonaktifkan produk.',
+            ], 500);
+        }
+    }
+
+    public function active(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:product,id',
+        ]);
+
+        try {
+            $product = Product::findOrFail($request->id);
+            $product->is_active = true;
+            $product->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Produk berhasil diaktifkan kembali.',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Gagal aktifkan produk: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengaktifkan produk.',
+            ], 500);
         }
     }
 }

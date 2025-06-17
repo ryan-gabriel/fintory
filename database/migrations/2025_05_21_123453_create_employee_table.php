@@ -9,7 +9,7 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+   public function up(): void
     {
         Schema::create('employee', function (Blueprint $table) {
             $table->id();
@@ -18,11 +18,19 @@ return new class extends Migration
             $table->string('position', 100)->nullable();
             $table->date('joined_at')->nullable();
             $table->unique(['user_id', 'outlet_id']);
-            $table->foreign('user_id')->references('id')->on('users');
-            $table->foreign('outlet_id')->references('id')->on('outlet');
+
+            // Relasi dengan cascade delete pada outlet
+            $table->foreign('user_id')
+                ->references('id')->on('users');
+            
+            $table->foreign('outlet_id')
+                ->references('id')->on('outlet')
+                ->onDelete('cascade');
+
             $table->timestamps();
         });
     }
+
 
     /**
      * Reverse the migrations.

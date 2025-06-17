@@ -68,7 +68,7 @@ class OutletController extends Controller
             $actionButtons = '
                 <div class="flex space-x-2 justify-center">
                     <a href="' . $editUrl . '" class="edit-link px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition">Edit</a>
-                    <a href="#" class="delete-link px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition" data-url="' . $deleteUrl . '">Delete</a>
+                    <a href="#" class="delete-btn delete-outlet px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition" data-url="' . $deleteUrl . '">Delete</a>
                 </div>
             ';
 
@@ -243,25 +243,58 @@ class OutletController extends Controller
     /**
      * Menghapus outlet dari database.
      */
-    public function destroy(Outlet $outlet)
+    public function destroy(Request $request, $outlet_id)
     {
+        $outlet = Outlet::findOrFail($outlet_id);
+
         if ($outlet->lembaga_id != session('current_lembaga_id')) {
-            return response()->json(['success' => false, 'message' => 'Aksi tidak diizinkan.'], 403);
+            return response()->json([
+                'success' => false,
+                'message' => 'Aksi tidak diizinkan.'
+            ], 403);
         }
 
-        if ($outlet->products()->exists() || $outlet->sales()->exists() || $outlet->stockMutations()->exists() || $outlet->hutang()->exists() || $outlet->employees()->exists()) {
-             return response()->json([
-                'success' => false,
-                'message' => 'Gagal menghapus! Outlet ini masih memiliki data terkait (produk, penjualan, dll).'
-            ], 409);
+        $force = $request->input('force', false);
+
+        $hasRelasi = $outlet->products()->exists()
+            || $outlet->sales()->exists()
+            || $outlet->stockMutations()->exists()
+            || $outlet->hutang()->exists()
+            || $outlet->employees()->exists()
+            || $outlet->cashLedgers()->exists();
+
+        // Jika ada relasi dan belum dikonfirmasi untuk force delete
+        if ($hasRelasi && !$force) {
+            return response()->json([
+                'requiresConfirmation' => true,
+                'message' => 'Outlet memiliki data terkait (produk, penjualan, dll). Apakah Anda yakin ingin menghapus semua?'
+            ]);
         }
 
         try {
+            // Jika force, hapus relasi dulu (opsional)
+            if ($force) {
+                $outlet->products()->delete();
+                $outlet->sales()->delete();
+                $outlet->stockMutations()->delete();
+                $outlet->hutang()->delete();
+                $outlet->employees()->delete();
+                $outlet->cashLedgers()->delete();
+            }
+
             $outlet->delete();
-            return response()->json(['success' => true, 'message' => 'Outlet berhasil dihapus.']);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Outlet berhasil dihapus.'
+            ]);
         } catch (QueryException $e) {
-            Log::error('Gagal menghapus outlet (QueryException): ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Gagal menghapus outlet karena kesalahan database.'], 500);
+            Log::error('Gagal menghapus outlet: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghapus outlet karena kesalahan database.'
+            ], 500);
         }
     }
+
 }
