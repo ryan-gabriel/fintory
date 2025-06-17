@@ -14,9 +14,15 @@
         <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
         <link rel="stylesheet" href="https://cdn.datatables.net/2.3.1/css/dataTables.dataTables.css" />
+        <link rel="icon" type="image/png" href="{{ asset('images/fintory.png') }}">
+        
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script src="https://cdn.datatables.net/2.3.1/js/dataTables.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.46.0/dist/apexcharts.min.js"></script>
     </head>
 
     <body class="font-sans antialiased">
@@ -141,12 +147,6 @@
 
                 </div>
             </div>
-
-            <!-- Scripts -->
-            <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-            <script src="https://cdn.datatables.net/2.3.1/js/dataTables.js"></script>
-            <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
-            <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.46.0/dist/apexcharts.min.js"></script>
             
 
             <script>
@@ -1022,6 +1022,151 @@
                         };
 
                         waitForForm();
+                    },
+
+                    initSalesChart() {
+                        fetch("/api/sales-last-7-days")
+                            .then(response => response.json())
+                            .then(data => {
+                                const dates = data.map(item => item.date);
+                                const totals = data.map(item => item.total);
+
+                                const options = {
+                                    chart: {
+                                        height: "100%",
+                                        width: "100%",
+                                        type: "area",
+                                        fontFamily: "Inter, sans-serif",
+                                        toolbar: { show: false },
+                                        dropShadow: { enabled: false }
+                                    },
+                                    tooltip: {
+                                        enabled: true,
+                                        x: { show: true }
+                                    },
+                                    fill: {
+                                        type: "gradient",
+                                        gradient: {
+                                            opacityFrom: 0.55,
+                                            opacityTo: 0,
+                                            shade: "#1C64F2",
+                                            gradientToColors: ["#1C64F2"]
+                                        }
+                                    },
+                                    dataLabels: { enabled: false },
+                                    stroke: { width: 6 },
+                                    grid: {
+                                        show: false,
+                                        strokeDashArray: 4,
+                                        padding: { left: 2, right: 2, top: 0 }
+                                    },
+                                    series: [{
+                                        name: "Sales",
+                                        data: totals,
+                                        color: "#1A56DB"
+                                    }],
+                                    xaxis: {
+                                        categories: dates,
+                                        labels: { show: true },
+                                        axisBorder: { show: false },
+                                        axisTicks: { show: true }
+                                    },
+                                    yaxis: { show: true }
+                                };
+
+                                const el = document.getElementById("area-chart");
+                                if (el && typeof ApexCharts !== 'undefined') {
+                                    const chart = new ApexCharts(el, options);
+                                    chart.render();
+                                }
+                            })
+                            .catch(error => {
+                                console.error("Error fetching sales chart data:", error);
+                            });
+                    },
+
+                    initBestSellerChart() {
+                        fetch('/api/best-seller-products')
+                            .then(response => response.json())
+                            .then(data => {
+                                const products = data.products || [];
+
+                                if (products.length === 0) {
+                                    document.getElementById('no-product-info').classList.remove('hidden');
+                                    return;
+                                }
+
+                                const categories = products.map(p => p.name);
+                                const quantities = products.map(p => p.qty);
+
+                                const options = {
+                                    series: [{
+                                        name: "Jumlah Terjual",
+                                        data: quantities
+                                    }],
+                                    chart: {
+                                        type: "bar",
+                                        height: 400,
+                                        toolbar: { show: false }
+                                    },
+                                    plotOptions: {
+                                        bar: {
+                                            horizontal: true,
+                                            borderRadius: 4,
+                                            barHeight: '60%',
+                                            distributed: true
+                                        }
+                                    },
+                                    dataLabels: { enabled: false },
+                                    colors: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'],
+                                    xaxis: {
+                                        categories: categories,
+                                        labels: {
+                                            style: {
+                                                fontFamily: "Inter, sans-serif",
+                                                fontSize: "14px",
+                                                colors: "#6B7280"
+                                            }
+                                        },
+                                        title: {
+                                            text: "Jumlah Terjual",
+                                            style: {
+                                                fontWeight: 600,
+                                                fontSize: "14px"
+                                            }
+                                        }
+                                    },
+                                    yaxis: {
+                                        labels: {
+                                            style: {
+                                                fontFamily: "Inter, sans-serif",
+                                                fontSize: "14px",
+                                                fontWeight: 500,
+                                                colors: "#374151"
+                                            }
+                                        }
+                                    },
+                                    tooltip: {
+                                        y: {
+                                            formatter: val => `${val} unit`
+                                        }
+                                    },
+                                    grid: {
+                                        borderColor: "#E5E7EB",
+                                        strokeDashArray: 4
+                                    }
+                                };
+
+                                const el = document.querySelector("#bar-chart");
+                                if (el && typeof ApexCharts !== 'undefined') {
+                                    const chart = new ApexCharts(el, options);
+                                    chart.render();
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Gagal mengambil data produk terlaris:', error);
+                                document.getElementById('no-product-info').classList.remove('hidden');
+                            });
                     }
                 };
 
@@ -1041,8 +1186,9 @@
                                 const url = element.href || element.getAttribute('data-url');
                                 if (url) {
                                     const pathname = new URL(url, window.location.origin).pathname;
-                                    if (pathname === '/dashboard') {
-                                        window.location.reload();
+                                    if(pathname == '/dashboard'){
+                                        Utils.initBestSellerChart();
+                                        Utils.initSalesChart();
                                     }
                                 }
                             }
@@ -1511,179 +1657,6 @@
                         });
                     }
                 })
-
-                // Jalankan chart hanya jika di halaman /dashboard
-                document.addEventListener("DOMContentLoaded", () => {
-                    if (window.location.pathname === "/dashboard") {
-                        // Area Chart: Penjualan 7 Hari Terakhir
-                        fetch("/api/sales-last-7-days")
-                            .then(response => response.json())
-                            .then(data => {
-                                const dates = data.map(item => item.date);
-                                const totals = data.map(item => item.total);
-
-                                const options = {
-                                    chart: {
-                                        height: "100%",
-                                        width: "100%",
-                                        type: "area",
-                                        fontFamily: "Inter, sans-serif",
-                                        toolbar: {
-                                            show: false
-                                        },
-                                        dropShadow: {
-                                            enabled: false
-                                        },
-                                    },
-                                    tooltip: {
-                                        enabled: true,
-                                        x: {
-                                            show: true
-                                        },
-                                    },
-                                    fill: {
-                                        type: "gradient",
-                                        gradient: {
-                                            opacityFrom: 0.55,
-                                            opacityTo: 0,
-                                            shade: "#1C64F2",
-                                            gradientToColors: ["#1C64F2"],
-                                        },
-                                    },
-                                    dataLabels: {
-                                        enabled: false
-                                    },
-                                    stroke: {
-                                        width: 6
-                                    },
-                                    grid: {
-                                        show: false,
-                                        strokeDashArray: 4,
-                                        padding: {
-                                            left: 2,
-                                            right: 2,
-                                            top: 0
-                                        },
-                                    },
-                                    series: [{
-                                        name: "Sales",
-                                        data: totals,
-                                        color: "#1A56DB",
-                                    }],
-                                    xaxis: {
-                                        categories: dates,
-                                        labels: {
-                                            show: true
-                                        },
-                                        axisBorder: {
-                                            show: false
-                                        },
-                                        axisTicks: {
-                                            show: true
-                                        },
-                                    },
-                                    yaxis: {
-                                        show: true
-                                    },
-                                };
-
-                                const el = document.getElementById("area-chart");
-                                if (el && typeof ApexCharts !== 'undefined') {
-                                    const chart = new ApexCharts(el, options);
-                                    chart.render();
-                                }
-                            })
-                            .catch(error => {
-                                console.error("Error fetching chart data:", error);
-                            });
-
-                        // Bar Chart: Produk Terlaris
-                        fetch('/api/best-seller-products')
-                            .then(response => response.json())
-                            .then(data => {
-                                const products = data.products || [];
-
-                                if (products.length === 0) {
-                                    document.getElementById('no-product-info').classList.remove('hidden');
-                                    return;
-                                }
-
-                                const categories = products.map(p => p.name);
-                                const quantities = products.map(p => p.qty);
-
-                                const options = {
-                                    series: [{
-                                        name: "Jumlah Terjual",
-                                        data: quantities,
-                                    }],
-                                    chart: {
-                                        type: "bar",
-                                        height: 400,
-                                        toolbar: {
-                                            show: false
-                                        }
-                                    },
-                                    plotOptions: {
-                                        bar: {
-                                            horizontal: true,
-                                            borderRadius: 4,
-                                            barHeight: '60%',
-                                            distributed: true
-                                        }
-                                    },
-                                    dataLabels: {
-                                        enabled: false
-                                    },
-                                    colors: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'],
-                                    xaxis: {
-                                        categories: categories,
-                                        labels: {
-                                            style: {
-                                                fontFamily: "Inter, sans-serif",
-                                                fontSize: "14px",
-                                                colors: "#6B7280"
-                                            }
-                                        },
-                                        title: {
-                                            text: "Jumlah Terjual",
-                                            style: {
-                                                fontWeight: 600,
-                                                fontSize: "14px"
-                                            }
-                                        }
-                                    },
-                                    yaxis: {
-                                        labels: {
-                                            style: {
-                                                fontFamily: "Inter, sans-serif",
-                                                fontSize: "14px",
-                                                fontWeight: 500,
-                                                colors: "#374151"
-                                            }
-                                        }
-                                    },
-                                    tooltip: {
-                                        y: {
-                                            formatter: function(val) {
-                                                return val + " unit";
-                                            }
-                                        }
-                                    },
-                                    grid: {
-                                        borderColor: "#E5E7EB",
-                                        strokeDashArray: 4
-                                    }
-                                };
-
-                                const chart = new ApexCharts(document.querySelector("#bar-chart"), options);
-                                chart.render();
-                            })
-                            .catch(error => {
-                                console.error('Gagal mengambil data produk terlaris:', error);
-                                document.getElementById('no-product-info').classList.remove('hidden');
-                            });
-                    }
-                });
             </script>
 
             <script>

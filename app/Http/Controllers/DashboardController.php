@@ -11,16 +11,14 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
-        
-        // Redirect jika belum punya role apapun
+
         if (!$user->hasAnyRole()) {
             return redirect()->route('auth.setup.lembaga');
         }
 
-        // Ambil outlet aktif dan lembaga aktif dari session
         $activeOutletId = session('active_outlet_id', 'all');
         $lembaga_id = session('current_lembaga_id');
 
@@ -28,31 +26,39 @@ class DashboardController extends Controller
             return redirect()->route('auth.setup.lembaga')->withErrors(['Lembaga belum dipilih.']);
         }
 
-        // Panggil stored procedure dengan outlet ID
+        // Stored procedure untuk ringkasan dashboard
         $summary = DB::select('CALL GetDashboardSummary(?, ?)', [$lembaga_id, $activeOutletId]);
-
         $dashboardData = $summary[0] ?? null;
 
-        // Data default
+        // Total penjualan 7 hari terakhir
+        $totalSalesLast7Days = \App\Models\Sale::whereHas('outlet', function ($query) use ($lembaga_id) {
+                $query->where('lembaga_id', $lembaga_id);
+            })
+            ->where('sale_date', '>=', now()->subDays(6)->startOfDay())
+            ->sum('total');
+
+        // Data untuk view
         $viewData = [
             'totalSales' => $dashboardData->total_sales_today ?? 0,
             'totalTransaction' => $dashboardData->total_transactions_today ?? 0,
             'activeProductTotal' => $dashboardData->active_products ?? 0,
             'lowProductTotal' => $dashboardData->low_stock_products ?? 0,
+            'totalSalesLast7Days' => $totalSalesLast7Days,
         ];
 
-        // Hitung total penjualan 7 hari terakhir berdasarkan lembaga
-        $totalSalesLast7Days = \App\Models\Sale::whereHas('outlet', function ($query) use ($lembaga_id) {
-            $query->where('lembaga_id', $lembaga_id);
-        })
-        ->where('sale_date', '>=', now()->subDays(6)->startOfDay())
-        ->sum('total');
+        // === AJAX request ===
+        if ($request->ajax()) {
+            return view('dashboard', $viewData);
+        }
 
-
-        $viewData['totalSalesLast7Days'] = $totalSalesLast7Days;
-
-        return view('dashboard', $viewData);
+        // === Normal request (layout penuh) ===
+        return view('layouts.admin', [
+            'slot' => view('dashboard', $viewData),
+            'title' => 'Dashboard',
+            'lembaga' => \App\Models\Lembaga::find($lembaga_id),
+        ]);
     }
+
 
 
     public function getSalesLast7Days()
