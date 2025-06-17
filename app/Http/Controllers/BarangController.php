@@ -49,7 +49,9 @@ class BarangController extends Controller
         }
 
         $totalFiltered = $query->count();
-        $data = $query->latest()->offset($request->start)->limit($request->length)->get();
+        $start = $request->input('start', 0);
+        $length = $request->input('length', 10); // Default ke 10 jika tidak ada
+        $data = $query->skip($start)->take($length)->get();
 
         // Siapkan format JSON yang benar untuk DataTables
         $jsonData = [

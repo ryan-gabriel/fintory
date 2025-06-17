@@ -9,6 +9,8 @@ use App\Models\Kategori;
 use App\Models\Outlet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use App\Models\StockMutation;
 
 class ProductController extends Controller
 {
@@ -33,7 +35,7 @@ class ProductController extends Controller
         // Filter search
         if ($request->filled('search.value')) {
             $search = $request->input('search.value');
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->orWhereHas('barang', function ($q2) use ($search) {
                     $q2->where('nama', 'like', "%{$search}%");
                 })->orWhereHas('kategori', function ($q2) use ($search) {
@@ -113,9 +115,18 @@ class ProductController extends Controller
                 $product->barang->nama ?? 'N/A',
                 optional($product->kategori)->nama ?? 'N/A',
                 $product->outlet->name ?? 'N/A',
+<<<<<<< HEAD
                 'Rp ' . number_format($product->harga_jual ?? 0, 0, ',', '.'),
                 $product->stok ?? 0,
                 $actionButtons
+=======
+                'Rp ' . number_format($product->harga_jual, 0, ',', '.'),
+                $product->stok,
+                '<div class="text-center">' .
+                '<a href="' . route('produk-stok.produk.edit', $product->id) . '" class="edit-link inline-block px-3 py-1 bg-blue-500 text-white rounded font-semibold hover:bg-blue-600 transition">Edit</a> ' .
+                '<a href="' . route('produk-stok.produk.destroy', $product->id) . '" class="delete-link inline-block px-3 py-1 bg-red-500 text-white rounded font-semibold hover:bg-red-600 transition" data-id="' . $product->id . '">Hapus</a>' .
+                '</div>'
+>>>>>>> 7b2aac43a16d8fa7e4b763745a9dd35dde0fe836
             ];
         }
 
@@ -164,7 +175,7 @@ class ProductController extends Controller
             'kategoris' => Kategori::orderBy('nama')->get(),
             'outlets' => Outlet::where('lembaga_id', session('current_lembaga_id'))->orderBy('name')->get(),
         ];
-        
+
         if ($request->ajax()) {
             return view('produk-stok.produk.edit', $data);
         }
@@ -185,9 +196,41 @@ class ProductController extends Controller
             'stok' => 'required|integer|min:0',
         ]);
 
-        $produk->update($validated);
+        try {
+            DB::transaction(function () use ($validated, $produk) {
+                $stok_lama = $produk->stok;
+                $stok_baru = (int) $validated['stok'];
 
-        return response()->json(['success' => true, 'message' => 'Produk berhasil diperbarui!', 'redirect' => route('produk-stok.produk.index')]);
+                $produk->update($validated);
+
+                if ($stok_baru != $stok_lama) {
+                    $selisih = abs($stok_baru - $stok_lama);
+                    $tipe_mutasi = ($stok_baru > $stok_lama) ? 'in' : 'out';
+
+                    StockMutation::create([
+                        'product_id' => $produk->id,
+                        'outlet_id' => $produk->outlet_id,
+                        'quantity' => $selisih,
+                        'type' => $tipe_mutasi,
+                        'reference_type' => 'adjustment',
+                        'reference_id' => null,
+                    ]);
+                }
+            });
+
+            // ▼▼▼ GANTI BAGIAN INI ▼▼▼
+            return response()->json([
+                'success' => true,
+                'message' => 'Produk berhasil diperbarui!',
+                'redirect' => route('produk-stok.produk.index')
+            ]);
+            // ▲▲▲ AKHIR PERUBAHAN ▲▲▲
+
+        } catch (\Exception $e) {
+            Log::error('Gagal update produk: ' . $e->getMessage());
+            // Kirim respon error sebagai JSON juga
+            return response()->json(['success' => false, 'message' => 'Gagal memperbarui produk.'], 500);
+        }
     }
 
     public function destroy($id)

@@ -187,14 +187,15 @@
                     ]
                 },
                 
-                    '/dashboard/outlet-karyawan/saldo': {
-        url: '{{ route("outlet.saldo.data") }}',
-        columns: [
-            { data: 0, name: 'name', title: "Nama Outlet" },
-            { data: 1, name: 'address', title: "Alamat" },
-            { data: 2, name: 'balance', title: "Saldo", className: "text-right", orderable: false, searchable: false }
-        ]
-    },
+                '/dashboard/outlet-karyawan/saldo': {
+                    url: '{{ route("outlet.saldo.data") }}',
+                    columns: [
+                        { data: 0, name: 'name', title: "Nama Outlet" },
+                        // Pastikan baris ini menggunakan 'text-center'
+                        { data: 1, name: 'saldo', title: "Saldo Saat Ini", className: "text-center", orderable: false, searchable: false },
+                        { data: 2, name: 'last_updated', title: "Terakhir Diperbarui", orderable: false, searchable: false }
+                    ]
+                },
 
                 '/dashboard/keuangan/kas-ledger': {
                     url: '/dashboard/keuangan/kas-ledger/data',
