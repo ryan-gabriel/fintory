@@ -279,18 +279,35 @@ class CicilanController extends Controller
 
     public function destroy($id)
     {
+        $currentLembagaId = session('current_lembaga_id');
+
+        if (!$currentLembagaId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lembaga tidak ditemukan dalam sesi.'
+            ], 403);
+        }
+
         $cicilan = Cicilan::findOrFail($id);
-        $hutang = Hutang::find($cicilan->hutang_id);
+        $hutang = Hutang::with('outlet')->find($cicilan->hutang_id);
+
+        if (!$hutang || !$hutang->outlet || $hutang->outlet->lembaga_id != $currentLembagaId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Akses ditolak. Hutang tidak sesuai dengan lembaga aktif.'
+            ], 403);
+        }
 
         // Kembalikan jumlah_bayar ke sisa_hutang
-        if ($hutang) {
-            $hutang->sisa_hutang += $cicilan->jumlah_bayar;
-            $hutang->save();
-        }
+        $hutang->sisa_hutang += $cicilan->jumlah_bayar;
+        $hutang->save();
 
         $cicilan->delete();
 
-        return response()->json(['success' => true, 'message' => 'Cicilan berhasil dihapus.']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Cicilan berhasil dihapus.'
+        ]);
     }
 
 }

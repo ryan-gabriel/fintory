@@ -205,11 +205,41 @@ class HutangController extends Controller
         return redirect()->route('keuangan.hutang.index')->with('success', 'Hutang berhasil diperbarui.');
     }
 
-    public function destroy($id, Request $request){
-        $hutang = Hutang::findOrFail($id);
+    public function destroy($id, Request $request)
+    {
+        $currentLembagaId = session('current_lembaga_id');
+
+        if (!$currentLembagaId) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Lembaga tidak ditemukan dalam sesi.'
+                ], 403);
+            }
+            return redirect()->back()->withErrors(['Lembaga tidak ditemukan dalam session.']);
+        }
+
+        $hutang = Hutang::with('outlet')->where('id', $id)->first();
+
+        if (!$hutang || $hutang->outlet->lembaga_id != $currentLembagaId) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data hutang tidak ditemukan atau tidak milik lembaga Anda.'
+                ], 403);
+            }
+            return redirect()->back()->withErrors(['Data hutang tidak ditemukan atau tidak milik lembaga Anda.']);
+        }
+
         $hutang->delete();
 
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Hutang berhasil dihapus.'
+            ]);
+        }
+
         return redirect()->route('keuangan.hutang.index')->with('success', 'Hutang berhasil dihapus.');
-      
     }
 }

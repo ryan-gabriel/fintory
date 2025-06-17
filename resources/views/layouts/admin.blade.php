@@ -225,12 +225,13 @@
             $(document).ready(function() {
                 $(document).on('click', '.delete-btn, .toggle-status-product-btn', function(e) {
                     e.preventDefault();
-
+                    e.stopPropagation();
+                    
                     const $button = $(this);
                     const url = $button.data('url');
                     const action = $button.data('action') || 'delete';
                     const id = $button.data('id');
-
+                    
                     // Tentukan konfigurasi berdasarkan aksi
                     let config = {
                         title: 'Anda yakin?',
@@ -382,7 +383,7 @@
                 });
             });
         </script>
-        
+
         <script>
             setTimeout(() => {
                 ['alert-success', 'alert-error'].forEach(id => {
