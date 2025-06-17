@@ -19,11 +19,20 @@ return new class extends Migration
             $table->enum('type', ['in', 'out']);
             $table->enum('reference_type', ['purchase', 'sale', 'adjustment']);
             $table->unsignedBigInteger('reference_id')->nullable();
-            $table->foreign('product_id')->references('id')->on('product');
-            $table->foreign('outlet_id')->references('id')->on('outlet');
+
+            // Tambahkan cascade
+            $table->foreign('product_id')
+                ->references('id')->on('product')
+                ->onDelete('cascade');
+
+            $table->foreign('outlet_id')
+                ->references('id')->on('outlet')
+                ->onDelete('cascade');
+
             $table->timestamps();
         });
     }
+
 
     /**
      * Reverse the migrations.

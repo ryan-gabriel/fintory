@@ -15,8 +15,12 @@ return new class extends Migration
             $table->unsignedBigInteger('outlet_id')->primary();
             $table->decimal('saldo', 14, 2)->default(0);
             $table->timestamp('last_updated')->useCurrent();
-            $table->foreign('outlet_id')->references('id')->on('outlet');
             $table->timestamps();
+
+            // Foreign key dengan cascade delete
+            $table->foreign('outlet_id')
+                ->references('id')->on('outlet')
+                ->onDelete('cascade');
         });
     }
 

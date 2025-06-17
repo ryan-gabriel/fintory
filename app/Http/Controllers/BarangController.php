@@ -63,16 +63,24 @@ class BarangController extends Controller
 
         // Looping data dan format menjadi array-of-arrays
         foreach ($data as $barang) {
+            $editUrl = route('produk-stok.barang.edit', $barang->kode_barang);
+            $deleteUrl = route('produk-stok.barang.destroy', $barang->kode_barang);
+
+            ob_start(); ?>
+                <div class="flex space-x-2">
+                    <a href="<?= $editUrl ?>" class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition edit-link">Edit</a>
+                    <button type="button" class="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition delete-btn" data-id="<?= $barang->kode_barang ?>" data-url="<?= $deleteUrl ?>">Hapus</button>
+                </div>
+            <?php
+            $actionButtons = ob_get_clean();
+
             $jsonData['data'][] = [
-                // Kolom 0: Nama
-                $barang->nama,
-                // Kolom 1: Deskripsi
+                $barang->nama ?? '-',
                 $barang->deskripsi ?? '-',
-                // Kolom 2: Aksi
-                '<a href="' . route('produk-stok.barang.edit', $barang->kode_barang) . '" class="edit-link inline-block px-3 py-1 bg-blue-500 text-white rounded font-semibold hover:bg-blue-600 transition mr-2">Edit</a>' .
-                '<a href="' . route('produk-stok.barang.destroy', $barang->kode_barang) . '" class="delete-link inline-block px-3 py-1 bg-red-500 text-white rounded font-semibold hover:bg-red-600 transition" data-id="' . $barang->kode_barang . '">Hapus</a>'
+                $actionButtons
             ];
         }
+
 
         return response()->json($jsonData);
     }

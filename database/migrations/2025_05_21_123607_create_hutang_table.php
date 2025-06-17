@@ -20,11 +20,19 @@ return new class extends Migration
             $table->decimal('sisa_hutang', 14, 2)->nullable();
             $table->text('deskripsi')->nullable();
             $table->unsignedBigInteger('created_by')->nullable();
-            $table->foreign('outlet_id')->references('id')->on('outlet');
-            $table->foreign('created_by')->references('id')->on('users');
             $table->timestamps();
+
+            // Foreign key: outlet_id dengan cascade delete
+            $table->foreign('outlet_id')
+                ->references('id')->on('outlet')
+                ->onDelete('cascade');
+
+            // Foreign key: created_by (tidak perlu cascade untuk user)
+            $table->foreign('created_by')
+                ->references('id')->on('users');
         });
     }
+
 
     /**
      * Reverse the migrations.

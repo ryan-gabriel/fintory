@@ -59,7 +59,7 @@ class KategoriController extends Controller
                 $kategori->deskripsi ?? '-',
                 '<div class="text-center">' .
                     '<a href="'.route('produk-stok.kategori.edit', $kategori->id).'" class="edit-link text-yellow-500 font-semibold hover:underline">Edit</a> | ' .
-                    '<a href="'.route('produk-stok.kategori.destroy', $kategori->id).'" class="delete-link text-red-500 font-semibold hover:underline" data-id="'.$kategori->id.'">Hapus</a>' .
+                    '<a href="'.route('produk-stok.kategori.destroy', $kategori->id).'" class="delete-btn text-red-500 font-semibold hover:underline" data-id="'.$kategori->id.'">Hapus</a>' .
                 '</div>'
             ];
         }

@@ -17,11 +17,20 @@ return new class extends Migration {
             $table->integer('quantity');
             $table->decimal('harga_satuan', 12, 2);
             $table->decimal('subtotal', 14, 2);
-            $table->foreign('sale_id')->references('id')->on('sale');
-            $table->foreign('product_id')->references('id')->on('product');
             $table->timestamps();
+
+            // Foreign keys with cascading delete
+            $table->foreign('sale_id')
+                ->references('id')->on('sale')
+                ->onDelete('cascade');
+
+            $table->foreign('product_id')
+                ->references('id')->on('product')
+                ->onDelete('cascade');
         });
     }
+
+
 
     /**
      * Reverse the migrations.

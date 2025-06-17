@@ -103,6 +103,9 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
         // Rute untuk Produk
         Route::get('produk/data', [\App\Http\Controllers\ProductController::class, 'getData'])->name('produk.data');
         Route::resource('produk', \App\Http\Controllers\ProductController::class)->except(['show']);
+        Route::post('produk/non-active', [\App\Http\Controllers\ProductController::class, 'nonActive'])->name('produk.non-active');
+        Route::post('produk/active', [\App\Http\Controllers\ProductController::class, 'active'])->name('produk.active');
+
 
         // Rute untuk Mutasi Stok
         Route::get('mutasi', [\App\Http\Controllers\StockMutationController::class, 'index'])->name('mutasi.index');

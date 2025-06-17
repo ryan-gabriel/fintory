@@ -145,6 +145,7 @@
         <script src="https://cdn.datatables.net/2.3.1/js/dataTables.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.46.0/dist/apexcharts.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
         <script>
             let previousUrl = window.location.href;
@@ -1110,38 +1111,6 @@
                             });
                         }
                     },
-                    '.confirm-delete': {
-                        method: 'DELETE',
-                        requireConfirmation: true, // Ini akan memicu dialog konfirmasi
-                        confirmMessage: 'Apakah Anda yakin ingin menghapus data ini?',
-                        showLoader: false, // Tidak perlu loader besar untuk aksi cepat
-                        onSuccess: (response, element) => {
-                            if (typeof $ !== 'undefined' && $.fn.DataTable.isDataTable('#data-table')) {
-                                $('#data-table').DataTable().ajax.reload(null, false);
-                            }
-                            if (typeof Swal !== 'undefined') {
-                                Swal.fire('Berhasil!', response.message || 'Data berhasil dihapus.', 'success');
-                            } else {
-                                alert(response.message || 'Data berhasil dihapus.');
-                            }
-                        },
-                        onError: (error, element) => {
-                            let message = 'Terjadi kesalahan saat menghapus data.';
-                            if (error.response && typeof error.response.json === 'function') {
-                                error.response.json().then(json => {
-                                    if (json.message) message = json.message;
-                                    if (typeof Swal !== 'undefined') Swal.fire('Gagal!', message, 'error');
-                                    else alert(message);
-                                }).catch(() => {
-                                    if (typeof Swal !== 'undefined') Swal.fire('Gagal!', message, 'error');
-                                    else alert(message);
-                                });
-                            } else {
-                                if (typeof Swal !== 'undefined') Swal.fire('Gagal!', message, 'error');
-                                else alert(message);
-                            }
-                        }
-                    },
                     '.ajax-link': {
                         method: 'GET',
                         loadIntoContainer: '#main-content',
@@ -1727,35 +1696,68 @@
         </script>
 
         <script>
-            $(document).ready(function() {
-
-                // Event Handler untuk Tombol Hapus dengan SweetAlert
-                $(document).on('click', '.delete-btn', function(e) {
+            $(document).ready(function () {
+                // Handler umum untuk tombol delete atau toggle
+                $(document).on('click', '.delete-btn, .toggle-status-product-btn', function (e) {
                     e.preventDefault();
-                    const url = $(this).data('url');
+
+                    const $button = $(this);
+                    const url = $button.data('url');
+                    const action = $button.data('action') || 'delete'; // 'delete', 'non-active', 'active'
+                    const id = $button.data('id');
+
+                    // Tentukan konfigurasi berdasarkan aksi
+                    let config = {
+                        title: 'Anda yakin?',
+                        text: '',
+                        icon: 'warning',
+                        confirmText: 'Ya, lanjutkan!',
+                        successMessage: 'Aksi berhasil dilakukan.',
+                        errorMessage: 'Terjadi kesalahan.',
+                    };
+
+                    if (action === 'delete') {
+                        config.text = "Data yang dihapus tidak dapat dikembalikan!";
+                        config.confirmText = 'Ya, hapus!';
+                        config.successMessage = 'Data berhasil dihapus.';
+                        config.errorMessage = 'Gagal menghapus data.';
+                    } else if (action === 'non-active') {
+                        config.text = "Produk akan dinonaktifkan dari daftar.";
+                        config.confirmText = 'Ya, nonaktifkan!';
+                        config.successMessage = 'Produk berhasil dinonaktifkan.';
+                        config.errorMessage = 'Gagal menonaktifkan produk.';
+                    } else if (action === 'active') {
+                        config.text = "Produk akan diaktifkan kembali.";
+                        config.confirmText = 'Ya, aktifkan!';
+                        config.successMessage = 'Produk berhasil diaktifkan.';
+                        config.errorMessage = 'Gagal mengaktifkan produk.';
+                    }
 
                     Swal.fire({
-                        title: 'Anda yakin?',
-                        text: "Data yang dihapus tidak dapat dikembalikan!",
-                        icon: 'warning',
+                        title: config.title,
+                        text: config.text,
+                        icon: config.icon,
                         showCancelButton: true,
-                        confirmButtonColor: '#d33',
+                        confirmButtonColor: '#3085d6',
                         cancelButtonColor: '#6c757d',
-                        confirmButtonText: 'Ya, hapus!',
+                        confirmButtonText: config.confirmText,
                         cancelButtonText: 'Batal'
                     }).then((result) => {
                         if (result.isConfirmed) {
                             $.ajax({
                                 url: url,
-                                type: 'DELETE',
+                                type: (action === 'delete') ? 'DELETE' : 'POST',
                                 headers: {
                                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                                 },
-                                success: function(response) {
+                                data: {
+                                    id: id
+                                },
+                                success: function (response) {
                                     if (response.success) {
                                         Swal.fire(
                                             'Berhasil!',
-                                            response.message,
+                                            response.message || config.successMessage,
                                             'success'
                                         );
                                         if (window.dataTable) {
@@ -1763,16 +1765,51 @@
                                         } else if (typeof $('#data-table').DataTable === 'function') {
                                             $('#data-table').DataTable().ajax.reload(null, false);
                                         }
+                                    } else if (response.requiresConfirmation) {
+                                        Swal.fire({
+                                            title: 'Data Terkait Ditemukan!',
+                                            text: response.message || 'Data outlet ini memiliki relasi. Hapus semua data yang terkait?',
+                                            icon: 'warning',
+                                            showCancelButton: true,
+                                            confirmButtonText: 'Ya, hapus semua!',
+                                            cancelButtonText: 'Batal',
+                                            confirmButtonColor: '#e3342f'
+                                        }).then((confirmResult) => {
+                                            if (confirmResult.isConfirmed) {
+                                                $.ajax({
+                                                    url: url,
+                                                    type: 'DELETE',
+                                                    headers: {
+                                                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                                                    },
+                                                    data: {
+                                                        id: id,
+                                                        force: true // Kirim ulang dengan force delete
+                                                    },
+                                                    success: function (res) {
+                                                        Swal.fire('Berhasil!', res.message, 'success');
+                                                        if (window.dataTable) {
+                                                            window.dataTable.draw(false);
+                                                        } else if (typeof $('#data-table').DataTable === 'function') {
+                                                            $('#data-table').DataTable().ajax.reload(null, false);
+                                                        }
+                                                    },
+                                                    error: function () {
+                                                        Swal.fire('Error!', 'Gagal menghapus secara paksa.', 'error');
+                                                    }
+                                                });
+                                            }
+                                        });
                                     } else {
                                         Swal.fire(
                                             'Gagal!',
-                                            response.message || 'Terjadi kesalahan.',
+                                            response.message || config.errorMessage,
                                             'error'
                                         );
                                     }
                                 },
-                                error: function(xhr) {
-                                    let errorMessage = 'Terjadi kesalahan saat menghapus data.';
+                                error: function (xhr) {
+                                    let errorMessage = config.errorMessage;
                                     if (xhr.responseJSON && xhr.responseJSON.message) {
                                         errorMessage = xhr.responseJSON.message;
                                     }
@@ -1786,9 +1823,9 @@
                         }
                     });
                 });
-
             });
         </script>
+
     </body>
 
 </html>

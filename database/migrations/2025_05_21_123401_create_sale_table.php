@@ -18,11 +18,21 @@ return new class extends Migration
             $table->date('sale_date');
             $table->decimal('total', 14, 2);
             $table->unsignedBigInteger('created_by')->nullable();
-            $table->foreign('outlet_id')->references('id')->on('outlet');
-            $table->foreign('created_by')->references('id')->on('users');
+
+            // Tambahkan cascade delete pada outlet
+            $table->foreign('outlet_id')
+                ->references('id')->on('outlet')
+                ->onDelete('cascade');
+
+            // Optional: biarkan null jika user dihapus
+            $table->foreign('created_by')
+                ->references('id')->on('users')
+                ->nullOnDelete();
+
             $table->timestamps();
         });
     }
+
 
     /**
      * Reverse the migrations.

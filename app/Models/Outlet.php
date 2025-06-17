@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Outlet extends Model
 {
@@ -13,23 +15,86 @@ class Outlet extends Model
     protected $table = 'outlet';
     protected $guarded = ['id'];
 
-    // ... relasi lain ...
+    /**
+     * Relasi ke lembaga (many-to-one)
+     *
+     * @return BelongsTo
+     */
+    public function lembaga(): BelongsTo
+    {
+        return $this->belongsTo(Lembaga::class);
+    }
 
     /**
-     * Relasi one-to-one ke OutletBalance.
+     * Relasi one-to-one ke OutletBalance
+     * 
+     * @return HasOne
      */
-    public function balance()
+    public function balance(): HasOne
     {
         return $this->hasOne(OutletBalance::class, 'outlet_id', 'id')->withDefault([
             'saldo' => 0,
             'last_updated' => now(), // Memberikan nilai default untuk last_updated
         ]);
     }
-    
-    // ... relasi lain seperti products, sales, dll. ...
-    public function products(): HasMany { return $this->hasMany(Product::class); }
-    public function sales(): HasMany { return $this->hasMany(Sale::class); }
-    public function stockMutations(): HasMany { return $this->hasMany(StockMutation::class); }
-    public function hutang(): HasMany { return $this->hasMany(Hutang::class); }
-    public function employees(): HasMany { return $this->hasMany(Employee::class); }
+
+    /**
+     * Produk yang dimiliki outlet ini.
+     *
+     * @return HasMany
+     */
+    public function products(): HasMany
+    {
+        return $this->hasMany(Product::class);
+    }
+
+    /**
+     * Penjualan di outlet ini.
+     *
+     * @return HasMany
+     */
+    public function sales(): HasMany
+    {
+        return $this->hasMany(Sale::class);
+    }
+
+    /**
+     * Mutasi stok di outlet ini.
+     *
+     * @return HasMany
+     */
+    public function stockMutations(): HasMany
+    {
+        return $this->hasMany(StockMutation::class);
+    }
+
+    /**
+     * Hutang terkait outlet ini.
+     *
+     * @return HasMany
+     */
+    public function hutang(): HasMany
+    {
+        return $this->hasMany(Hutang::class);
+    }
+
+    /**
+     * Pegawai yang bekerja di outlet ini.
+     *
+     * @return HasMany
+     */
+    public function employees(): HasMany
+    {
+        return $this->hasMany(Employee::class);
+    }
+
+    /**
+     * Relasi ke pencatatan kas outlet ini (cash ledger)
+     *
+     * @return HasMany
+     */
+    public function cashLedgers(): HasMany
+    {
+        return $this->hasMany(CashLedger::class);
+    }
 }
