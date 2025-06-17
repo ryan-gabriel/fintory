@@ -16,7 +16,7 @@
         <link rel="stylesheet" href="https://cdn.datatables.net/2.3.1/css/dataTables.dataTables.css" />
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     </head>
 
     <body class="font-sans antialiased">
@@ -147,7 +147,7 @@
             <script src="https://cdn.datatables.net/2.3.1/js/dataTables.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.46.0/dist/apexcharts.min.js"></script>
-            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            
 
             <script>
                 let previousUrl = window.location.href;
@@ -1918,5 +1918,7 @@
                 });
             }, 5000);
         </script>
+
+        @stack('scripts')
     </body>
 </html>

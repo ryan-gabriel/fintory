@@ -36,8 +36,6 @@
                         required>
                 </div>
                 
-                {{-- @livewire('terbilang-input', [], key('form-kas-ledger')) --}}
-
 
                 <div>
                     <label for="sumber" class="block mb-2 text-gray-900 dark:text-white">Sumber</label>
@@ -80,3 +78,16 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+    @if ($errors->has('jumlah'))
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: '{{ $errors->first('jumlah') }}',
+                confirmButtonColor: '#d33'
+            });
+        </script>
+    @endif
+@endpush

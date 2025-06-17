@@ -79,3 +79,17 @@
         </div>
     </div>
 </div>
+
+
+@push('scripts')
+    @if ($errors->has('jumlah'))
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: '{{ $errors->first('jumlah') }}',
+                confirmButtonColor: '#d33'
+            });
+        </script>
+    @endif
+@endpush
