@@ -30,7 +30,8 @@ class KeuanganSeeder extends Seeder
         foreach ($outlets as $outlet) {
             // OutletBalance untuk setiap outlet
             OutletBalance::factory()->create([
-                'outlet_id' => $outlet->id,
+            'saldo' => \Faker\Factory::create()->randomFloat(2, 10000, 1000000),
+            'last_updated' => now(),
             ]);
 
             // 3 transaksi cash ledger per outlet

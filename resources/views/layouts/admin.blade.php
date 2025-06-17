@@ -116,6 +116,21 @@
                         </svg>
                         <span class="sr-only">Loading...</span>
                     </div>
+
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 mb-4">
+        @if (session('error'))
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <strong class="font-bold">Terjadi Kesalahan!</strong>
+                <span class="block sm:inline">{{ session('error') }}</span>
+            </div>
+        @endif
+        @if (session('success'))
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                <strong class="font-bold">Sukses!</strong>
+                <span class="block sm:inline">{{ session('success') }}</span>
+            </div>
+        @endif
+                    
                 </div>
 
                 <main id="main-content" class="hidden">
@@ -151,6 +166,35 @@
             };
 
             const PAGE_CONFIGS = {
+
+                '/dashboard/saldo-outlet': {
+                    url: '{{ route("saldo-outlet.data") }}',
+                    columns: [
+                        { data: 0, name: 'name', title: "Nama Outlet" },
+                        { data: 1, name: 'address', title: "Alamat" },
+                        { data: 2, name: 'balance', title: "Saldo", className: "text-right", orderable: false, searchable: false }
+                    ]
+                },
+
+                '/dashboard/outlet-karyawan': {
+                    url: '{{ route("outlet.data") }}',
+                    columns: [
+                        { data: 0, name: 'name', title: "Nama Outlet" },
+                        { data: 1, name: 'address', title: "Alamat" },
+                        { data: 2, name: 'phone', title: "No. Telp" },
+                        { data: 3, name: 'action', title: "Aksi", orderable: false, searchable: false, className: "text-center" }
+                    ]
+                },
+                
+                    '/dashboard/outlet-karyawan/saldo': {
+        url: '{{ route("outlet.saldo.data") }}',
+        columns: [
+            { data: 0, name: 'name', title: "Nama Outlet" },
+            { data: 1, name: 'address', title: "Alamat" },
+            { data: 2, name: 'balance', title: "Saldo", className: "text-right", orderable: false, searchable: false }
+        ]
+    },
+
                 '/dashboard/keuangan/kas-ledger': {
                     url: '/dashboard/keuangan/kas-ledger/data',
                     columns: [{
@@ -991,6 +1035,7 @@
             // Enhanced Event Handlers dengan dukungan multiple link types
             const EventHandlers = {
                 linkConfigs: {
+                    
                     '.menu-link': {
                         method: 'GET',
                         loadIntoContainer: '#main-content',
@@ -1064,16 +1109,36 @@
                             });
                         }
                     },
-                    '.delete-link': {
+                    '.confirm-delete': {
                         method: 'DELETE',
-                        requireConfirmation: true,
+                        requireConfirmation: true, // Ini akan memicu dialog konfirmasi
                         confirmMessage: 'Apakah Anda yakin ingin menghapus data ini?',
+                        showLoader: false, // Tidak perlu loader besar untuk aksi cepat
                         onSuccess: (response, element) => {
-                            if ($.fn.DataTable.isDataTable('#data-table')) {
-                                $('#data-table').DataTable().ajax.reload();
+                            if (typeof $ !== 'undefined' && $.fn.DataTable.isDataTable('#data-table')) {
+                                $('#data-table').DataTable().ajax.reload(null, false);
                             }
-                            // Show success message
-                            alert('Data berhasil dihapus');
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire('Berhasil!', response.message || 'Data berhasil dihapus.', 'success');
+                            } else {
+                                alert(response.message || 'Data berhasil dihapus.');
+                            }
+                        },
+                        onError: (error, element) => {
+                            let message = 'Terjadi kesalahan saat menghapus data.';
+                            if (error.response && typeof error.response.json === 'function') {
+                                error.response.json().then(json => {
+                                    if (json.message) message = json.message;
+                                    if (typeof Swal !== 'undefined') Swal.fire('Gagal!', message, 'error');
+                                    else alert(message);
+                                }).catch(() => {
+                                    if (typeof Swal !== 'undefined') Swal.fire('Gagal!', message, 'error');
+                                    else alert(message);
+                                });
+                            } else {
+                                if (typeof Swal !== 'undefined') Swal.fire('Gagal!', message, 'error');
+                                else alert(message);
+                            }
                         }
                     },
                     '.ajax-link': {
@@ -1113,141 +1178,92 @@
 
                 // Enhanced handle click untuk semua jenis link
                 async handleLinkClick(e) {
-
-                    // If the clicked link is a hash-only navigation, just scroll to the section without AJAX
-                    const nextUrl = e.target.closest('a')?.href || e.target.getAttribute('data-url');
-                    if (nextUrl && Utils.isHashOnlyChange(nextUrl, window.location.href)) {
-
-                        const hash = new URL(nextUrl, window.location.origin).hash;
-                        if (hash) {
-                            Utils.scrollToHash(hash);
-                            // Update the URL hash in the address bar
-                            history.pushState({}, '', nextUrl);
-                        }
-                        e.preventDefault();
-                        e.stopPropagation();
-                        return;
-                    }
                     const clickedElement = e.target;
-                    let linkElement = null;
-                    let config = null;
+                    // Cari elemen yang cocok dengan konfigurasi di linkConfigs
+                    const linkElement = Object.keys(this.linkConfigs).reduce((acc, selector) => acc || clickedElement.closest(selector), null);
 
+                    if (!linkElement) return;
 
-                    // Cari link element dan konfigurasinya
-                    for (const selector of Object.keys(this.linkConfigs)) {
-                        const found = clickedElement.closest(selector);
-                        if (found) {
-                            linkElement = found;
-                            config = this.getLinkConfig(found);
-                            break;
-                        }
-                    }
-
-                    // Jika tidak ada link yang cocok, return
-                    if (!linkElement || !config) return;
+                    const config = this.getLinkConfig(linkElement);
+                    if (!config) return;
 
                     e.preventDefault();
                     e.stopPropagation();
 
                     const url = linkElement.href || linkElement.getAttribute('data-url');
                     if (!url) return;
+
+                    // Handle konfirmasi (sekarang dengan SweetAlert) jika diperlukan
+                    if (config.requireConfirmation) {
+                        try {
+                            const result = await Swal.fire({
+                                title: config.confirmMessage || 'Anda yakin?',
+                                text: "Tindakan ini tidak dapat dibatalkan!",
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonColor: '#d33',
+                                cancelButtonColor: '#6c757d',
+                                confirmButtonText: 'Ya, Lanjutkan!',
+                                cancelButtonText: 'Batal'
+                            });
+                            if (!result.isConfirmed) {
+                                return; // Berhenti jika pengguna menekan "Batal"
+                            }
+                        } catch (error) {
+                            console.error("SweetAlert error:", error);
+                            return; // Berhenti jika ada error
+                        }
+                    }
+
                     try {
-                        // Konfirmasi jika diperlukan
-                        if (config.requireConfirmation) {
-                            const confirmed = confirm(config.confirmMessage || 'Apakah Anda yakin?');
-                            if (!confirmed) return;
-                        }
-
-                        // Execute beforeLoad callback
-                        if (config.beforeLoad) {
-                            await config.beforeLoad(url, linkElement);
-                        }
-
-                        // Show loader jika diperlukan
-                        if (config.showLoader) {
-                            this.showLoader();
-                        }
-
-                        // Lakukan AJAX request
+                        if (config.showLoader) this.showLoader();
                         const response = await this.makeAjaxRequest(url, config.method, linkElement);
 
-                        // Handle response berdasarkan method
                         if (config.method === 'GET' && config.loadIntoContainer) {
                             await this.loadContentIntoContainer(response, config.loadIntoContainer, url);
                         }
-
-                        // Update history jika diperlukan
                         if (config.updateHistory) {
-                            previousUrl = window.location.href;
                             history.pushState({}, '', url);
                         }
-
-                        // Update title jika diperlukan
                         if (config.updateTitle) {
-                            const newTitle = linkElement.getAttribute('data-title');
-                            if (newTitle) {
-                                document.title = newTitle;
-                            }
+                            document.title = linkElement.getAttribute('data-title') || document.title;
                         }
-
-                        // Execute success callback
-                        if (config.onSuccess) {
-                            await config.onSuccess(response, linkElement);
-                        }
-
-                        // Execute afterLoad callback
-                        if (config.afterLoad) {
-                            await config.afterLoad(response, linkElement);
-                        }
+                        if (config.onSuccess) await config.onSuccess(response, linkElement);
+                        if (config.afterLoad) await config.afterLoad(response, linkElement);
 
                     } catch (error) {
-                        console.error('AJAX request failed:', error);
-
-                        // Execute error callback jika ada
+                        console.error('Request failed:', error);
                         if (config.onError) {
                             await config.onError(error, linkElement);
                         } else {
-                            console.log(error)
-                            alert('Terjadi kesalahan. Silakan coba lagi.');
+                            alert('Terjadi kesalahan.');
                         }
                     } finally {
-                        // Hide loader
-                        if (config.showLoader) {
-                            this.hideLoader();
-                        }
+                        if (config.showLoader) this.hideLoader();
                     }
-                },
-
-                // Method untuk melakukan AJAX request
+                },                // Method untuk melakukan AJAX request
                 async makeAjaxRequest(url, method = 'GET', element = null) {
                     const options = {
                         method: method,
                         headers: {
                             'X-Requested-With': 'XMLHttpRequest',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute(
-                                'content') || ''
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
                         }
                     };
 
-                    // Jika method POST/PUT/PATCH, tambahkan Content-Type
-                    if (['POST', 'PUT', 'PATCH'].includes(method)) {
-                        options.headers['Content-Type'] = 'application/json';
-                    }
-
-                    // Handle form data jika link ada di dalam form
-                    if (method !== 'GET' && element) {
-                        const form = element.closest('form');
-                        console.log("Form: " + form)
-                        const formData = new FormData(form);
-                        options.body = formData;
-                        delete options.headers['Content-Type']; // Let browser set it for FormData
-
+                    // Hanya proses FormData jika element ada di dalam sebuah form
+                    // Ini akan memperbaiki tombol Hapus yang tidak berada di dalam form
+                    const form = element ? element.closest('form') : null;
+                    if (form && ['POST', 'PUT', 'PATCH'].includes(method)) {
+                        options.body = new FormData(form);
                     }
 
                     const response = await fetch(url, options);
 
                     if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        const error = new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        error.response = response; // Lampirkan response ke error untuk penanganan lebih baik
+                        throw error;
                     }
 
                     // Return response berdasarkan content type
@@ -1463,55 +1479,6 @@
             window.addEventListener('popstate', EventHandlers.handlePopState.bind(EventHandlers));
             document.addEventListener('DOMContentLoaded', EventHandlers.handleDOMContentLoaded.bind(EventHandlers));
             window.addEventListener('load', EventHandlers.handleWindowLoad.bind(EventHandlers));
-
-            // Replace your existing delete handler with this
-            document.addEventListener('click', function(e) {
-                // Handle delete confirmation
-                if (e.target.classList.contains('confirm-delete')) {
-                    e.preventDefault();
-                    const button = e.target;
-                    const id = button.dataset.id;
-                    const url = button.dataset.url;
-                    const modalId = button.dataset.modalHide;
-
-                    if (!confirm('Apakah Anda yakin ingin menghapus data ini?')) {
-                        return;
-                    }
-
-                    // Show loading state
-                    button.disabled = true;
-                    const originalText = button.innerHTML;
-                    button.innerHTML = `<span class="loading-spinner">Deleting...</span>`;
-
-                    fetch(url, {
-                            method: 'DELETE',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                'Accept': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest'
-                            }
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            // Close modal
-                            const modal = document.getElementById(modalId);
-                            if (modal) modal.classList.add('hidden');
-
-                            // Reload DataTable
-                            if ($.fn.DataTable.isDataTable('#data-table')) {
-                                $('#data-table').DataTable().ajax.reload(null, false);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Terjadi kesalahan saat menghapus data.');
-                        })
-                        .finally(() => {
-                            button.disabled = false;
-                            button.innerHTML = originalText;
-                        });
-                }
-            });
 
             document.addEventListener('DOMContentLoaded', () => {
                 const selected_outlet = document.getElementById('outlet-select');
@@ -1755,6 +1722,70 @@
                             document.getElementById('no-product-info').classList.remove('hidden');
                         });
                 }
+            });
+        </script>
+
+        <script>
+            $(document).ready(function() {
+
+                // Event Handler untuk Tombol Hapus dengan SweetAlert
+                $(document).on('click', '.delete-btn', function(e) {
+                    e.preventDefault();
+                    const url = $(this).data('url');
+
+                    Swal.fire({
+                        title: 'Anda yakin?',
+                        text: "Data yang dihapus tidak dapat dikembalikan!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Ya, hapus!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            $.ajax({
+                                url: url,
+                                type: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                                },
+                                success: function(response) {
+                                    if (response.success) {
+                                        Swal.fire(
+                                            'Berhasil!',
+                                            response.message,
+                                            'success'
+                                        );
+                                        if (window.dataTable) {
+                                            window.dataTable.draw(false);
+                                        } else if (typeof $('#data-table').DataTable === 'function') {
+                                            $('#data-table').DataTable().ajax.reload(null, false);
+                                        }
+                                    } else {
+                                        Swal.fire(
+                                            'Gagal!',
+                                            response.message || 'Terjadi kesalahan.',
+                                            'error'
+                                        );
+                                    }
+                                },
+                                error: function(xhr) {
+                                    let errorMessage = 'Terjadi kesalahan saat menghapus data.';
+                                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                                        errorMessage = xhr.responseJSON.message;
+                                    }
+                                    Swal.fire(
+                                        'Error!',
+                                        errorMessage,
+                                        'error'
+                                    );
+                                }
+                            });
+                        }
+                    });
+                });
+
             });
         </script>
     </body>
