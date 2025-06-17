@@ -64,7 +64,7 @@ class UserManagementController extends Controller
         // Filter tanggal dibuat
         if ($request->filled('start_date')) {
             try {
-                $startDate = Carbon::createFromFormat('m/d/Y', $request->start_date)->startOfDay();
+                $startDate = Carbon::createFromFormat('d-m-Y', $request->start_date)->startOfDay();
                 $query->where('created_at', '>=', $startDate);
             } catch (\Exception $e) {
                 // Log error if needed
@@ -73,7 +73,7 @@ class UserManagementController extends Controller
 
         if ($request->filled('end_date')) {
             try {
-                $endDate = Carbon::createFromFormat('m/d/Y', $request->end_date)->endOfDay();
+                $endDate = Carbon::createFromFormat('d-m-Y', $request->end_date)->endOfDay();
                 $query->where('created_at', '<=', $endDate);
             } catch (\Exception $e) {
                 // Log error if needed

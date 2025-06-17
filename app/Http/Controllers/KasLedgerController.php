@@ -34,7 +34,7 @@ class KasLedgerController extends Controller
         // Filter tanggal
         if ($request->filled('start_date')) {
             try {
-                $startDate = Carbon::createFromFormat('m/d/Y', $request->start_date)->startOfDay();
+                $startDate = Carbon::createFromFormat('d-m-Y', $request->start_date)->startOfDay();
                 $query->where('tanggal', '>=', $startDate);
             } catch (\Exception $e) {
                 Log::warning('Invalid start_date format: ' . $request->start_date);
@@ -43,7 +43,7 @@ class KasLedgerController extends Controller
 
         if ($request->filled('end_date')) {
             try {
-                $endDate = Carbon::createFromFormat('m/d/Y', $request->end_date)->endOfDay();
+                $endDate = Carbon::createFromFormat('d-m-Y', $request->end_date)->endOfDay();
                 $query->where('tanggal', '<=', $endDate);
             } catch (\Exception $e) {
                 Log::warning('Invalid end_date format: ' . $request->end_date);
@@ -146,7 +146,7 @@ class KasLedgerController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'tanggal' => 'required|date_format:m/d/Y',
+            'tanggal' => 'required|date_format:d-m-Y',
             'tipe' => 'required|string|in:INCOME,EXPENSE,TRANSFER_IN,TRANSFER_OUT',
             'sumber' => 'nullable|string|max:255',
             'jumlah' => 'required|numeric|min:0',
@@ -154,7 +154,7 @@ class KasLedgerController extends Controller
             'deskripsi' => 'required|string|max:255',
         ]);
 
-        $tanggal = Carbon::createFromFormat('m/d/Y', $request->tanggal)->startOfDay();
+        $tanggal = Carbon::createFromFormat('d-m-Y', $request->tanggal)->startOfDay();
         $jumlah = $request->jumlah;
         $tipe = strtoupper($request->tipe);
 
@@ -210,7 +210,7 @@ class KasLedgerController extends Controller
         $kasLedger = CashLedger::findOrFail($id);
 
         $request->validate([
-            'tanggal' => 'required|date_format:m/d/Y',
+            'tanggal' => 'required|date_format:d-m-Y',
             'tipe' => 'required|string|in:INCOME,EXPENSE,TRANSFER_IN,TRANSFER_OUT',
             'sumber' => 'nullable|string|max:255',
             'jumlah' => 'required|numeric|min:0',
@@ -218,7 +218,7 @@ class KasLedgerController extends Controller
             'deskripsi' => 'required|string|max:255',
         ]);
 
-        $tanggal = Carbon::createFromFormat('m/d/Y', $request->tanggal)->startOfDay();
+        $tanggal = Carbon::createFromFormat('d-m-Y', $request->tanggal)->startOfDay();
         $jumlah = $request->jumlah;
         $tipe = strtoupper($request->tipe);
 

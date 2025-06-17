@@ -573,6 +573,7 @@
                     endDate: null
                 },
 
+
                 // Add method to initialize date pickers
                 initDatePickers() {
                     const dateRangeStartPicker = document.getElementById('datepicker-range-start');
@@ -1086,9 +1087,6 @@
                                     // Initialize datepicker
                                     const tanggalInput = document.getElementById('tanggal');
                                     if (tanggalInput) {
-                                        if (tanggalInput._datepicker) {
-                                            tanggalInput._datepicker.destroy();
-                                        }
 
                                         const datepickerInstance = new Datepicker(tanggalInput, {
                                             format: "yyyy/mm/dd",

@@ -30,7 +30,7 @@ class HutangController extends Controller
 
         if ($request->filled('start_date')) {
             try {
-                $startDate = Carbon::createFromFormat('m/d/Y', $request->start_date)->startOfDay();
+                $startDate = Carbon::createFromFormat('d-m-Y', $request->start_date)->startOfDay();
                 $query->where('tanggal_hutang', '>=', $startDate);
             } catch (\Exception $e) {
                 Log::warning('Invalid start_date format: ' . $request->start_date);
@@ -39,7 +39,7 @@ class HutangController extends Controller
 
         if ($request->filled('end_date')) {
             try {
-                $endDate = Carbon::createFromFormat('m/d/Y', $request->end_date)->endOfDay();
+                $endDate = Carbon::createFromFormat('d-m-Y', $request->end_date)->endOfDay();
                 $query->where('tanggal_hutang', '<=', $endDate);
             } catch (\Exception $e) {
                 Log::warning('Invalid end_date format: ' . $request->end_date);
@@ -152,11 +152,11 @@ class HutangController extends Controller
             'outlet' => 'required|exists:outlet,id',
             'nama_pemberi_hutang' => 'required|string|max:255',
             'jumlah' => 'required|numeric|min:0',
-            'tanggal' => 'required|date_format:m/d/Y',
+            'tanggal' => 'required|date_format:d-m-Y',
             'deskripsi' => 'nullable|string|max:500',
         ]);
 
-        $tanggal = Carbon::createFromFormat('m/d/Y', $request->tanggal)->startOfDay();
+        $tanggal = Carbon::createFromFormat('d-m-Y', $request->tanggal)->startOfDay();
         $hutang = new Hutang();
         $hutang->outlet_id = $request->outlet;
         $hutang->nama_pemberi_hutang = $request->nama_pemberi_hutang;
@@ -172,7 +172,7 @@ class HutangController extends Controller
     public function edit($id, Request $request)
     {
         $hutang = Hutang::findOrFail($id);
-        $hutang->tanggal_hutang = $hutang->tanggal_hutang ? Carbon::parse($hutang->tanggal_hutang)->format('m/d/Y') : null;
+        $hutang->tanggal_hutang = $hutang->tanggal_hutang ? Carbon::parse($hutang->tanggal_hutang)->format('d-m-Y') : null;
         $outlets = Outlet::all();
         if ($request->ajax()) {
             return view('keuangan.hutang-edit', compact('hutang', 'outlets'));
@@ -190,7 +190,7 @@ class HutangController extends Controller
             'outlet' => 'required|exists:outlet,id',
             'nama_pemberi_hutang' => 'required|string|max:255',
             'jumlah' => 'required|numeric|min:0',
-            'tanggal' => 'required|date_format:m/d/Y',
+            'tanggal' => 'required|date_format:d-m-Y',
             'deskripsi' => 'nullable|string|max:500',
         ]);
 
@@ -198,7 +198,7 @@ class HutangController extends Controller
         $hutang->outlet_id = $request->outlet;
         $hutang->nama_pemberi_hutang = $request->nama_pemberi_hutang;
         $hutang->jumlah = $request->jumlah;
-        $hutang->tanggal_hutang = Carbon::createFromFormat('m/d/Y', $request->tanggal)->startOfDay();
+        $hutang->tanggal_hutang = Carbon::createFromFormat('d-m-Y', $request->tanggal)->startOfDay();
         $hutang->deskripsi = $request->deskripsi;
         $hutang->save();
 

@@ -60,8 +60,8 @@ class SaleController extends Controller
         // Filter Tanggal dari Date Picker
         if ($request->filled('start_date') && $request->filled('end_date')) {
             try {
-                $startDate = \Carbon\Carbon::createFromFormat('m/d/Y', $request->start_date)->startOfDay();
-                $endDate = \Carbon\Carbon::createFromFormat('m/d/Y', $request->end_date)->endOfDay();
+                $startDate = \Carbon\Carbon::createFromFormat('d-m-Y', $request->start_date)->startOfDay();
+                $endDate = \Carbon\Carbon::createFromFormat('d-m-Y', $request->end_date)->endOfDay();
                 $query->whereBetween('sale_date', [$startDate, $endDate]);
             } catch (\Exception $e) {
                 Log::warning('Invalid date format: ' . $request->start_date . ' or ' . $request->end_date);

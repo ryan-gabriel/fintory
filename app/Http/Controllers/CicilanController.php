@@ -34,7 +34,7 @@ class CicilanController extends Controller
 
         if ($request->filled('start_date')) {
             try {
-                $startDate = Carbon::createFromFormat('m/d/Y', $request->start_date)->startOfDay();
+                $startDate = Carbon::createFromFormat('d-m-Y', $request->start_date)->startOfDay();
                 $query->where('tanggal_bayar', '>=', $startDate);
             } catch (\Exception $e) {
                 Log::warning('Invalid start_date format: ' . $request->start_date);
@@ -43,7 +43,7 @@ class CicilanController extends Controller
 
         if ($request->filled('end_date')) {
             try {
-                $endDate = Carbon::createFromFormat('m/d/Y', $request->end_date)->endOfDay();
+                $endDate = Carbon::createFromFormat('d-m-Y', $request->end_date)->endOfDay();
                 $query->where('tanggal_bayar', '<=', $endDate);
             } catch (\Exception $e) {
                 Log::warning('Invalid end_date format: ' . $request->end_date);
@@ -178,7 +178,7 @@ class CicilanController extends Controller
                 'required',
                 function ($attribute, $value, $fail) {
                     try {
-                        \Carbon\Carbon::createFromFormat('m/d/Y', $value);
+                        \Carbon\Carbon::createFromFormat('d-m-Y', $value);
                     } catch (\Exception $e) {
                         $fail('Format tanggal tidak valid. Gunakan format mm/dd/yyyy.');
                     }
@@ -190,7 +190,7 @@ class CicilanController extends Controller
         ]);
 
         // Konversi tanggal_bayar ke format Y-m-d
-        $tanggalBayar = \Carbon\Carbon::createFromFormat('m/d/Y', $request->tanggal_bayar)->format('Y-m-d');
+        $tanggalBayar = \Carbon\Carbon::createFromFormat('d-m-Y', $request->tanggal_bayar)->format('Y-m-d');
 
         $cicilan = new Cicilan();
         $cicilan->hutang_id = $request->hutang_id;
@@ -233,7 +233,7 @@ class CicilanController extends Controller
                 'required',
                 function ($attribute, $value, $fail) {
                     try {
-                        \Carbon\Carbon::createFromFormat('m/d/Y', $value);
+                        \Carbon\Carbon::createFromFormat('d-m-Y', $value);
                     } catch (\Exception $e) {
                         $fail('Format tanggal tidak valid. Gunakan format mm/dd/yyyy.');
                     }
@@ -249,7 +249,7 @@ class CicilanController extends Controller
         $hutang = Hutang::find($cicilan->hutang_id);
 
         // Konversi tanggal_bayar ke format Y-m-d
-        $tanggalBayar = \Carbon\Carbon::createFromFormat('m/d/Y', $request->tanggal_bayar)->format('Y-m-d');
+        $tanggalBayar = \Carbon\Carbon::createFromFormat('d-m-Y', $request->tanggal_bayar)->format('Y-m-d');
 
         $cicilan->hutang_id = $request->hutang_id;
         $cicilan->tanggal_bayar = $tanggalBayar;
