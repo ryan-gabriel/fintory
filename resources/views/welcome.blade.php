@@ -318,12 +318,6 @@
                              <p class="text-sm sm:text-base">Jl. Pendidikan No.15, Cibiru Wetan, 1500</p>
                          </div>
                      </div>
-                     <div class="space-y-2 md:space-y-3 w-full lg:w-[20%]">
-                         <h4 class="font-bold">Coba Sekarang</h4>
-                         <p class="text-sm sm:text-base">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do</p>
-                         {{-- DIUBAH: Menggunakan <a> tag dengan route register --}}
-                         <a href="{{ route('register') }}" class="bg-[#4F9CF9] text-white px-5 py-3 rounded-lg text-sm sm:text-base w-fit hover:brightness-90 transition-all duration-300 cursor-pointer hover:-translate-y-1">Coba Sekarang &rarr;</a>
-                     </div>
                  </div>
              </section>
         </div>
