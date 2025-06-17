@@ -79,6 +79,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call(MenuItemSeeder::class);
         $this->call(OutletSeeder::class);
+        $this->call(EmployeeSeeder::class);
         $this->call(ProdukPenjualanSeeder::class);
         $this->call(MenuRolesSeeder::class);
         $this->call(LembagaUserRoleTableSeeder::class);
