@@ -182,6 +182,7 @@ class ProductController extends Controller
                         'type' => $tipe_mutasi,
                         'reference_type' => 'adjustment',
                         'reference_id' => null,
+                        'created_at' => now(),
                     ]);
                 }
             });
