@@ -4,37 +4,40 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Outlet extends Model
 {
     use HasFactory;
 
     protected $table = 'outlet';
+    protected $guarded = ['id'];
 
-    protected $fillable = [
-        'name',
-        'address',
-        'phone',
-        'lembaga_id',
-    ];
-
-    public function owner()
+    /**
+     * Relasi ke Lembaga.
+     */
+    public function lembaga()
     {
-        return $this->belongsTo(Lembaga::class, 'lembaga_id');
+        return $this->belongsTo(Lembaga::class);
     }
 
+    /**
+     * Relasi one-to-one ke OutletBalance. (VERSI PERBAIKAN)
+     */
     public function balance()
     {
-        return $this->hasOne(OutletBalance::class, 'outlet_id');
+        // Secara eksplisit mendefinisikan foreign key dan local key
+        // Foreign Key: 'outlet_id' di tabel outletbalance
+        // Local Key: 'id' di tabel outlet ini sendiri
+        return $this->hasOne(OutletBalance::class, 'outlet_id', 'id')->withDefault([
+            'balance' => 0
+        ]);
     }
 
-    public function cashLedgers()
-    {
-        return $this->hasMany(CashLedger::class, 'outlet_id');
-    }
-
-    public function hutangs()
-    {
-       return $this->hasMany(Hutang::class, 'outlet_id');
-    }
+    // Relasi lain yang dibutuhkan (biarkan seperti ini)
+    public function products(): HasMany { return $this->hasMany(Product::class); }
+    public function sales(): HasMany { return $this->hasMany(Sale::class); }
+    public function stockMutations(): HasMany { return $this->hasMany(StockMutation::class); }
+    public function hutang(): HasMany { return $this->hasMany(Hutang::class); }
+    public function employees(): HasMany { return $this->hasMany(Employee::class); }
 }

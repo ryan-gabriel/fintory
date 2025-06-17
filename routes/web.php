@@ -15,6 +15,8 @@ use App\Models\Product;
 use App\Models\Sale;
 use App\Http\Controllers\UserManagementController; // Tambahkan ini
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\OutletController;
+use App\Http\Controllers\SaldoOutletController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -22,8 +24,27 @@ Route::get('/', function () {
 
 // Note: we do NOT put `role.selected` on the "welcome" or login pages.
 
+Route::middleware(['auth'])->prefix('dashboard')->group(function () {
+    // Redirect to the dashboard if the user is authenticated
+    Route::get('/outlet-saldo', [OutletController::class, 'showSaldoReport'])->name('outlet.saldo');
+});
+
 // But we do want it on dashboard + all child routes.
 Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
+
+    // Outlet & Karyawan Management
+    Route::prefix('dashboard/outlet-karyawan')->name('outlet.')->group(function () {
+        Route::get('/', [OutletController::class, 'index'])->name('index');
+        Route::get('/data', [OutletController::class, 'getData'])->name('data');
+        Route::get('/create', [OutletController::class, 'create'])->name('create');
+        Route::post('/', [OutletController::class, 'store'])->name('store');
+        Route::get('/{outlet}/edit', [OutletController::class, 'edit'])->name('edit');
+        Route::put('/{outlet}', [OutletController::class, 'update'])->name('update');
+        Route::delete('/{outlet}', [OutletController::class, 'destroy'])->name('destroy');
+        Route::get('/saldo', [OutletController::class, 'saldoIndex'])->name('saldo.index');
+        Route::get('/saldo/data', [OutletController::class, 'getSaldoData'])->name('saldo.data');
+    });
+
     // Dashboard (now guarded by role.selected)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/api/sales-last-7-days', [DashboardController::class, 'getSalesLast7Days'])->name('api.sales.last7days');
@@ -164,6 +185,15 @@ Route::middleware('auth')->group(function () {
     // Handle the form submission for choosing one combination
     Route::post('/choose-role', [RoleChoiceController::class, 'pick'])
         ->name('auth.pick_role');
+});
+
+Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
+    // ... (rute-rute yang sudah ada)
+
+    // Rute untuk Saldo Outlet
+    Route::get('/dashboard/saldo-outlet', [SaldoOutletController::class, 'index'])->name('saldo-outlet.index');
+    Route::get('/dashboard/saldo-outlet/data', [SaldoOutletController::class, 'getData'])->name('saldo-outlet.data');
+
 });
 
 require __DIR__ . '/auth.php';

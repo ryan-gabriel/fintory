@@ -122,7 +122,7 @@ class MenuItemSeeder extends Seeder
         MenuItem::create([
             'menu_name' => 'Daftar Outlet',
             'icon' => 'fa-solid fa-store',
-            'route' => '#',
+            'route' => '/dashboard/outlet-karyawan', // <-- ROUTE BARU
             'is_parent' => false,
             'parent_id' => $outletKaryawan->id,
             'order' => 1,
@@ -130,8 +130,8 @@ class MenuItemSeeder extends Seeder
 
         MenuItem::create([
             'menu_name' => 'Saldo Outlet',
-            'icon' => 'fa-solid fa-scale-balanced',
-            'route' => '#',
+            'icon' => 'fa-solid fa-wallet',
+            'route' => '/dashboard/outlet-karyawan/saldo', // <-- Pastikan ini
             'is_parent' => false,
             'parent_id' => $outletKaryawan->id,
             'order' => 2,
