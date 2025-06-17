@@ -1,5 +1,6 @@
 {{-- resources/views/auth/choose_role.blade.php --}}
-
+<link rel="icon" type="image/png" href="{{ asset('images/fintory.png') }}">
+<title>{{ __('Pilih role') }}</title>
 <x-app-layout>
     {{-- If your <x-app-layout> accepts a “header” slot, you can set the page title there: --}}
     <x-slot name="header">

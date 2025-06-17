@@ -1,3 +1,4 @@
+<link rel="icon" type="image/png" href="{{ asset('images/fintory.png') }}">
 <x-admin-layout>
     <div class="my-12 px-4 w-full space-y-8">
 

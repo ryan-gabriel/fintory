@@ -7,6 +7,7 @@
 
     <title>Fintory</title>
 
+    <link rel="icon" type="image/png" href="{{ asset('images/fintory.png') }}">
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -31,7 +32,7 @@
                     Log in
                 </a>
                 <a href="{{ route('register') }}" class="p-4 rounded-xl text-text-light bg-button-primary transition-transform duration-300 hover:-translate-y-1">
-                    Coba Gratis 14 Hari &rarr;
+                    Daftar Sekarang  &rarr;
                 </a>
             </div>
         </nav>
@@ -49,8 +50,8 @@
                         Fintory membantu Anda menghemat waktu, meningkatkan produktivitas, dan mengontrol bisnis
                         dengan lebih mudah. Kelola semua aspek bisnis dalam satu platform terpadu, kapan saja dan di
                         mana saja. Saatnya beralih ke sistem yang lebih pintar dan otomatis bersama Fintory! 🚀</p>
-                    <button class="w-fit p-3 sm:p-4 bg-[#4F9CF9] rounded-xl text-sm sm:text-base hover:brightness-90 transition-all duration-300 cursor-pointer hover:-translate-y-1">Coba
-                        Gratis 14 Hari &rarr;</button>
+                    {{-- DIUBAH: Menggunakan <a> tag dengan route register --}}
+                    <a href="{{ route('register') }}" class="w-fit p-3 sm:p-4 bg-[#4F9CF9] rounded-xl text-sm sm:text-base hover:brightness-90 transition-all duration-300 cursor-pointer hover:-translate-y-1">Coba Gratis 14 Hari &rarr;</a>
                 </div>
                 <div class="w-full lg:w-1/2 order-1 lg:order-2" data-aos="fade-left">
                     <img src="images/hero-img.svg" alt="hero-image" class="w-full h-auto scale-110" />
@@ -103,19 +104,23 @@
                             <li class="flex items-start space-x-2"> <span class="text-xl pt-1">🔗</span> <span><strong>Integrasi Marketplace</strong> – Sinkronkan bisnis Anda dengan berbagai marketplace dan payment gateway dalam satu platform.</span> </li>
                             <li class="flex items-start space-x-2"> <span class="text-xl pt-1">📱</span> <span><strong>Akses Fleksibel</strong> – Kelola bisnis dari mana saja dengan aplikasi berbasis cloud yang aman dan cepat.</span> </li>
                         </ul>
-                        <button class="w-fit p-3 sm:p-4 bg-[#4F9CF9] text-white rounded-xl text-sm sm:text-base hover:brightness-90 transition-all duration-300 cursor-pointer hover:-translate-y-1">Coba Sekarang &rarr;</button>
+                        {{-- DIUBAH: Menggunakan <a> tag dengan route register --}}
+                        <a href="{{ route('register') }}" class="w-fit p-3 sm:p-4 bg-[#4F9CF9] text-white rounded-xl text-sm sm:text-base hover:brightness-90 transition-all duration-300 cursor-pointer hover:-translate-y-1">Coba Sekarang &rarr;</a>
                     @elseif($section['content'] == 'kenapa_fintory')
                         <h1 class="text-3xl sm:text-4xl font-bold">Kenapa harus Fintory?</h1>
                         <p class="text-sm sm:text-base">Dengan Fintory, semua operasional bisnis Anda berjalan otomatis—mulai dari pengelolaan stok, pencatatan transaksi, hingga laporan keuangan. Kurangi pekerjaan manual dan fokus pada pertumbuhan bisnis!</p>
-                        <button class="w-fit p-3 sm:p-4 bg-[#4F9CF9] text-white rounded-xl text-sm sm:text-base hover:brightness-90 transition-all duration-300 cursor-pointer hover:-translate-y-1">Coba Sekarang &rarr;</button>
+                        {{-- DIUBAH: Menggunakan <a> tag dengan route register --}}
+                        <a href="{{ route('register') }}" class="w-fit p-3 sm:p-4 bg-[#4F9CF9] text-white rounded-xl text-sm sm:text-base hover:brightness-90 transition-all duration-300 cursor-pointer hover:-translate-y-1">Coba Sekarang &rarr;</a>
                     @elseif($section['content'] == 'kelola_bisnis')
                          <h1 class="text-3xl sm:text-4xl font-bold">Kelola bisnis dengan mudah</h1>
                          <p class="text-sm sm:text-base">Gunakan alat terbaik untuk mengelola bisnis Anda secara efisien. Dengan fitur yang dirancang untuk memudahkan pencatatan, analisis, dan pengelolaan keuangan, Anda dapat fokus pada pertumbuhan bisnis tanpa khawatir dengan administrasi yang rumit.</p>
-                         <button class="w-fit p-3 sm:p-4 bg-[#4F9CF9] rounded-xl text-sm sm:text-base hover:brightness-90 transition-all duration-300 cursor-pointer hover:-translate-y-1">Pelajari lebih lanjut &rarr;</button>
+                         {{-- DIUBAH: Menggunakan <a> tag dengan route register --}}
+                         <a href="{{ route('register') }}" class="w-fit p-3 sm:p-4 bg-[#4F9CF9] rounded-xl text-sm sm:text-base hover:brightness-90 transition-all duration-300 cursor-pointer hover:-translate-y-1">Coba sekarang &rarr;</a>
                     @elseif($section['content'] == 'otomatisasi_keuangan')
                          <h1 class="text-3xl sm:text-4xl font-bold">Otomatisasi Keuangan dalam Satu Klik</h1>
                          <p class="text-sm sm:text-base">Hilangkan kerepotan pencatatan manual dengan solusi otomatis kami. Dari pelacakan transaksi hingga pembuatan laporan keuangan, semuanya bisa dilakukan dengan mudah dalam satu platform. Tingkatkan efisiensi dan ambil keputusan lebih cerdas dengan data yang akurat.</p>
-                         <button class="w-fit p-3 sm:p-4 bg-[#4F9CF9] text-white rounded-xl text-sm sm:text-base hover:brightness-90 transition-all duration-300 cursor-pointer hover:-translate-y-1">Mulai Sekarang &rarr;</button>
+                         {{-- DIUBAH: Menggunakan <a> tag dengan route register --}}
+                         <a href="{{ route('register') }}" class="w-fit p-3 sm:p-4 bg-[#4F9CF9] text-white rounded-xl text-sm sm:text-base hover:brightness-90 transition-all duration-300 cursor-pointer hover:-translate-y-1">Mulai Sekarang &rarr;</a>
                     @endif
                 </div>
                 <div class="w-full lg:w-1/2 order-1 {{ $section['order_img'] }}" data-aos="fade-up" data-aos-delay="200">
@@ -146,7 +151,8 @@
                             <li class="flex items-center gap-2"> <img src="images/black-pricing-icon.svg" alt="icon" class="w-4 h-4 md:w-5 md:h-5"> Akuntansi Lengkap </li>
                             <li class="flex items-center gap-2"> <img src="images/black-pricing-icon.svg" alt="icon" class="w-4 h-4 md:w-5 md:h-5"> Manajemen Karyawan </li>
                         </ul>
-                        <button class="text-base md:text-lg px-6 py-2 md:px-8 md:py-3 border border-[#FFE492] rounded-lg w-full hover:bg-[#FFE492] transition-all duration-300 cursor-pointer">Get Started</button>
+                        {{-- DIUBAH: Menggunakan <a> tag dengan route register --}}
+                        <a href="{{ route('register') }}" class="text-center block text-base md:text-lg px-6 py-2 md:px-8 md:py-3 border border-[#FFE492] rounded-lg w-full hover:bg-[#FFE492] transition-all duration-300 cursor-pointer">Mulai Berlangganan</a>
                     </div>
                     {{-- ANIMASI: Menambahkan data-aos dan efek hover pada kartu harga "Prime" --}}
                     <div data-aos="fade-up" class="text-white border rounded-xl flex items-center bg-[#043873] w-full lg:w-[38%] transition-all duration-300 hover:shadow-2xl hover:-translate-y-3">
@@ -155,17 +161,18 @@
                             <h1 class="font-bold text-3xl md:text-4xl text-[#FFE492]">Rp. 149.000,00</h1>
                             <p class="text-base md:text-lg">Untuk semua jenis usaha. Automasi operasional, penjualan, keuangan, karyawan dan penggajian lengkap</p>
                              <ul class="space-y-2 md:space-y-4 text-base md:text-lg">
-                                 <li class="flex items-start gap-2"> <img src="images/gold-pricing-icon.svg" alt="icon" class="w-4 h-4 md:w-5 md:h-5 mt-1"> Multi Outlet </li>
-                                 <li class="flex items-start gap-2"> <img src="images/gold-pricing-icon.svg" alt="icon" class="w-4 h-4 md:w-5 md:h-5 mt-1"> <div> Toko Online <br> <small class="text-xs"> + Website, Webtree, Weborder, Opsi Premium Domain, Shopee, Tokopedia, Grabmart, Multiakun Marketplace Omnichannel </small> </div> </li>
-                                 <li class="flex items-start gap-2"> <img src="images/gold-pricing-icon.svg" alt="icon" class="w-4 h-4 md:w-5 md:h-5 mt-1"> Aplikasi Kasir Online </li>
-                                 <li class="flex items-start gap-2"> <img src="images/gold-pricing-icon.svg" alt="icon" class="w-4 h-4 md:w-5 md:h-5 mt-1"> Manajemen Inventori </li>
-                                 <li class="flex items-start gap-2"> <img src="images/gold-pricing-icon.svg" alt="icon" class="w-4 h-4 md:w-5 md:h-5 mt-1"> Laporan Lengkap </li>
-                                 <li class="flex items-start gap-2"> <img src="images/gold-pricing-icon.svg" alt="icon" class="w-4 h-4 md:w-5 md:h-5 mt-1"> Manajemen Keuangan </li>
-                                 <li class="flex items-start gap-2"> <img src="images/gold-pricing-icon.svg" alt="icon" class="w-4 h-4 md:w-5 md:h-5 mt-1"> <div> Pencatatan Keuangan <br> <small class="text-xs">Invoice, SO, DO</small> </div> </li>
-                                 <li class="flex items-start gap-2"> <img src="images/gold-pricing-icon.svg" alt="icon" class="w-4 h-4 md:w-5 md:h-5 mt-1"> Digital Payment </li>
-                                 <li class="flex items-start gap-2"> <img src="images/gold-pricing-icon.svg" alt="icon" class="w-4 h-4 md:w-5 md:h-5 mt-1"> Manajemen Karyawan </li>
-                             </ul>
-                            <button class="text-base md:text-lg px-6 py-2 md:px-8 md:py-3 bg-[#4F9CF9] rounded-lg w-full hover:brightness-90 transition-all duration-300 cursor-pointer hover:-translate-y-1">Get Started</button>
+                                  <li class="flex items-start gap-2"> <img src="images/gold-pricing-icon.svg" alt="icon" class="w-4 h-4 md:w-5 md:h-5 mt-1"> Multi Outlet </li>
+                                  <li class="flex items-start gap-2"> <img src="images/gold-pricing-icon.svg" alt="icon" class="w-4 h-4 md:w-5 md:h-5 mt-1"> <div> Toko Online <br> <small class="text-xs"> + Website, Webtree, Weborder, Opsi Premium Domain, Shopee, Tokopedia, Grabmart, Multiakun Marketplace Omnichannel </small> </div> </li>
+                                  <li class="flex items-start gap-2"> <img src="images/gold-pricing-icon.svg" alt="icon" class="w-4 h-4 md:w-5 md:h-5 mt-1"> Aplikasi Kasir Online </li>
+                                  <li class="flex items-start gap-2"> <img src="images/gold-pricing-icon.svg" alt="icon" class="w-4 h-4 md:w-5 md:h-5 mt-1"> Manajemen Inventori </li>
+                                  <li class="flex items-start gap-2"> <img src="images/gold-pricing-icon.svg" alt="icon" class="w-4 h-4 md:w-5 md:h-5 mt-1"> Laporan Lengkap </li>
+                                  <li class="flex items-start gap-2"> <img src="images/gold-pricing-icon.svg" alt="icon" class="w-4 h-4 md:w-5 md:h-5 mt-1"> Manajemen Keuangan </li>
+                                  <li class="flex items-start gap-2"> <img src="images/gold-pricing-icon.svg" alt="icon" class="w-4 h-4 md:w-5 md:h-5 mt-1"> <div> Pencatatan Keuangan <br> <small class="text-xs">Invoice, SO, DO</small> </div> </li>
+                                  <li class="flex items-start gap-2"> <img src="images/gold-pricing-icon.svg" alt="icon" class="w-4 h-4 md:w-5 md:h-5 mt-1"> Digital Payment </li>
+                                  <li class="flex items-start gap-2"> <img src="images/gold-pricing-icon.svg" alt="icon" class="w-4 h-4 md:w-5 md:h-5 mt-1"> Manajemen Karyawan </li>
+                               </ul>
+                            {{-- DIUBAH: Menggunakan <a> tag dengan route register --}}
+                            <a href="{{ route('register') }}" class="text-center block text-base md:text-lg px-6 py-2 md:px-8 md:py-3 bg-[#4F9CF9] rounded-lg w-full hover:brightness-90 transition-all duration-300 cursor-pointer hover:-translate-y-1">Mulai Berlangganan</a>
                         </div>
                     </div>
                     {{-- ANIMASI: Menambahkan data-aos dan efek hover pada kartu harga --}}
@@ -183,7 +190,8 @@
                             <li class="flex items-center gap-2"> <img src="images/black-pricing-icon.svg" alt="icon" class="w-4 h-4 md:w-5 md:h-5"> Manajemen Karyawan </li>
                             <li class="flex items-center gap-2"> <img src="images/black-pricing-icon.svg" alt="icon" class="w-4 h-4 md:w-5 md:h-5"> Digital Payment </li>
                         </ul>
-                        <button class="text-base md:text-lg px-6 py-2 md:px-8 md:py-3 border border-[#FFE492] rounded-lg w-full hover:bg-[#FFE492] transition-all duration-300 cursor-pointer">Get Started</button>
+                        {{-- DIUBAH: Menggunakan <a> tag dengan route register --}}
+                        <a href="{{ route('register') }}" class="text-center block text-base md:text-lg px-6 py-2 md:px-8 md:py-3 border border-[#FFE492] rounded-lg w-full hover:bg-[#FFE492] transition-all duration-300 cursor-pointer">Mulai Berlangganan</a>
                     </div>
                 </div>
             </section>
@@ -193,7 +201,8 @@
             <section data-aos="zoom-in" class="max-w-[1480px] flex flex-col w-[95%] items-center justify-center py-12 md:py-20 lg:py-28 text-white gap-4 md:gap-6">
                 <h2 class="font-bold text-3xl sm:text-4xl md:text-5xl text-center">Atur keuangan toko darimana saja !</h2>
                 <p class="w-full md:w-[80%] text-center text-sm sm:text-base">Kelola bisnis Anda dengan mudah dan praktis bersama Fintory! Semua transaksi tercatat otomatis, laporan keuangan tersusun rapi, dan arus kas selalu terpantau. Akses data keuangan real-time kapan saja dan di mana saja untuk mendapatkan insight mendalam tentang profit, pengeluaran, serta performa toko Anda dalam satu dashboard intuitif. Terhubung dengan berbagai metode pembayaran, termasuk payment gateway dan marketplace, sehingga pencatatan transaksi menjadi lebih efisien. Jangan biarkan pencatatan keuangan yang rumit menghambat bisnis Anda—gunakan Fintory untuk mengoptimalkan keuangan dan memaksimalkan keuntungan!</p>
-                <button class="py-3 px-6 md:py-4 md:px-8 bg-[#4F9CF9] rounded-lg text-sm sm:text-base hover:brightness-90 transition-all duration-300 cursor-pointer hover:-translate-y-1">Try Taskey &rarr;</button>
+                {{-- DIUBAH: Menggunakan <a> tag dengan route register --}}
+                <a href="{{ route('register') }}" class="py-3 px-6 md:py-4 md:px-8 bg-[#4F9CF9] rounded-lg text-sm sm:text-base hover:brightness-90 transition-all duration-300 cursor-pointer hover:-translate-y-1">Coba Fintory &rarr;</a>
             </section>
         </div>
 
@@ -222,7 +231,7 @@
                     {{-- ANIMASI: Kartu testimoni --}}
                     <div data-aos="fade-up" data-aos-delay="100" class="p-6 md:p-8 lg:p-10 border rounded-xl space-y-4 md:space-y-6 bg-[#4F9CF9] w-full lg:w-1/3 text-white transition-all duration-300 hover:shadow-xl hover:-translate-y-2">
                         <img src="images/quote.svg" alt="quote-icon" class="w-12 h-12" />
-                        <p class="pb-4 md:pb-6 text-sm sm:text-base">Gadjian memudahkan saya dalam mengelaborasi data karyawan, mulai dari absensi, cuti, hingga izin, untuk evaluasi yang lebih mendalam.</p>
+                        <p class="pb-4 md:pb-6 text-sm sm:text-base">"Dulu, urusan stok barang dan laporan penjualan itu paling bikin pusing. Sering ada selisih dan susah banget lacak keuntungan. Sejak pakai Fintory, semua jadi transparan! Saya bisa lihat langsung stok mana yang laris, dan laporan keuangan jadi otomatis. Sekarang saya bisa fokus mengembangkan model pakaian baru tanpa khawatir data berantakan."</p>
                         <hr />
                         <div class="pt-4 md:pt-6 pb-2 md:pb-3 flex items-center gap-4">
                             <img src="images/avatar.png" alt="user-avatar" class="rounded-full w-16 h-16" />
@@ -234,7 +243,7 @@
                     </div>
                     <div data-aos="fade-up" data-aos-delay="200" class="p-6 md:p-8 lg:p-10 border rounded-xl space-y-4 md:space-y-6 bg-[#4F9CF9] w-full lg:w-1/3 text-white transition-all duration-300 hover:shadow-xl hover:-translate-y-2">
                         <img src="images/quote.svg" alt="quote-icon" class="w-12 h-12" />
-                        <p class="pb-4 md:pb-6 text-sm sm:text-base">Gadjian memudahkan saya dalam mengelaborasi data karyawan, mulai dari absensi, cuti, hingga izin, untuk evaluasi yang lebih mendalam.</p>
+                        <p class="pb-4 md:pb-6 text-sm sm:text-base">"Sebagai pemilik kedai kopi, kecepatan dan akurasi transaksi itu kunci. Awalnya pakai pencatatan manual, sering banget salah hitung dan butuh waktu lama buat rekap. Fintory benar-benar mengubah segalanya. Transaksi jadi cepat, laporan harian otomatis tersedia, bahkan saya bisa pantau pemasukan dari mana saja. Bikin tenang dan bisa lebih fokus ke kualitas kopi!"</p>
                         <hr />
                         <div class="pt-4 md:pt-6 pb-2 md:pb-3 flex items-center gap-4">
                             <img src="images/avatar.png" alt="user-avatar" class="rounded-full w-16 h-16" />
@@ -246,7 +255,7 @@
                     </div>
                     <div data-aos="fade-up" data-aos-delay="300" class="p-6 md:p-8 lg:p-10 border rounded-xl space-y-4 md:space-y-6 bg-[#4F9CF9] w-full lg:w-1/3 text-white transition-all duration-300 hover:shadow-xl hover:-translate-y-2">
                         <img src="images/quote.svg" alt="quote-icon" class="w-12 h-12" />
-                        <p class="pb-4 md:pb-6 text-sm sm:text-base">Gadjian memudahkan saya dalam mengelaborasi data karyawan, mulai dari absensi, cuti, hingga izin, untuk evaluasi yang lebih mendalam.</p>
+                        <p class="pb-4 md:pb-6 text-sm sm:text-base">"Usaha makanan rumahan saya makin besar, tapi kesulitan di pencatatan pesanan dan biaya bahan baku. Sering lupa siapa yang sudah bayar dan berapa keuntungan bersihnya. Fintory bantu saya rapikan semua itu. Sekarang, setiap pesanan tercatat rapi, pengeluaran juga terdeteksi, jadi saya bisa lihat untung ruginya dengan jelas. Fiturnya simpel banget, cocok buat UMKM kayak saya!"</p>
                         <hr />
                         <div class="pt-4 md:pt-6 pb-2 md:pb-3 flex items-center gap-4">
                             <img src="images/avatar.png" alt="user-avatar" class="rounded-full w-16 h-16" />
@@ -264,7 +273,8 @@
             <section data-aos="fade-up" class="max-w-[1480px] flex flex-col w-[95%] items-center justify-center py-12 md:py-20 lg:py-28 text-white gap-6 md:gap-8 lg:gap-12">
                 <h1 class="font-medium text-center text-3xl sm:text-4xl md:text-5xl"> Coba Fintory <br> Sekarang ! </h1>
                 <p class="text-center text-sm sm:text-base">Kelola bisnis Anda dengan lebih mudah menggunakan Fintory. Optimalkan produktivitas, tingkatkan efisiensi, dan nikmati solusi digital terbaik untuk manajemen tim serta operasional perusahaan.</p>
-                <button class="bg-[#4F9CF9] px-5 py-3 rounded-lg w-fit text-white text-sm sm:text-base hover:brightness-90 transition-all duration-300 cursor-pointer hover:-translate-y-1">Coba Gratis 14 Hari &rarr;</button>
+                {{-- DIUBAH: Menggunakan <a> tag dengan route register. Nama tombol ini sebelumnya adalah 'Coba Gratis 14 Hari'. --}}
+                <a href="{{ route('register') }}" class="bg-[#4F9CF9] px-5 py-3 rounded-lg w-fit text-white text-sm sm:text-base hover:brightness-90 transition-all duration-300 cursor-pointer hover:-translate-y-1">Coba Gratis 30 Hari &rarr;</a>
                 <p class="text-sm sm:text-base">On a big team? Contact Sales</p>
                 <div class="flex gap-6 md:gap-8 justify-center">
                     <img src="images/light-apple.svg" alt="apple" class="w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10 transition-transform duration-300 hover:scale-110" />
@@ -276,45 +286,46 @@
 
         <div class="w-full bg-[#043873] flex justify-center">
              <section class="max-w-[1480px] w-full py-10">
-                <div data-aos="fade-up" class="flex flex-col lg:flex-row justify-between gap-8 md:gap-10 mt-8 md:mt-12 w-full text-white px-4">
-                    <div class="space-y-2 md:space-y-3 w-full lg:w-[20%]">
-                        <img src="{{ asset('images/logo.svg') }}" alt="Fintory Logo" class="h-14 w-auto mb-4" />
-                        <p class="text-sm sm:text-base">Aplikasi wirausaha terlengkap untuk kelola bisnismu jadi lebih maju.</p>
-                    </div>
-                    <div class="space-y-2 md:space-y-3 w-full lg:w-[15%]">
-                        <h4 class="font-bold">Fitur</h4>
-                        <p class="text-sm sm:text-base">Database Karyawan</p>
-                        <p class="text-sm sm:text-base">Organisasi</p>
-                        <p class="text-sm sm:text-base">Manajemen Aset Kantor</p>
-                    </div>
-                    <div class="space-y-2 md:space-y-3 w-full lg:w-[15%]">
-                        <h4 class="font-bold">Tentang Kami</h4>
-                        <p class="text-sm sm:text-base">Blog</p>
-                        <p class="text-sm sm:text-base">Syarat & Ketentuan</p>
-                        <p class="text-sm sm:text-base">Kebijakan & Privasi</p>
-                    </div>
-                    <div class="space-y-2 md:space-y-3 w-full lg:w-[25%]">
-                        <h4 class="font-bold">Hubungi Kami</h4>
-                        <div class="flex gap-2 md:gap-3 items-center">
-                            <img src="images/send-icon.svg" alt="send" class="w-3 h-3 md:w-4 md:h-4" />
-                            <p class="text-sm sm:text-base">Kirim Pesan</p>
-                        </div>
-                        <div class="flex gap-2 md:gap-3 items-center">
-                            <img src="images/telephone-icon.svg" alt="telephone" class="w-3 h-3 md:w-4 md:h-4" />
-                            <p class="text-sm sm:text-base">021-1111-1111</p>
-                        </div>
-                        <div class="flex gap-2 md:gap-3 items-center">
-                            <img src="images/location-icon.svg" alt="location" class="w-3 h-3 md:w-4 md:h-4" />
-                            <p class="text-sm sm:text-base">Jl. Pendidikan No.15, Cibiru Wetan, 1500</p>
-                        </div>
-                    </div>
-                    <div class="space-y-2 md:space-y-3 w-full lg:w-[20%]">
-                        <h4 class="font-bold">Coba Sekarang</h4>
-                        <p class="text-sm sm:text-base">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do</p>
-                        <button class="bg-[#4F9CF9] text-white px-5 py-3 rounded-lg text-sm sm:text-base w-fit hover:brightness-90 transition-all duration-300 cursor-pointer hover:-translate-y-1">Coba Sekarang &rarr;</button>
-                    </div>
-                </div>
-            </section>
+                 <div data-aos="fade-up" class="flex flex-col lg:flex-row justify-between gap-8 md:gap-10 mt-8 md:mt-12 w-full text-white px-4">
+                     <div class="space-y-2 md:space-y-3 w-full lg:w-[20%]">
+                         <img src="{{ asset('images/logo.svg') }}" alt="Fintory Logo" class="h-14 w-auto mb-4" />
+                         <p class="text-sm sm:text-base">Aplikasi wirausaha terlengkap untuk kelola bisnismu jadi lebih maju.</p>
+                     </div>
+                     <div class="space-y-2 md:space-y-3 w-full lg:w-[15%]">
+                         <h4 class="font-bold">Fitur</h4>
+                         <p class="text-sm sm:text-base">Database Karyawan</p>
+                         <p class="text-sm sm:text-base">Organisasi</p>
+                         <p class="text-sm sm:text-base">Manajemen Aset Kantor</p>
+                     </div>
+                     <div class="space-y-2 md:space-y-3 w-full lg:w-[15%]">
+                         <h4 class="font-bold">Tentang Kami</h4>
+                         <p class="text-sm sm:text-base">Blog</p>
+                         <p class="text-sm sm:text-base">Syarat & Ketentuan</p>
+                         <p class="text-sm sm:text-base">Kebijakan & Privasi</p>
+                     </div>
+                     <div class="space-y-2 md:space-y-3 w-full lg:w-[25%]">
+                         <h4 class="font-bold">Hubungi Kami</h4>
+                         <div class="flex gap-2 md:gap-3 items-center">
+                             <img src="images/send-icon.svg" alt="send" class="w-3 h-3 md:w-4 md:h-4" />
+                             <p class="text-sm sm:text-base">Kirim Pesan</p>
+                         </div>
+                         <div class="flex gap-2 md:gap-3 items-center">
+                             <img src="images/telephone-icon.svg" alt="telephone" class="w-3 h-3 md:w-4 md:h-4" />
+                             <p class="text-sm sm:text-base">021-1111-1111</p>
+                         </div>
+                         <div class="flex gap-2 md:gap-3 items-center">
+                             <img src="images/location-icon.svg" alt="location" class="w-3 h-3 md:w-4 md:h-4" />
+                             <p class="text-sm sm:text-base">Jl. Pendidikan No.15, Cibiru Wetan, 1500</p>
+                         </div>
+                     </div>
+                     <div class="space-y-2 md:space-y-3 w-full lg:w-[20%]">
+                         <h4 class="font-bold">Coba Sekarang</h4>
+                         <p class="text-sm sm:text-base">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do</p>
+                         {{-- DIUBAH: Menggunakan <a> tag dengan route register --}}
+                         <a href="{{ route('register') }}" class="bg-[#4F9CF9] text-white px-5 py-3 rounded-lg text-sm sm:text-base w-fit hover:brightness-90 transition-all duration-300 cursor-pointer hover:-translate-y-1">Coba Sekarang &rarr;</a>
+                     </div>
+                 </div>
+             </section>
         </div>
 
         <div class="w-full bg-[#043873] border-t border-[#2E4E73] flex justify-center">
