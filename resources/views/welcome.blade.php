@@ -51,7 +51,7 @@
                         dengan lebih mudah. Kelola semua aspek bisnis dalam satu platform terpadu, kapan saja dan di
                         mana saja. Saatnya beralih ke sistem yang lebih pintar dan otomatis bersama Fintory! 🚀</p>
                     {{-- DIUBAH: Menggunakan <a> tag dengan route register --}}
-                    <a href="{{ route('register') }}" class="w-fit p-3 sm:p-4 bg-[#4F9CF9] rounded-xl text-sm sm:text-base hover:brightness-90 transition-all duration-300 cursor-pointer hover:-translate-y-1">Coba Gratis 14 Hari &rarr;</a>
+                    <a href="{{ route('register') }}" class="w-fit p-3 sm:p-4 bg-[#4F9CF9] rounded-xl text-sm sm:text-base hover:brightness-90 transition-all duration-300 cursor-pointer hover:-translate-y-1">Coba Fintory &rarr;</a>
                 </div>
                 <div class="w-full lg:w-1/2 order-1 lg:order-2" data-aos="fade-left">
                     <img src="images/hero-img.svg" alt="hero-image" class="w-full h-auto scale-110" />
