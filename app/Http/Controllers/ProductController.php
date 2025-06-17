@@ -115,18 +115,9 @@ class ProductController extends Controller
                 $product->barang->nama ?? 'N/A',
                 optional($product->kategori)->nama ?? 'N/A',
                 $product->outlet->name ?? 'N/A',
-<<<<<<< HEAD
                 'Rp ' . number_format($product->harga_jual ?? 0, 0, ',', '.'),
                 $product->stok ?? 0,
                 $actionButtons
-=======
-                'Rp ' . number_format($product->harga_jual, 0, ',', '.'),
-                $product->stok,
-                '<div class="text-center">' .
-                '<a href="' . route('produk-stok.produk.edit', $product->id) . '" class="edit-link inline-block px-3 py-1 bg-blue-500 text-white rounded font-semibold hover:bg-blue-600 transition">Edit</a> ' .
-                '<a href="' . route('produk-stok.produk.destroy', $product->id) . '" class="delete-link inline-block px-3 py-1 bg-red-500 text-white rounded font-semibold hover:bg-red-600 transition" data-id="' . $product->id . '">Hapus</a>' .
-                '</div>'
->>>>>>> 7b2aac43a16d8fa7e4b763745a9dd35dde0fe836
             ];
         }
 
