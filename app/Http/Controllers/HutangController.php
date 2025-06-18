@@ -161,6 +161,7 @@ class HutangController extends Controller
         $hutang->outlet_id = $request->outlet;
         $hutang->nama_pemberi_hutang = $request->nama_pemberi_hutang;
         $hutang->jumlah = $request->jumlah;
+        $hutang->sisa_hutang = $request->jumlah;
         $hutang->tanggal_hutang = $tanggal;
         $hutang->deskripsi = $request->deskripsi;
         $hutang->created_by = auth()->user()->id;
