@@ -477,12 +477,48 @@ export const Utils = {
 
             return sisaHutang;
         }
+        
+        function updateTanggalHutangDisplay() {
+            const selectedOption = $("#hutang option:selected");
+            const tanggalHutang = selectedOption.data("tanggal-hutang"); // format: yyyy-mm-dd
+
+            if (tanggalHutang) {
+                const [year, month, day] = tanggalHutang.split("-");
+                const formattedTanggal = `${day}-${month}-${year}`; // ubah ke dd-mm-yyyy
+
+                $("#tanggal-hutang-info").text(
+                    `Tanggal hutang: ${formattedTanggal}`
+                );
+            }
+        }
+
+
+        function updateMinDateForDatepicker() {
+            const selectedOption = $("#hutang option:selected");
+            const rawTanggal = selectedOption.data("tanggal-hutang");
+            console.log(rawTanggal)
+            if (rawTanggal) {
+                const [year, month, day] = rawTanggal.split("-");
+                const formattedDate = `${day}-${month}-${year}`; // format: dd-mm-yyyy
+
+                $("#tanggal_bayar").attr("datepicker-min-date", formattedDate);
+
+                const input = document.getElementById("tanggal_bayar");
+                input.setAttribute("datepicker-min-date", formattedDate);
+                window.initFlowbite();
+            }
+        }
+
 
         let sisaHutangSaatIni = updateSisaHutangDisplay();
-
+        updateTanggalHutangDisplay();
+        updateMinDateForDatepicker();
+        
         // Saat dropdown hutang diubah
         $("#hutang").on("change", function () {
             sisaHutangSaatIni = updateSisaHutangDisplay();
+            updateTanggalHutangDisplay();
+            updateMinDateForDatepicker();
         });
 
         // Saat tombol "Bayar Full" diklik
