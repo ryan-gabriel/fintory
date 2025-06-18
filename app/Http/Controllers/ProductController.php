@@ -67,9 +67,9 @@ class ProductController extends Controller
         $orderCol = isset($columns[$orderCol]) ? $columns[$orderCol] : 'id';
 
         if ($orderCol === 'outlet_id') {
-            $query->join('outlets', 'outlets.id', '=', 'products.outlet_id')
-                ->orderBy('outlets.name', $orderDir)
-                ->select('products.*'); // ensure products.* is selected after join
+            $query->join('outlet', 'outlet.id', '=', 'product.outlet_id')
+                ->orderBy('outlet.name', $orderDir)
+                ->select('product.*'); // ensure product.* is selected after join
         } else {
             $query->orderBy($orderCol, $orderDir);
         }
