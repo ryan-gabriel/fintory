@@ -52,11 +52,9 @@ class SaleController extends Controller
         );
 
         $lembaga_id = session('current_lembaga_id');
-
-        $query = Sale::with(['outlet'])
-            ->whereHas('outlet', function ($query) use ($lembaga_id) {
-                $query->where('lembaga_id', $lembaga_id);
-            });
+        $query->whereHas('outlet', function ($q) use ($lembaga_id) {
+            $q->where('lembaga_id', $lembaga_id);
+        });
 
         // 2. Gunakan nama session yang konsisten
         $activeOutletId = session('active_outlet_id');
@@ -87,7 +85,9 @@ class SaleController extends Controller
             });
         }
 
+        $totalDataForLembaga = $query->clone()->count();
         $totalFiltered = $query->clone()->count();
+
 
         // Logika Pengurutan (Ordering)
         if ($request->filled('order')) {
@@ -109,20 +109,20 @@ class SaleController extends Controller
         $data = $query->offset($request->start)->limit($request->length)->get();
 
         $jsonData = [
-            "draw" => intval($request->input('draw')),
-            "recordsTotal" => Sale::count(),
+            "draw"            => intval($request->input('draw')),
+            "recordsTotal"    => Sale::whereHas('outlet', fn($q) => $q->where('lembaga_id', $lembaga_id))->count(),
             "recordsFiltered" => $totalFiltered,
-            "data" => []
+            "data"            => []
         ];
 
         foreach ($data as $sale) {
             $jsonData['data'][] = [
                 \Carbon\Carbon::parse($sale->sale_date)->format('d M Y'),
-                $sale->formatted_id,
+                $sale->formatted_id, // Sekarang ini akan ada nilainya
                 $sale->outlet->name ?? 'N/A',
                 $sale->customer_name,
                 'Rp ' . number_format($sale->total, 0, ',', '.'),
-                '<a href="' . route('penjualan.show', $sale->id) . '" class="text-indigo-600 dark:text-indigo-400 hover:underline font-medium">Detail</a>'
+                '<a href="'.route('penjualan.show', $sale->id).'" class="text-indigo-600 dark:text-indigo-400 hover:underline font-medium">Detail</a>'
             ];
         }
 

@@ -34,20 +34,29 @@ class LaporanPenjualanController extends Controller
      */
     public function getData(Request $request)
     {
+        $columns = [
+            0 => 'sale_date',
+            1 => 'id',
+            2 => 'outlet_id',
+            3 => 'customer_name',
+            4 => 'total',
+        ];
+
         // Mulai query ke model Sale dengan relasi yang dibutuhkan
         $query = Sale::with(['outlet', 'creator']);
 
         $lembaga_id = session('current_lembaga_id');
 
-        $query = Sale::with(['outlet', 'creator'])
+        $query = Sale::with(['outlet'])
             ->whereHas('outlet', function ($query) use ($lembaga_id) {
                 $query->where('lembaga_id', $lembaga_id);
             });
+        
+        $activeOutletId = session('active_outlet_id');
+        if ($activeOutletId && $activeOutletId !== 'all') {
+            $query->where('outlet_id', $activeOutletId);
+        }
 
-        // Hapus filter tanggal individual, karena filter rentang tanggal sudah ada di bawah
-        // Tidak perlu filter created_at, gunakan sale_date sesuai filter rentang tanggal di bawah
-
-        // Terapkan filter rentang tanggal jika ada
         if ($request->filled('start_date')) {
             $startDate = Carbon::createFromFormat('d-m-Y', $request->start_date)->startOfDay();
             if ($request->filled('end_date')) {
@@ -76,21 +85,28 @@ class LaporanPenjualanController extends Controller
         // Ambil parameter sorting dari request DataTables
         $orderColIndex = $request->input('order.0.column', 0);
         $orderDir = $request->input('order.0.dir', 'desc');
-        $columns = [
-            0 => 'sale_date',
-            1 => 'id',
-            2 => 'outlet.name',
-            3 => 'customer_name',
-            4 => 'total',
-        ];
-        $orderCol = $columns[$orderColIndex] ?? 'sale_date';
 
-        if ($orderCol === 'outlet.name') {
-            $query->join('outlets', 'outlets.id', '=', 'sales.outlet_id')
-                ->orderBy('outlets.name', $orderDir)
-                ->select('sales.*'); // ensure sales.* is selected after join
+        $orderCol = isset($columns[$orderColIndex]) ? $columns[$orderColIndex] : 'id';
+
+        if ($request->filled('order')) {
+            $order = $request->input('order')[0];
+            $orderColIndex = $order['column'];
+            $orderDir = $order['dir'];
+            $orderColName = $columns[$orderColIndex] ?? 'sale_date';
+
+            // ▼▼▼ BAGIAN INI DIPERBAIKI ▼▼▼
+            if ($orderColName === 'outlet.name') {
+                // Gunakan nama tabel 'outlet' dan 'sale' (tanpa 's')
+                $query->join('outlet', 'outlet.id', '=', 'sale.outlet_id')
+                      ->orderBy('outlet.name', $orderDir)
+                      ->select('sale.*'); // Pilih semua dari tabel 'sale'
+            } else {
+                $query->orderBy($orderColName, $orderDir);
+            }
+            // ▲▲▲ AKHIR PERBAIKAN ▲▲▲
+
         } else {
-            $query->orderBy($orderCol, $orderDir);
+            $query->latest('sale_date');
         }
 
         $totalFiltered = $query->count();
