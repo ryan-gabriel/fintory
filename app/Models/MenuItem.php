@@ -96,7 +96,7 @@ class MenuItem extends Model
                 // Keep parent menus that either have accessible children or are accessible themselves
                 return $menu->children->count() > 0 || $menu->roles->count() > 0;
             });
-    }
+    }   
 
     /**
      * Get menu hierarchy (original method for backward compatibility)
