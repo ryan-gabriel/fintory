@@ -32,6 +32,7 @@ class BarangController extends Controller
     public function getData(Request $request)
     {
         $query = Barang::query();
+        
 
         // Filter pencarian
         if ($request->filled('search.value')) {

@@ -30,7 +30,15 @@ class ProductController extends Controller
     public function getData(Request $request)
     {
         // Gunakan 'with' untuk eager loading agar query lebih efisien
+
         $query = Product::with(['barang', 'kategori', 'outlet']);
+        
+        $lembaga_id = session('current_lembaga_id');
+
+        $query = Product::with(['barang', 'kategori', 'outlet'])
+            ->whereHas('outlet', function ($query) use ($lembaga_id) {
+                $query->where('lembaga_id', $lembaga_id);
+            });
 
         // Filter search
         if ($request->filled('search.value')) {

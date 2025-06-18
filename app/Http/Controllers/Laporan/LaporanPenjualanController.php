@@ -37,6 +37,13 @@ class LaporanPenjualanController extends Controller
         // Mulai query ke model Sale dengan relasi yang dibutuhkan
         $query = Sale::with(['outlet', 'creator']);
 
+        $lembaga_id = session('current_lembaga_id');
+
+        $query = Sale::with(['outlet', 'creator'])
+            ->whereHas('outlet', function ($query) use ($lembaga_id) {
+                $query->where('lembaga_id', $lembaga_id);
+            });
+
         // Hapus filter tanggal individual, karena filter rentang tanggal sudah ada di bawah
         // Tidak perlu filter created_at, gunakan sale_date sesuai filter rentang tanggal di bawah
 

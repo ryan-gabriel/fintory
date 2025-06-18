@@ -51,6 +51,13 @@ class SaleController extends Controller
             DB::raw('FormatSaleID(sale.id) as formatted_id')
         );
 
+        $lembaga_id = session('current_lembaga_id');
+
+        $query = Sale::with(['outlet'])
+            ->whereHas('outlet', function ($query) use ($lembaga_id) {
+                $query->where('lembaga_id', $lembaga_id);
+            });
+
         // 2. Gunakan nama session yang konsisten
         $activeOutletId = session('active_outlet_id');
         if ($activeOutletId && $activeOutletId !== 'all') {
