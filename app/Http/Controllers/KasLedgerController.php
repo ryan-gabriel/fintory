@@ -130,18 +130,23 @@ class KasLedgerController extends Controller
         ]);
     }
     
-    public function create(Request $request){
-        $outlets = Outlet::all();
+    public function create(Request $request)
+    {
+        $lembagaId = session('current_lembaga_id');
+
+        $outlets = Outlet::where('lembaga_id', $lembagaId)->get();
+
         if ($request->ajax()) {
             return view('keuangan.kas-ledger-create', compact('outlets'));
         }
+
         return view('layouts.admin', [
             'slot' => view('keuangan.kas-ledger-create', compact('outlets')),
             'title' => 'Tambah Kas & Ledger',
-            'lembaga' => Lembaga::find(session('current_lembaga_id')),
-            ]
-        );
+            'lembaga' => Lembaga::find($lembagaId),
+        ]);
     }
+
     
     public function store(Request $request)
     {
@@ -192,18 +197,23 @@ class KasLedgerController extends Controller
 
     public function edit($id, Request $request)
     {
+        $lembagaId = session('current_lembaga_id');
+
         $kasLedger = CashLedger::findOrFail($id);
-        $outlets = Outlet::all();
+
+        $outlets = Outlet::where('lembaga_id', $lembagaId)->get();
 
         if ($request->ajax()) {
             return view('keuangan.kas-ledger-edit', compact('kasLedger', 'outlets'));
         }
+
         return view('layouts.admin', [
             'slot' => view('keuangan.kas-ledger-edit', compact('kasLedger', 'outlets')),
             'title' => 'Edit Kas & Ledger',
-            'lembaga' => Lembaga::find(session('current_lembaga_id')),
+            'lembaga' => Lembaga::find($lembagaId),
         ]);
     }
+
 
     public function update(Request $request, $id)
     {
