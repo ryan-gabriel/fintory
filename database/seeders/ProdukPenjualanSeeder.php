@@ -18,9 +18,11 @@ class ProdukPenjualanSeeder extends Seeder
             $this->command->info('10 Kategori dummy dibuat.');
         }
 
-        // 1. Buat 50 master barang
-        Barang::factory()->count(50)->create();
-        $this->command->info('50 Barang dummy berhasil dibuat.');
+        // 1. Buat 40 master barang
+        Barang::truncate();
+        Barang::factory()->count(40)->create();
+
+        $this->command->info('40 Barang dummy yang realistis berhasil dibuat.');
 
         // 2. Buat 100 produk yang tersebar di outlet-outlet
         Product::factory()->count(100)->create();
