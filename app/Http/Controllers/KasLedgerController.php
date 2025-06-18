@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CashLedger;
 use App\Models\Lembaga;
 use App\Models\Outlet;
+use App\Models\OutletBalance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -162,38 +163,65 @@ class KasLedgerController extends Controller
         $tanggal = Carbon::createFromFormat('d-m-Y', $request->tanggal)->startOfDay();
         $jumlah = $request->jumlah;
         $tipe = strtoupper($request->tipe);
+        $outletId = $request->outlet_id;
 
-        $saldoSebelum = CashLedger::where('outlet_id', $request->outlet_id)
-            ->where('tanggal', '<=', $tanggal)
-            ->orderBy('tanggal', 'desc')
-            ->value('saldo_setelah') ?? 0;
+        try {
+            DB::beginTransaction();
 
-        if (in_array($tipe, ['EXPENSE', 'TRANSFER_OUT']) && $saldoSebelum < $jumlah) {
+            // Ambil saldo terakhir dari OutletBalance
+            $outletBalance = OutletBalance::firstOrCreate(
+                ['outlet_id' => $outletId],
+                ['saldo' => 0, 'last_updated' => now()]
+            );
+
+            $saldoSebelum = $outletBalance->saldo;
+
+            // Validasi saldo cukup
+            if (in_array($tipe, ['EXPENSE', 'TRANSFER_OUT']) && $saldoSebelum < $jumlah) {
+                return redirect()->back()->withInput()->withErrors([
+                    'jumlah' => 'Saldo tidak mencukupi untuk pengeluaran atau transfer keluar.',
+                ]);
+            }
+
+            // Hitung saldo setelah
+            $saldoSetelah = in_array($tipe, ['EXPENSE', 'TRANSFER_OUT']) 
+                ? $saldoSebelum - $jumlah 
+                : $saldoSebelum + $jumlah;
+
+            // Simpan ke CashLedger
+            \App\Models\CashLedger::create([
+                'tanggal' => $tanggal,
+                'tipe' => $tipe,
+                'sumber' => $request->sumber,
+                'amount' => $jumlah,
+                'saldo_sebelum' => $saldoSebelum,
+                'saldo_setelah' => $saldoSetelah,
+                'outlet_id' => $outletId,
+                'deskripsi' => $request->deskripsi,
+                'created_by' => auth()->id(),
+            ]);
+
+            // Update saldo outlet
+            $outletBalance->update([
+                'saldo' => $saldoSetelah,
+                'last_updated' => now(),
+            ]);
+
+            DB::commit();
+
+            return redirect()
+                ->route('keuangan.kas-ledger.index')
+                ->with('success', 'Data kas ledger berhasil disimpan.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Gagal menyimpan kas ledger: " . $e->getMessage());
+
             return redirect()->back()->withInput()->withErrors([
-                'jumlah' => 'Saldo tidak mencukupi untuk pengeluaran atau transfer keluar.',
+                'general' => 'Terjadi kesalahan saat menyimpan transaksi kas.',
             ]);
         }
-
-        $saldoSetelah = in_array($tipe, ['EXPENSE', 'TRANSFER_OUT']) 
-            ? $saldoSebelum - $jumlah 
-            : $saldoSebelum + $jumlah;
-
-        CashLedger::create([
-            'tanggal' => $tanggal,
-            'tipe' => $tipe,
-            'sumber' => $request->sumber,
-            'amount' => $jumlah,
-            'saldo_sebelum' => $saldoSebelum,
-            'saldo_setelah' => $saldoSetelah,
-            'outlet_id' => $request->outlet_id,
-            'deskripsi' => $request->deskripsi,
-            'created_by' => auth()->id(), // 👈 ini baris penting
-        ]);
-
-        return redirect()
-            ->route('keuangan.kas-ledger.index')
-            ->with('success', 'Data kas ledger berhasil disimpan.');
     }
+
 
     public function edit($id, Request $request)
     {
@@ -230,27 +258,43 @@ class KasLedgerController extends Controller
 
         $tanggal = Carbon::createFromFormat('d-m-Y', $request->tanggal)->startOfDay();
         $jumlah = $request->jumlah;
-        $tipe = strtoupper($request->tipe);
+        $tipeBaru = strtoupper($request->tipe);
 
-        $saldoSebelum = CashLedger::where('outlet_id', $request->outlet_id)
-            ->where('tanggal', '<=', $tanggal)
-            ->where('id', '!=', $kasLedger->id)
-            ->orderBy('tanggal', 'desc')
-            ->value('saldo_setelah') ?? 0;
+        // Ambil saldo dari OutletBalance
+        $outletBalance = OutletBalance::where('outlet_id', $request->outlet_id)->first();
+        if (!$outletBalance) {
+            return redirect()->back()->withInput()->withErrors([
+                'outlet_id' => 'Saldo outlet tidak ditemukan.',
+            ]);
+        }
 
-        if (in_array($tipe, ['EXPENSE', 'TRANSFER_OUT']) && $saldoSebelum < $jumlah) {
+        // Kembalikan saldo karena kasLedger lama akan ditimpa
+        $saldoLama = $kasLedger->amount;
+        if (in_array($kasLedger->tipe, ['EXPENSE', 'TRANSFER_OUT'])) {
+            $outletBalance->saldo += $saldoLama;
+        } else {
+            $outletBalance->saldo -= $saldoLama;
+        }
+
+        // Hitung saldo_sebelum baru dari outletbalance yang sudah direkalkulasi
+        $saldoSebelum = $outletBalance->saldo;
+
+        // Validasi saldo cukup
+        if (in_array($tipeBaru, ['EXPENSE', 'TRANSFER_OUT']) && $saldoSebelum < $jumlah) {
             return redirect()->back()->withInput()->withErrors([
                 'jumlah' => 'Saldo tidak mencukupi untuk pengeluaran atau transfer keluar.',
             ]);
         }
 
-        $saldoSetelah = in_array($tipe, ['EXPENSE', 'TRANSFER_OUT'])
+        // Hitung saldo setelah
+        $saldoSetelah = in_array($tipeBaru, ['EXPENSE', 'TRANSFER_OUT'])
             ? $saldoSebelum - $jumlah
             : $saldoSebelum + $jumlah;
 
+        // Update data kas ledger
         $kasLedger->update([
             'tanggal' => $tanggal,
-            'tipe' => $tipe,
+            'tipe' => $tipeBaru,
             'sumber' => $request->sumber,
             'amount' => $jumlah,
             'saldo_sebelum' => $saldoSebelum,
@@ -259,10 +303,16 @@ class KasLedgerController extends Controller
             'deskripsi' => $request->deskripsi,
         ]);
 
+        // Simpan saldo baru ke outlet_balance
+        $outletBalance->saldo = $saldoSetelah;
+        $outletBalance->last_updated = now();
+        $outletBalance->save();
+
         return redirect()
             ->route('keuangan.kas-ledger.index')
             ->with('success', 'Data kas ledger berhasil diperbarui.');
     }
+
 
     public function destroy($id)
     {
