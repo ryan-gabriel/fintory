@@ -135,18 +135,24 @@ class HutangController extends Controller
         ]);
     }
     
-    public function create(Request $request){
-        $outlets = Outlet::all();
+    public function create(Request $request)
+    {
+        $lembagaId = session('current_lembaga_id');
+
+        // Ambil hanya outlet milik lembaga ini
+        $outlets = Outlet::where('lembaga_id', $lembagaId)->get();
+
         if ($request->ajax()) {
             return view('keuangan.hutang-create', compact('outlets'));
         }
+
         return view('layouts.admin', [
             'slot' => view('keuangan.hutang-create', compact('outlets')),
             'title' => 'Tambah Hutang',
-            'lembaga' => Lembaga::find(session('current_lembaga_id')),
-            ]
-        );
+            'lembaga' => Lembaga::find($lembagaId),
+        ]);
     }
+
 
     public function store(Request $request){
         $request->validate([
@@ -173,16 +179,31 @@ class HutangController extends Controller
 
     public function edit($id, Request $request)
     {
-        $hutang = Hutang::findOrFail($id);
-        $hutang->tanggal_hutang = $hutang->tanggal_hutang ? Carbon::parse($hutang->tanggal_hutang)->format('d-m-Y') : null;
-        $outlets = Outlet::all();
+        $lembagaId = session('current_lembaga_id');
+
+        // Ambil hutang yang outlet-nya milik lembaga ini
+        $hutang = Hutang::where('id', $id)
+            ->whereHas('outlet', function ($query) use ($lembagaId) {
+                $query->where('lembaga_id', $lembagaId);
+            })
+            ->firstOrFail();
+
+        // Format tanggal agar tampil di form input
+        $hutang->tanggal_hutang = $hutang->tanggal_hutang
+            ? Carbon::parse($hutang->tanggal_hutang)->format('d-m-Y')
+            : null;
+
+        // Ambil hanya outlet milik lembaga ini
+        $outlets = Outlet::where('lembaga_id', $lembagaId)->get();
+
         if ($request->ajax()) {
             return view('keuangan.hutang-edit', compact('hutang', 'outlets'));
         }
+
         return view('layouts.admin', [
             'slot' => view('keuangan.hutang-edit', compact('hutang', 'outlets')),
             'title' => 'Edit Hutang',
-            'lembaga' => Lembaga::find(session('current_lembaga_id')),
+            'lembaga' => Lembaga::find($lembagaId),
         ]);
     }
 

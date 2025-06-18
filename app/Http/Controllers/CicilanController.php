@@ -191,7 +191,7 @@ class CicilanController extends Controller
             return response()->json(['success' => false, 'message' => 'Jumlah bayar tidak boleh melebihi sisa hutang.'], 400);
         }
 
-        $cicilan = Cicilan::create([
+        Cicilan::create([
             'hutang_id' => $request->hutang_id,
             'jumlah_bayar' => $request->jumlah_bayar,
             'tanggal_bayar' => Carbon::createFromFormat('d-m-Y', $request->tanggal_bayar)->format('Y-m-d'),
@@ -214,15 +214,23 @@ class CicilanController extends Controller
 
     public function edit(Request $request, $id)
     {
+        $lembagaId = session('current_lembaga_id');
         $cicilan = Cicilan::with('hutang')->findOrFail($id);
-        $hutangs = Hutang::all();
+
+        $hutangs = Hutang::whereHas('outlet', function ($query) use ($lembagaId) {
+            $query->where('lembaga_id', $lembagaId);
+        })
+        ->where('sisa_hutang', '>', 0)
+        ->get();
+
         if ($request->ajax()) {
             return view('keuangan.cicilan-edit', compact('cicilan', 'hutangs'));
         }
+
         return view('layouts.admin', [
             'slot' => view('keuangan.cicilan-edit', compact('cicilan', 'hutangs')),
             'title' => 'Edit Cicilan',
-            'lembaga' => Lembaga::find(session('current_lembaga_id')),
+            'lembaga' => Lembaga::find($lembagaId),
         ]);
     }
     
