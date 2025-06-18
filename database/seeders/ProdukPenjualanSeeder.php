@@ -19,7 +19,7 @@ class ProdukPenjualanSeeder extends Seeder
         }
 
         // 1. Buat 40 master barang
-        Barang::truncate();
+        // Barang::truncate();
         Barang::factory()->count(40)->create();
 
         $this->command->info('40 Barang dummy yang realistis berhasil dibuat.');
