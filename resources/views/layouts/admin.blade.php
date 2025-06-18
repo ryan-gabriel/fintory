@@ -122,7 +122,7 @@
                         <span class="sr-only">Loading...</span>
                     </div>
 
-                    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 mb-4">
+                    <!-- <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 mb-4">
                         @if (session('error'))
                             <div id="alert-error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
                                 role="alert">
@@ -138,7 +138,7 @@
                             </div>
                         @endif
 
-                    </div>
+                    </div> -->
 
                     <main id="main-content" class="hidden">
                         {!! $slot !!}

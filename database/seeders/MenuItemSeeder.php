@@ -200,10 +200,20 @@ class MenuItemSeeder extends Seeder
             'parent_id' => $pengaturan->id,
             'order' => 1,
         ]);
+
         MenuItem::create([
             'menu_name' => 'Manajemen Role & Menu',
             'icon' => 'fa-solid fa-list-ul',
             'route' => '/dashboard/admin/menu',
+            'is_parent' => false,
+            'parent_id' => $pengaturan->id,
+            'order' => 2,
+        ]);
+
+        MenuItem::create([
+            'menu_name' => 'Manajemen Role & Menu',
+            'icon' => 'fa-solid fa-users-gear',
+            'route' => '#',
             'is_parent' => false,
             'parent_id' => $pengaturan->id,
             'order' => 2,

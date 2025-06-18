@@ -128,8 +128,16 @@ class SaleController extends Controller
     public function create(Request $request)
     {
         $lembaga_id = session('current_lembaga_id');
+
+        $outlets = Outlet::where('lembaga_id', $lembaga_id)
+            ->whereHas('products', function ($query) {
+                $query->where('is_active', true)->where('stok', '>', 0);
+            })
+            ->orderBy('name')
+            ->get();
+
         $data = [
-            'outlets' => Outlet::where('lembaga_id', $lembaga_id)->orderBy('name')->get(),
+            'outlets' => $outlets,
         ];
 
         $view = view('penjualan.create', $data);
