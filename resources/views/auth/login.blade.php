@@ -65,9 +65,6 @@
 
       <div class="flex items-center justify-between text-sm">
         @if (Route::has('password.request'))
-          <a href="{{ route('password.request') }}" class="text-blue-800 hover:underline">
-            Lupa kata sandi?
-          </a>
         @endif
       </div>
 
