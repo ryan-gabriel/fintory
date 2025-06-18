@@ -57,13 +57,21 @@ class KategoriController extends Controller
         ];
 
         foreach ($data as $kategori) {
+            $editUrl = route('produk-stok.kategori.edit', $kategori->id);
+            $deleteUrl = route('produk-stok.kategori.destroy', $kategori->id);
+
+            ob_start(); ?>
+            <div class="flex space-x-2">
+                <a href="<?= $editUrl ?>" class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition edit-link">Edit</a>
+                <button type="button" class="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition delete-btn" data-id="<?= $kategori->id ?>" data-url="<?= $deleteUrl ?>">Hapus</button>
+            </div>
+            <?php
+            $actionButtons = ob_get_clean();
+
             $jsonData['data'][] = [
-                $kategori->nama,
-                $kategori->deskripsi ?? '-',
-                '<div class="text-center">' .
-                    '<a href="'.route('produk-stok.kategori.edit', $kategori->id).'" class="edit-link text-yellow-500 font-semibold hover:underline">Edit</a> | ' .
-                    '<a href="'.route('produk-stok.kategori.destroy', $kategori->id).'" class="delete-btn text-red-500 font-semibold hover:underline" data-id="'.$kategori->id.'">Hapus</a>' .
-                '</div>'
+            $kategori->nama,
+            $kategori->deskripsi ?? '-',
+            $actionButtons
             ];
         }
 
