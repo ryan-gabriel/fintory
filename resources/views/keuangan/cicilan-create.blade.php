@@ -1,8 +1,18 @@
 <div>
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-5">
-            <h1 class="text-2xl font-semibold mb-5">Tambah Cicilan</h1>
             
+            <a href="{{ route('keuangan.cicilan.index') }}"
+            class="inline-flex items-center text-sm text-gray-700 hover:text-blue-600 transition-colors duration-200 mb-4">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                Kembali
+            </a>
+
+            <h1 class="text-2xl font-semibold mb-5">Tambah Cicilan</h1>
+
             {{-- PERUBAHAN: Tambahkan class="ajax-form" --}}
             <form action="{{ route('keuangan.cicilan.store') }}" method="POST" class="ajax-form space-y-6">
                 @csrf
