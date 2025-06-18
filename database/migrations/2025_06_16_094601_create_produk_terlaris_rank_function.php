@@ -18,7 +18,8 @@ return new class extends Migration
             SELECT
                 si.product_id,
                 COALESCE(b.nama, "Produk Tidak Diketahui") AS product_name,
-                o.lembaga_id as lembaga_id,
+                o.lembaga_id AS lembaga_id,
+                p.outlet_id AS outlet_id, -- ✅ Tambahkan outlet_id
                 SUM(si.quantity) AS total_qty,
                 RANK() OVER (PARTITION BY o.lembaga_id ORDER BY SUM(si.quantity) DESC) AS rank_num
             FROM saleitem si
@@ -27,8 +28,9 @@ return new class extends Migration
             LEFT JOIN barang b ON b.kode_barang = p.barang_id
             LEFT JOIN outlet o ON o.id = p.outlet_id
             WHERE s.sale_date BETWEEN DATE_FORMAT(CURDATE(), "%Y-%m-01") AND LAST_DAY(CURDATE())
-            GROUP BY si.product_id, b.nama, o.lembaga_id
+            GROUP BY si.product_id, b.nama, o.lembaga_id, p.outlet_id
         ');
+
     }
 
 
