@@ -176,6 +176,10 @@
                                 if ($.fn.DataTable.isDataTable('#data-table')) {
                                     $('#data-table').DataTable().ajax.reload();
                                 }
+                                const pathname = window.location.pathname;
+                                if(pathname == '/dashboard'){
+                                    EventHandlers.handleDashboardRefresh();
+                                }
                                 const current_selected_outlet_name = document.getElementById(
                                     'current_selected_outlet_name');
 

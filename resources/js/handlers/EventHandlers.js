@@ -473,4 +473,30 @@ export const EventHandlers = {
     handleWindowLoad() {
         this.hideLoader();
     },
+
+    handleDashboardRefresh() {
+        const currentUrl = window.location.pathname;
+
+        if (currentUrl === '/dashboard') {
+            this.showLoader();
+            this.makeAjaxRequest(currentUrl)
+                .then((content) => {
+                    this.loadContentIntoContainer(content, "#main-content", currentUrl);
+
+                    if (typeof Utils !== "undefined") {
+                        Utils.initBestSellerChart();
+                        Utils.initSalesChart();
+                    }
+                })
+                .catch((error) => {
+                    console.error("Gagal memuat ulang dashboard:", error);
+                    window.location.reload();
+                })
+                .finally(() => {
+                    this.hideLoader();
+                    previousUrl = currentUrl;
+                });
+        }
+    }
+
 };

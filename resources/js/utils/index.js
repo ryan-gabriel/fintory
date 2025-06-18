@@ -1,3 +1,5 @@
+import { refresh } from "aos";
+
 export const Utils = {
     // Store event handler references for proper cleanup
     dateChangeHandlers: {
@@ -709,6 +711,7 @@ export const Utils = {
                     .classList.remove("hidden");
             });
     },
+
     resetPassword(userId) {
         Swal.fire({
             title: 'Anda yakin?',

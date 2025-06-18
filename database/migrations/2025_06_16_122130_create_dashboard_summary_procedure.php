@@ -10,50 +10,60 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Hapus procedure lama jika ada untuk memastikan definisi baru yang diterapkan
-        DB::unprepared('DROP PROCEDURE IF EXISTS `GetDashboardSummary`');
+        DB::unprepared('
+            DROP PROCEDURE IF EXISTS `GetDashboardSummary`
+        ');
 
-        // Buat procedure baru dengan referensi kolom yang jelas
         DB::unprepared('
             CREATE PROCEDURE `GetDashboardSummary`(
                 IN p_lembaga_id INT,
-                IN p_outlet_id_param VARCHAR(10)
+                IN p_outlet_id INT UNSIGNED
             )
             BEGIN
                 SELECT
-                    -- Query Penjualan Hari Ini sebagai subquery
-                    (SELECT IFNULL(SUM(total), 0) FROM sale s
+                    -- Total Penjualan Hari Ini
+                    (
+                        SELECT IFNULL(SUM(s.total), 0)
+                        FROM sale s
                         JOIN outlet o ON s.outlet_id = o.id
                         WHERE o.lembaga_id = p_lembaga_id
                         AND DATE(s.sale_date) = CURDATE()
-                        AND (p_outlet_id_param = "all" OR s.outlet_id = p_outlet_id_param)
+                        AND (p_outlet_id IS NULL OR s.outlet_id = p_outlet_id)
                     ) AS total_sales_today,
-                    
-                    -- Query Transaksi Hari Ini sebagai subquery
-                    (SELECT COUNT(s.id) FROM sale s -- Diperjelas menjadi s.id
+
+                    -- Total Transaksi Hari Ini
+                    (
+                        SELECT COUNT(s.id)
+                        FROM sale s
                         JOIN outlet o ON s.outlet_id = o.id
                         WHERE o.lembaga_id = p_lembaga_id
                         AND DATE(s.sale_date) = CURDATE()
-                        AND (p_outlet_id_param = "all" OR s.outlet_id = p_outlet_id_param)
+                        AND (p_outlet_id IS NULL OR s.outlet_id = p_outlet_id)
                     ) AS total_transactions_today,
-                    
-                    -- Query Produk Aktif sebagai subquery
-                    (SELECT COUNT(p.id) FROM product p -- Diperjelas menjadi p.id
+
+                    -- Total Produk Aktif
+                    (
+                        SELECT COUNT(p.id)
+                        FROM product p
                         JOIN outlet o ON p.outlet_id = o.id
                         WHERE o.lembaga_id = p_lembaga_id
                         AND p.is_active = 1
-                        AND (p_outlet_id_param = "all" OR p.outlet_id = p_outlet_id_param)
+                        AND (p_outlet_id IS NULL OR p.outlet_id = p_outlet_id)
                     ) AS active_products,
-                    
-                    -- Query Stok Kritis sebagai subquery
-                    (SELECT COUNT(p.id) FROM product p -- Diperjelas menjadi p.id
+
+                    -- Produk dengan Stok Rendah
+                    (
+                        SELECT COUNT(p.id)
+                        FROM product p
                         JOIN outlet o ON p.outlet_id = o.id
                         WHERE o.lembaga_id = p_lembaga_id
-                        AND p.stok < 10 AND p.is_active = 1
-                        AND (p_outlet_id_param = "all" OR p.outlet_id = p_outlet_id_param)
+                        AND p.is_active = 1
+                        AND p.stok < 10
+                        AND (p_outlet_id IS NULL OR p.outlet_id = p_outlet_id)
                     ) AS low_stock_products;
             END
         ');
+
     }
 
     /**
