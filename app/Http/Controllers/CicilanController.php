@@ -8,6 +8,7 @@ use App\Models\Lembaga;
 use App\Models\Outlet;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
@@ -101,12 +102,21 @@ class CicilanController extends Controller
             $formattedData = [];
             foreach ($hutangData as $hutang) {
                 $latestCicilan = $hutang->cicilan->first();
-                $bayarUrl = route('keuangan.cicilan.create', ['hutang_id' => $hutang->id]);
                 
-                $actionButtons = '
-                    <div class="flex space-x-2">
-                        <a href="' . $bayarUrl . '" class="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700 transition create-link" data-title="Bayar Cicilan">Bayar</a>
-                    </div>';
+                // PERUBAHAN LOGIKA TOMBOL AKSI
+                $actionButtons = '<div class="flex space-x-2">';
+
+                // Tombol "Edit" tetap untuk mengedit cicilan terakhir (jika ada).
+                if ($latestCicilan) {
+                    $editUrl = route('keuangan.cicilan.edit', $latestCicilan->id);
+                    $actionButtons .= '<a href="' . $editUrl . '" class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition edit-link" data-title="Edit Cicilan">Edit</a>';
+                }
+
+                // Tombol "Hapus" sekarang menargetkan data Hutang, bukan Cicilan.
+                $deleteUrl = route('keuangan.hutang.destroy', $hutang->id);
+                $actionButtons .= '<button type="button" class="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition delete-btn" data-id="'. $hutang->id .'" data-url="'. $deleteUrl .'">Hapus</button>';
+                
+                $actionButtons .= '</div>';
 
                 $formattedData[] = [
                     'tanggal_hutang'      => $hutang->tanggal_hutang ? Carbon::parse($hutang->tanggal_hutang)->format('d-m-Y') : '-',
@@ -167,7 +177,6 @@ class CicilanController extends Controller
 
     /**
      * Menyimpan data cicilan baru ke database.
-     * PERUBAHAN UTAMA ADA DI SINI.
      */
     public function store(Request $request)
     {
@@ -180,14 +189,12 @@ class CicilanController extends Controller
         ]);
 
         if ($validator->fails()) {
-            // Mengembalikan error validasi dalam format JSON
             return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
         }
 
         $hutang = Hutang::findOrFail($request->hutang_id);
 
         if (floatval($request->jumlah_bayar) > floatval($hutang->sisa_hutang)) {
-            // Mengembalikan pesan error dalam format JSON
             return response()->json(['success' => false, 'message' => 'Jumlah bayar tidak boleh melebihi sisa hutang.'], 400);
         }
 
@@ -200,11 +207,9 @@ class CicilanController extends Controller
             'created_by' => auth()->id(),
         ]);
 
-        // Update sisa hutang
         $hutang->sisa_hutang -= $request->jumlah_bayar;
         $hutang->save();
 
-        // Mengembalikan respon sukses dengan instruksi redirect dalam format JSON
         return response()->json([
             'success' => true, 
             'message' => 'Pembayaran cicilan berhasil ditambahkan', 
@@ -236,7 +241,6 @@ class CicilanController extends Controller
     
     public function update(Request $request, $id)
     {
-        // ... (Kode update Anda sudah benar, menggunakan response()->json()) ...
         $cicilan = Cicilan::findOrFail($id);
 
         $validator = Validator::make($request->all(), [
@@ -277,14 +281,27 @@ class CicilanController extends Controller
         return response()->json(['success' => true, 'message' => 'Cicilan berhasil diupdate.', 'redirect' => route('keuangan.cicilan.index')]);
     }
     
+    /**
+     * Menghapus data cicilan dari database. (Metode ini tetap ada untuk penggunaan lain)
+     */
     public function destroy($id)
     {
-        // ... (Kode destroy Anda sudah benar, menggunakan response()->json()) ...
-        $cicilan = Cicilan::findOrFail($id);
-        $hutang = Hutang::find($cicilan->hutang_id);
-        $hutang->sisa_hutang += $cicilan->jumlah_bayar;
-        $hutang->save();
-        $cicilan->delete();
-        return response()->json(['success' => true, 'message' => 'Cicilan berhasil dihapus.']);
+        DB::beginTransaction();
+        try {
+            $cicilan = Cicilan::findOrFail($id);
+            $hutang = Hutang::find($cicilan->hutang_id);
+
+            if ($hutang) {
+                $hutang->sisa_hutang += $cicilan->jumlah_bayar;
+                $hutang->save();
+            }
+            $cicilan->delete();
+            DB::commit();
+            return response()->json(['success' => true, 'message' => 'Data cicilan berhasil dihapus.']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Gagal menghapus cicilan: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Gagal menghapus data cicilan karena terjadi kesalahan server.'], 500);
+        }
     }
 }
