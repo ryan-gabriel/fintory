@@ -112,28 +112,45 @@ export const PAGE_CONFIGS = {
         url: "/dashboard/keuangan/cicilan/data",
         columns: [
             {
-                data: 0,
-                title: "Tanggal Bayar",
+                data: "tanggal_hutang",
+                name: "hutang.tanggal_hutang", // untuk sorting
+                title: "Tanggal Hutang",
             },
             {
-                data: 1,
+                data: "nama_pemberi_hutang",
+                name: "hutang.nama_pemberi_hutang", // untuk sorting
                 title: "Pemberi Hutang",
             },
             {
-                data: 2,
-                title: "Jumlah Bayar",
+                data: "jumlah",
+                name: "hutang.jumlah", // untuk sorting
+                title: "Total Hutang",
             },
             {
-                data: 3,
+                data: "sisa_hutang",
+                name: "hutang.sisa_hutang", // untuk sorting
                 title: "Sisa Hutang",
             },
             {
-                data: 4,
-                title: "Metode Pembayaran",
+                data: "metode_pembayaran",
+                name: "metode_pembayaran",
+                title: "Metode Bayar Terakhir",
+                orderable: false,
+                searchable: false,
             },
             {
-                data: 5,
-                title: "Action",
+                data: "tanggal_bayar",
+                name: "tanggal_bayar",
+                title: "Tgl Bayar Terakhir",
+                orderable: false,
+                searchable: false,
+            },
+            {
+                data: "action",
+                name: "action",
+                title: "Aksi",
+                orderable: false,
+                searchable: false,
             },
         ],
     },
