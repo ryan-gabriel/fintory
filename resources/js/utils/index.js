@@ -486,10 +486,10 @@ export const Utils = {
             return saldoOutlet;
         }
 
-        let saldoOutlet = updateSaldoDisplay();
+        updateSaldoDisplay();
 
         $("#outlet").on("change", function () {
-            saldoOutlet = updateSaldoDisplay();
+            updateSaldoDisplay();
         });
     },
 
@@ -653,4 +653,42 @@ export const Utils = {
                     .classList.remove("hidden");
             });
     },
+    resetPassword(userId) {
+        if (confirm('Apakah Anda yakin ingin reset password user ini ke 12345?')) {
+            $.post(`/dashboard/admin/user-management/${userId}/reset-password`, {
+                _token: '{{ csrf_token() }}'
+            }, function (response) {
+                if (response.success) {
+                    alert(response.message);
+                } else {
+                    alert('Terjadi kesalahan: ' + response.message);
+                }
+            }).fail(function () {
+                alert('Terjadi kesalahan saat reset password');
+            });
+        }
+    },
+
+    deleteUser(userId) {
+        if (confirm('Apakah Anda yakin ingin menghapus user ini dari lembaga?')) {
+            $.ajax({
+                url: `/dashboard/admin/user-management/${userId}`,
+                type: 'DELETE',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function (response) {
+                    if (response.success) {
+                        alert(response.message);
+                        $('#data-table').DataTable().ajax.reload();
+                    } else {
+                        alert('Terjadi kesalahan: ' + response.message);
+                    }
+                },
+                error: function () {
+                    alert('Terjadi kesalahan saat menghapus user');
+                }
+            });
+        }
+    }
 };

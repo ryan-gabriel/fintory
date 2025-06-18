@@ -142,35 +142,50 @@ class UserManagementController extends Controller
         foreach ($data as $user) {
             $employee = $user->employees->first();
             $employeeName = $employee ? $employee->name : '-';
-            
+
             $role = $user->lembagaRoles->first();
             $roleName = $role ? $role->display_name : '-';
-            
-            $actions = '
+
+            $editUrl = route('admin.user-management.edit', $user->id);
+            $deleteUrl = route('admin.user-management.destroy', $user->id);
+            $resetUrl = route('admin.user-management.reset-password', $user->id);
+
+            ob_start(); ?>
                 <div class="flex space-x-2">
-                    <a href="' . route('admin.user-management.edit', $user->id) . '" 
-                       class="edit-link text-blue-600 hover:text-blue-800" 
-                       data-title="Edit User">
+                    <a href="<?= $editUrl ?>"
+                    class="text-blue-600 hover:text-blue-800 edit-link"
+                    data-title="Edit User"
+                    title="Edit User">
                         <i class="fas fa-edit"></i>
                     </a>
-                    <button onclick="resetPassword(' . $user->id . ')" 
-                            class="text-yellow-600 hover:text-yellow-800" 
-                            title="Reset Password">
+
+                    <button type="button"
+                            class="text-yellow-600 hover:text-yellow-800 reset-password"
+                            data-id="<?= $user->id ?>"
+                            data-url=<?= $resetUrl ?>
+                            data-action="reset-password"
+                            title="Reset Password"
+                            >
                         <i class="fas fa-key"></i>
                     </button>
-                    <button onclick="deleteUser(' . $user->id . ')" 
-                            class="text-red-600 hover:text-red-800" 
-                            title="Hapus User">
+
+                    <button type="button"
+                            class="text-red-600 hover:text-red-800 delete-btn"
+                            title="Hapus User"
+                            data-id="<?= $user->id ?>"
+                            data-url=<?= $deleteUrl ?>>
                         <i class="fas fa-trash"></i>
                     </button>
-                </div>';
+                </div>
+            <?php
+            $actionButtons = ob_get_clean();
 
             $jsonData['data'][] = [
                 $employeeName,
                 $user->email,
                 $roleName,
                 $user->created_at ? $user->created_at->format('d-m-Y H:i') : '-',
-                $actions
+                $actionButtons
             ];
         }
 

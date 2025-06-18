@@ -223,7 +223,7 @@
 
         <script>
             $(document).ready(function() {
-                $(document).on('click', '.delete-btn, .toggle-status-product-btn', function(e) {
+                $(document).on('click', '.delete-btn, .toggle-status-product-btn, .reset-password', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
                     
@@ -257,6 +257,11 @@
                         config.confirmText = 'Ya, aktifkan!';
                         config.successMessage = 'Produk berhasil diaktifkan.';
                         config.errorMessage = 'Gagal mengaktifkan produk.';
+                    } else if (action === 'reset-password') {
+                        config.text = "Password user akan di reset menjadi '12345'.";
+                        config.confirmText = 'Ya, Reset Password!';
+                        config.successMessage = 'Password user berhasil di reset.';
+                        config.errorMessage = 'Gagal melakukan reset password.';
                     }
 
                     Swal.fire({
@@ -297,7 +302,7 @@
                                         Swal.fire({
                                             title: 'Data Terkait Ditemukan!',
                                             text: response.message ||
-                                                'Data outlet ini memiliki relasi. Hapus semua data yang terkait?',
+                                                'Data ini memiliki relasi. Hapus semua data yang terkait?',
                                             icon: 'warning',
                                             showCancelButton: true,
                                             confirmButtonText: 'Ya, hapus semua!',

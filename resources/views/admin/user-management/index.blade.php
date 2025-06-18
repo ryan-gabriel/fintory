@@ -36,39 +36,6 @@
 
 @push('scripts')
 <script>
-    $(document).ready(function () {
-        $('#data-table').DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: "{{ route('admin.user-management.data') }}",
-            columns: [
-                { data: 'name', name: 'employee.name' },
-                { data: 'email', name: 'email' },
-                { data: 'role', name: 'roles.display_name', orderable: false, searchable: false },
-                { data: 'created_at', name: 'created_at' },
-                { data: 'actions', name: 'actions', orderable: false, searchable: false }
-            ],
-            order: [[3, 'desc']],
-            language: {
-                processing: "Memproses...",
-                search: "Cari:",
-                lengthMenu: "Tampilkan _MENU_ data per halaman",
-                info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-                infoEmpty: "Menampilkan 0 sampai 0 dari 0 data",
-                infoFiltered: "(disaring dari _MAX_ total data)",
-                loadingRecords: "Memuat...",
-                zeroRecords: "Tidak ada data yang ditemukan",
-                emptyTable: "Tidak ada data tersedia",
-                paginate: {
-                    first: "Pertama",
-                    previous: "Sebelumnya",
-                    next: "Selanjutnya",
-                    last: "Terakhir"
-                }
-            }
-        });
-    });
-
     function resetPassword(userId) {
         if (confirm('Apakah Anda yakin ingin reset password user ini ke 12345?')) {
             $.post(`/dashboard/admin/user-management/${userId}/reset-password`, {
