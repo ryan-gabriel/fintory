@@ -9,6 +9,7 @@ use App\Models\Outlet;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class CicilanController extends Controller
 {
@@ -227,7 +228,7 @@ class CicilanController extends Controller
     {
         $cicilan = Cicilan::findOrFail($id);
 
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'hutang_id' => 'required|exists:hutang,id',
             'tanggal_bayar' => [
                 'required',
@@ -235,7 +236,7 @@ class CicilanController extends Controller
                     try {
                         \Carbon\Carbon::createFromFormat('d-m-Y', $value);
                     } catch (\Exception $e) {
-                        $fail('Format tanggal tidak valid. Gunakan format mm/dd/yyyy.');
+                        $fail('Format tanggal tidak valid. Gunakan format dd-mm-yyyy.');
                     }
                 }
             ],
@@ -244,11 +245,22 @@ class CicilanController extends Controller
             'deskripsi' => 'required|string|max:255',
         ]);
 
+        if ($validator->fails()) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $validator->errors()->first(),
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
         // Hitung selisih jumlah_bayar untuk update sisa_hutang
         $oldJumlahBayar = $cicilan->jumlah_bayar;
         $hutang = Hutang::find($cicilan->hutang_id);
 
-        // Konversi tanggal_bayar ke format Y-m-d
         $tanggalBayar = \Carbon\Carbon::createFromFormat('d-m-Y', $request->tanggal_bayar)->format('Y-m-d');
 
         $cicilan->hutang_id = $request->hutang_id;
@@ -258,7 +270,6 @@ class CicilanController extends Controller
         $cicilan->deskripsi = $request->deskripsi;
         $cicilan->save();
 
-        // Update sisa_hutang pada hutang lama jika hutang_id berubah
         if ($hutang && $cicilan->wasChanged('hutang_id')) {
             $hutang->sisa_hutang += $oldJumlahBayar;
             $hutang->save();
@@ -269,13 +280,21 @@ class CicilanController extends Controller
                 $newHutang->save();
             }
         } elseif ($hutang) {
-            // Jika hutang_id tidak berubah, update sisa_hutang pada hutang yang sama
             $hutang->sisa_hutang = max(0, $hutang->sisa_hutang + $oldJumlahBayar - $request->jumlah_bayar);
             $hutang->save();
         }
 
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Cicilan berhasil diupdate.',
+                'redirect' => route('keuangan.cicilan.index'),
+            ]);
+        }
+
         return redirect()->route('keuangan.cicilan.index')->with('success', 'Cicilan berhasil diupdate.');
     }
+
 
     public function destroy($id)
     {

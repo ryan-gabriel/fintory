@@ -8,6 +8,7 @@ use App\Models\Outlet;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class HutangController extends Controller
 {
@@ -187,13 +188,25 @@ class HutangController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'outlet' => 'required|exists:outlet,id',
             'nama_pemberi_hutang' => 'required|string|max:255',
             'jumlah' => 'required|numeric|min:0',
             'tanggal' => 'required|date_format:d-m-Y',
             'deskripsi' => 'nullable|string|max:500',
         ]);
+
+        if ($validator->fails()) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $validator->errors()->first(),
+                    'errors' => $validator->errors(),
+                ], 422);
+            }
+
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
 
         $hutang = Hutang::findOrFail($id);
         $hutang->outlet_id = $request->outlet;
@@ -203,8 +216,17 @@ class HutangController extends Controller
         $hutang->deskripsi = $request->deskripsi;
         $hutang->save();
 
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Hutang berhasil diperbarui.',
+                'redirect' => route('keuangan.hutang.index'),
+            ]);
+        }
+
         return redirect()->route('keuangan.hutang.index')->with('success', 'Hutang berhasil diperbarui.');
     }
+
 
     public function destroy($id, Request $request)
     {
