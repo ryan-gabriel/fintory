@@ -231,7 +231,7 @@ class OutletController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error("Gagal membuat outlet: " . $e->getMessage());
+            Log::error("Gagal membuat outlet: " . $e->getMessage());
 
             return response()->json([
                 'success' => false,
