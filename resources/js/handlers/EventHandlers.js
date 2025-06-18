@@ -316,7 +316,7 @@ export const EventHandlers = {
         const method = form.method.toUpperCase();
         const formData = new FormData(form);
 
-        try {
+       try {
             this.showLoader();
 
             const response = await fetch(url, {
@@ -324,66 +324,84 @@ export const EventHandlers = {
                 body: formData,
                 headers: {
                     "X-Requested-With": "XMLHttpRequest",
-                    "X-CSRF-TOKEN":
-                        document
-                            .querySelector('meta[name="csrf-token"]')
-                            ?.getAttribute("content") || "",
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.getAttribute("content") || "",
                 },
             });
 
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-
             const result = await response.json();
 
-            // Handle success response
-            if (result.success) {
-                // Redirect jika ada redirect URL
-                if (result.redirect) {
-                    await this.loadContentIntoContainer(
-                        await this.makeAjaxRequest(result.redirect),
-                        "#main-content",
-                        result.redirect
-                    );
-                    history.pushState({}, "", result.redirect);
-                }
-
-                // Reload DataTable jika ada
-                if ($.fn.DataTable.isDataTable("#data-table")) {
-                    $("#data-table").DataTable().ajax.reload();
-                }
-
-                // Show success message
+            if (!response.ok || !result.success) {
+                // Jika ada pesan umum (misal: "The nama has already been taken.")
                 if (result.message) {
                     Swal.fire({
-                        icon: 'success',
+                        icon: 'error',
                         title: result.message,
                         toast: true,
                         position: 'top-end',
                         showConfirmButton: false,
                         timer: 3000,
-                        timerProgressBar: true
+                        timerProgressBar: true,
                     });
                 }
-            } else {
-                // Handle validation errors
+
+                // Jika ada error spesifik per field
                 this.handleFormErrors(form, result.errors || {});
+                return;
             }
+
+            // === Handle sukses ===
+
+            if (result.redirect) {
+                await this.loadContentIntoContainer(
+                    await this.makeAjaxRequest(result.redirect),
+                    "#main-content",
+                    result.redirect
+                );
+                history.pushState({}, "", result.redirect);
+            }
+
+            if ($.fn.DataTable.isDataTable("#data-table")) {
+                $("#data-table").DataTable().ajax.reload();
+            }
+
+            if (result.message) {
+                Swal.fire({
+                    icon: 'success',
+                    title: result.message,
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                });
+            }
+
         } catch (error) {
-            console.error("Form submission failed:", error);
+            let message = 'Terjadi kesalahan saat memproses permintaan.';
+
+            // Coba ambil pesan dari response JSON jika ada
+            if (error instanceof Error && error.message) {
+                try {
+                    const parsed = JSON.parse(error.message);
+                    message = parsed.message || message;
+                } catch (_) {
+                    // Biarkan default
+                }
+            }
+
             Swal.fire({
                 icon: 'error',
-                title: 'Terjadi kesalahan. Silakan coba lagi.',
+                title: message,
                 toast: true,
                 position: 'top-end',
                 showConfirmButton: false,
                 timer: 3000,
-                timerProgressBar: true
+                timerProgressBar: true,
             });
         } finally {
             this.hideLoader();
         }
+
     },
 
     // Handle form validation errors

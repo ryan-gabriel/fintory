@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Barang;
 use App\Models\Lembaga;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class BarangController extends Controller
 {
@@ -133,20 +135,39 @@ class BarangController extends Controller
     /**
      * Memperbarui data barang di database.
      */
+
     public function update(Request $request, Barang $barang)
     {
-        $validated = $request->validate([
-            'nama' => 'required|string|max:100|unique:barang,nama,' . $barang->kode_barang . ',kode_barang',
-            'deskripsi' => 'nullable|string',
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'nama' => 'required|string|max:100|unique:barang,nama,' . $barang->kode_barang . ',kode_barang',
+                'deskripsi' => 'nullable|string',
+            ],
+            [
+                'nama.required' => 'Nama barang wajib diisi.',
+                'nama.max' => 'Nama barang maksimal 100 karakter.',
+                'nama.unique' => 'Nama barang sudah digunakan, silakan gunakan nama lain.',
+            ]
+        );
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first(),
+                'errors' => $validator->errors(),
+            ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        $barang->update($validator->validated());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Barang berhasil diperbarui!',
+            'redirect' => route('produk-stok.barang.index')
         ]);
-
-        $barang->update($validated);
-
-        // ==========================================================
-        // === PERBAIKAN DI SINI (menggunakan nama route yang benar) ===
-        // ==========================================================
-        return response()->json(['success' => true, 'message' => 'Barang berhasil diperbarui!', 'redirect' => route('produk-stok.barang.index')]);
     }
+
 
     /**
      * Menghapus barang dari database.
