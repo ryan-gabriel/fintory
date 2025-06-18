@@ -175,27 +175,27 @@ export const PAGE_CONFIGS = {
             },
             {
                 data: 1,
-                title: "Tipe",
+                title: "Outlet",
             },
             {
                 data: 2,
-                title: "Sumber",
+                title: "Tipe",
             },
             {
                 data: 3,
-                title: "Deskripsi",
+                title: "Sumber",
             },
             {
                 data: 4,
-                title: "Jumlah",
+                title: "Deskripsi",
             },
             {
                 data: 5,
-                title: "Saldo Setelah",
+                title: "Jumlah",
             },
             {
                 data: 6,
-                title: "Outlet",
+                title: "Saldo Setelah",
             },
             {
                 data: 7,
