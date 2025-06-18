@@ -232,7 +232,7 @@ class MenuItemSeeder extends Seeder
         MenuItem::create([
             'menu_name' => 'Log Aktivitas',
             'icon' => 'fa-solid fa-timeline',
-            'route' => '#',
+            'route' => '/dashboard/log-aktivitas',
             'is_parent' => false,
             'order' => 8,
         ]);

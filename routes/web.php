@@ -11,6 +11,7 @@ use App\Http\Controllers\Penjualan\SaleController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StokProdukController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LogAktivitasController;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Http\Controllers\UserManagementController; // Tambahkan ini
@@ -175,7 +176,11 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
         Route::get('/keuangan', [LaporanKeuanganController::class, 'index'])->name('keuangan.index');
         Route::get('/keuangan/{id}', [LaporanKeuanganController::class, 'show'])->name('keuangan.show');
     });
-
+    
+    Route::prefix('dashboard/log-aktivitas')->name('log-aktivitas.')->group(function () {
+        Route::get('/', [LogAktivitasController::class, 'index'])->name('index');
+        Route::get('/data', [LogAktivitasController::class, 'getData'])->name('data');
+    });
 });
 
 // These two "choose-role" routes must be reachable whenever a user is logged in

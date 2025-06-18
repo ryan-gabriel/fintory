@@ -482,4 +482,11 @@ export const PAGE_CONFIGS = {
         ],
         order: [[3, "desc"]],
     },
+    "/dashboard/log-aktivitas": {
+        url: "/dashboard/log-aktivitas/data",
+        columns: [
+            { data: 0, title: "Waktu" },
+            { data: 1, title: "Pesan" },
+        ]
+    },
 };
