@@ -331,13 +331,17 @@ export const Utils = {
 
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = "Submit";
+
                     if (typeof response === "object" && response.redirect) {
                         window.location.href = response.redirect;
-                    } else if (
-                        typeof response === "object" &&
-                        response.message
-                    ) {
-                        alert(response.message);
+                    } else if (typeof response === "object" && response.message) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Berhasil",
+                            text: response.message,
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
                         form.reset();
                     } else if (typeof response === "string") {
                         console.log("HTML response received");
@@ -346,7 +350,12 @@ export const Utils = {
                     console.error("Error:", error);
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = "Submit";
-                    alert("An error occurred: " + error.message);
+
+                    Swal.fire({
+                        icon: "error",
+                        title: "Gagal",
+                        text: "Terjadi kesalahan: " + (error.message || "Unknown error"),
+                    });
                 }
             });
 
@@ -413,9 +422,7 @@ export const Utils = {
                         const response = await fetch(form.action, {
                             method: "POST",
                             headers: {
-                                "X-CSRF-TOKEN": document.querySelector(
-                                    'meta[name="csrf-token"]'
-                                ).content,
+                                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
                                 Accept: "application/json",
                                 "X-Requested-With": "XMLHttpRequest",
                             },
@@ -426,16 +433,28 @@ export const Utils = {
 
                         submitBtn.disabled = false;
                         submitBtn.innerHTML = "Update";
+
                         if (result.redirect) {
                             window.location.href = result.redirect;
                         } else if (result.message) {
-                            alert(result.message);
+                            Swal.fire({
+                                icon: "success",
+                                title: "Berhasil",
+                                text: result.message,
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
                         }
                     } catch (error) {
                         console.error("Error:", error);
                         submitBtn.disabled = false;
                         submitBtn.innerHTML = "Update";
-                        alert("An error occurred: " + error.message);
+
+                        Swal.fire({
+                            icon: "error",
+                            title: "Gagal",
+                            text: "Terjadi kesalahan: " + (error.message || "Unknown error"),
+                        });
                     }
                 });
             } else {
@@ -654,41 +673,84 @@ export const Utils = {
             });
     },
     resetPassword(userId) {
-        if (confirm('Apakah Anda yakin ingin reset password user ini ke 12345?')) {
-            $.post(`/dashboard/admin/user-management/${userId}/reset-password`, {
-                _token: '{{ csrf_token() }}'
-            }, function (response) {
-                if (response.success) {
-                    alert(response.message);
-                } else {
-                    alert('Terjadi kesalahan: ' + response.message);
-                }
-            }).fail(function () {
-                alert('Terjadi kesalahan saat reset password');
-            });
-        }
+        Swal.fire({
+            title: 'Anda yakin?',
+            text: 'Password user ini akan direset ke "12345".',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, reset!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post(`/dashboard/admin/user-management/${userId}/reset-password`, {
+                    _token: '{{ csrf_token() }}'
+                }, function (response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil',
+                            text: response.message
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: 'Terjadi kesalahan: ' + response.message
+                        });
+                    }
+                }).fail(function () {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal',
+                        text: 'Terjadi kesalahan saat reset password.'
+                    });
+                });
+            }
+        });
     },
 
     deleteUser(userId) {
-        if (confirm('Apakah Anda yakin ingin menghapus user ini dari lembaga?')) {
-            $.ajax({
-                url: `/dashboard/admin/user-management/${userId}`,
-                type: 'DELETE',
-                data: {
-                    _token: '{{ csrf_token() }}'
-                },
-                success: function (response) {
-                    if (response.success) {
-                        alert(response.message);
-                        $('#data-table').DataTable().ajax.reload();
-                    } else {
-                        alert('Terjadi kesalahan: ' + response.message);
+        Swal.fire({
+            title: 'Anda yakin?',
+            text: 'User ini akan dihapus dari lembaga.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/dashboard/admin/user-management/${userId}`,
+                    type: 'DELETE',
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil',
+                                text: response.message
+                            });
+                            $('#data-table').DataTable().ajax.reload();
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal',
+                                text: 'Terjadi kesalahan: ' + response.message
+                            });
+                        }
+                    },
+                    error: function () {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: 'Terjadi kesalahan saat menghapus user.'
+                        });
                     }
-                },
-                error: function () {
-                    alert('Terjadi kesalahan saat menghapus user');
-                }
-            });
-        }
+                });
+            }
+        });
     }
+
 };

@@ -223,7 +223,7 @@
 
         <script>
             $(document).ready(function() {
-                $(document).on('click', '.delete-btn, .toggle-status-product-btn, .reset-password', function(e) {
+                $(document).on('click', '.delete-btn, .toggle-status-product-btn, .reset-password, .swal-btn', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
                     
@@ -389,7 +389,7 @@
             });
         </script>
 
-        <script>
+        {{-- <script>
             setTimeout(() => {
                 ['alert-success', 'alert-error'].forEach(id => {
                     const el = document.getElementById(id);
@@ -399,7 +399,7 @@
                     }
                 });
             }, 5000);
-        </script>
+        </script> --}}
 
         @stack('scripts')
     </body>

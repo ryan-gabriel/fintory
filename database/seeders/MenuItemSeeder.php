@@ -211,15 +211,6 @@ class MenuItemSeeder extends Seeder
         ]);
 
         MenuItem::create([
-            'menu_name' => 'Manajemen Role & Menu',
-            'icon' => 'fa-solid fa-users-gear',
-            'route' => '#',
-            'is_parent' => false,
-            'parent_id' => $pengaturan->id,
-            'order' => 2,
-        ]);
-
-        MenuItem::create([
             'menu_name' => 'Kategori Produk',
             'icon' => 'fa-solid fa-tags',
             'route' => '/dashboard/produk-stok/kategori',

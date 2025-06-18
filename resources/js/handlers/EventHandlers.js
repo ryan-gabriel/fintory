@@ -191,7 +191,15 @@ export const EventHandlers = {
             if (config.onError) {
                 await config.onError(error, linkElement);
             } else {
-                alert("Terjadi kesalahan.");
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Terjadi kesalahan.',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
             }
         } finally {
             if (config.showLoader) this.hideLoader();
@@ -348,7 +356,15 @@ export const EventHandlers = {
 
                 // Show success message
                 if (result.message) {
-                    alert(result.message);
+                    Swal.fire({
+                        icon: 'success',
+                        title: result.message,
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
                 }
             } else {
                 // Handle validation errors
@@ -356,7 +372,15 @@ export const EventHandlers = {
             }
         } catch (error) {
             console.error("Form submission failed:", error);
-            alert("Terjadi kesalahan. Silakan coba lagi.");
+            Swal.fire({
+                icon: 'error',
+                title: 'Terjadi kesalahan. Silakan coba lagi.',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
+            });
         } finally {
             this.hideLoader();
         }

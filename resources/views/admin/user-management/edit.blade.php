@@ -134,27 +134,3 @@
         </div>
     </div>
 </div>
-
-<script>
-function resetPassword(userId) {
-    if (confirm('Apakah Anda yakin ingin reset password user ini ke 12345?')) {
-        $.ajax({
-            url: `/dashboard/admin/user-management/${userId}/reset-password`,
-            type: 'POST',
-            data: {
-                _token: '{{ csrf_token() }}'
-            },
-            success: function(response) {
-                if (response.success) {
-                    alert(response.message);
-                } else {
-                    alert('Terjadi kesalahan: ' + response.message);
-                }
-            },
-            error: function(xhr) {
-                alert('Terjadi kesalahan saat reset password');
-            }
-        });
-    }
-}
-</script>
