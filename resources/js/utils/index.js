@@ -429,6 +429,7 @@ export const Utils = {
                             body: new FormData(form),
                         });
 
+
                         const result = await response.json();
 
                         submitBtn.disabled = false;
