@@ -27,7 +27,7 @@ class MutasiStokController extends Controller
 
         // Filter awal berdasarkan outlet lembaga
         $query = StockMutation::with(['product.barang', 'product.kategori', 'product.outlet', 'outlet'])
-            ->whereIn('outlet_id', $outletIds);
+            ->whereIn('stockmutation.outlet_id', $outletIds);
 
         // Filter tanggal menggunakan created_at
         if ($request->filled('start_date')) {
@@ -52,7 +52,7 @@ class MutasiStokController extends Controller
         if (session()->has('selected_outlet_id')) {
             $selectedOutletId = session('selected_outlet_id');
             if (!empty($selectedOutletId) && $selectedOutletId !== 'all') {
-                $query->where('outlet_id', $selectedOutletId);
+                $query->where('stockmutation.outlet_id', $selectedOutletId);
             }
         }
 

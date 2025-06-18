@@ -246,6 +246,8 @@ export const PAGE_CONFIGS = {
             {
                 data: 5,
                 title: "Detail",
+                orderable: false,
+                searchable: false,
             },
         ],
     },
