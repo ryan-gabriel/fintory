@@ -163,14 +163,12 @@ class KasLedgerController extends Controller
             ->orderBy('tanggal', 'desc')
             ->value('saldo_setelah') ?? 0;
 
-        // Cek saldo untuk tipe pengeluaran / transfer keluar
         if (in_array($tipe, ['EXPENSE', 'TRANSFER_OUT']) && $saldoSebelum < $jumlah) {
             return redirect()->back()->withInput()->withErrors([
                 'jumlah' => 'Saldo tidak mencukupi untuk pengeluaran atau transfer keluar.',
             ]);
         }
 
-        // Hitung saldo setelah
         $saldoSetelah = in_array($tipe, ['EXPENSE', 'TRANSFER_OUT']) 
             ? $saldoSebelum - $jumlah 
             : $saldoSebelum + $jumlah;
@@ -184,12 +182,14 @@ class KasLedgerController extends Controller
             'saldo_setelah' => $saldoSetelah,
             'outlet_id' => $request->outlet_id,
             'deskripsi' => $request->deskripsi,
+            'created_by' => auth()->id(), // 👈 ini baris penting
         ]);
 
         return redirect()
-            ->route('keuangan.kas-ledger.index') // ganti sesuai rute daftar kas ledger kamu
+            ->route('keuangan.kas-ledger.index')
             ->with('success', 'Data kas ledger berhasil disimpan.');
     }
+
     public function edit($id, Request $request)
     {
         $kasLedger = CashLedger::findOrFail($id);
