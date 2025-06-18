@@ -33,6 +33,19 @@ class BarangController extends Controller
     {
         $query = Barang::query();
         
+        $lembaga_id = session('current_lembaga_id');
+
+        // ▼▼▼ LOGIKA FILTER BARU ▼▼▼
+        // Memulai query ke model Barang
+        $query = Barang::query();
+
+        // Terapkan filter: hanya tampilkan barang yang terhubung ke produk
+        // di dalam outlet milik lembaga yang sedang aktif.
+        $query->whereHas('products', function ($productQuery) use ($lembaga_id) {
+            $productQuery->whereHas('outlet', function ($outletQuery) use ($lembaga_id) {
+                $outletQuery->where('lembaga_id', $lembaga_id);
+            });
+        });
 
         // Filter pencarian
         if ($request->filled('search.value')) {

@@ -42,4 +42,9 @@ class Barang extends Model
         'nama',
         'deskripsi',
     ];
+
+    public function products()
+    {
+        return $this->hasMany(Product::class, 'barang_id', 'kode_barang');
+    }
 }
