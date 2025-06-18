@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Lembaga;
 use App\Models\Outlet;
+use App\Models\OutletBalance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\QueryException;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class OutletController extends Controller
 {
@@ -188,7 +190,7 @@ class OutletController extends Controller
     /**
      * Menyimpan outlet baru ke database.
      */
-    public function store(Request $request)
+   public function store(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:100',
@@ -203,24 +205,41 @@ class OutletController extends Controller
                 'message' => 'Sesi lembaga tidak ditemukan. Silakan login ulang.'
             ], 400);
         }
+
         $validated['lembaga_id'] = $currentLembagaId;
 
         try {
-            Outlet::create($validated);
+            // Gunakan transaksi DB agar jika salah satu gagal, rollback semuanya
+            DB::beginTransaction();
+
+            // Simpan outlet baru
+            $outlet = Outlet::create($validated);
+
+            // Buat saldo awal outlet balance
+            OutletBalance::create([
+                'outlet_id' => $outlet->id,
+                'saldo' => 0,
+                'last_updated' => now(),
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Outlet berhasil ditambahkan!',
+                'redirect' => route('outlet.index'),
+            ]);
         } catch (\Exception $e) {
-            Log::error("Gagal membuat outlet: " . $e->getMessage());
+            DB::rollBack();
+            \Log::error("Gagal membuat outlet: " . $e->getMessage());
+
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat menyimpan data ke database.'
             ], 500);
         }
-
-        return response()->json([
-            'success' => true, 
-            'message' => 'Outlet berhasil ditambahkan!', 
-            'redirect' => route('outlet.index')
-        ]);
     }
+
     
     /**
      * Menampilkan form untuk mengedit outlet.
