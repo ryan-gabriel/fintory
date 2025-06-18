@@ -10,10 +10,13 @@
                         <x-date-range-picker />
                     </div>
 
-                    <a href="/dashboard/keuangan/hutang/create"
-                        class="text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg text-sm px-5 py-2.5 create-link" data-title="Tambah Hutang Baru">
-                        Bayar Hutang +
+                    {{-- PERUBAHAN DI SINI --}}
+                    <a href="/dashboard/keuangan/cicilan/create"
+                        class="text-white bg-button-primary hover:bg-blue-500 font-medium rounded-lg text-sm px-5 py-2.5 create-link" data-title="Tambah Cicilan">
+                        Tambah Cicilan +
                     </a>
+                    {{-- AKHIR PERUBAHAN --}}
+
                 </div>
 
                 <div class="overflow-x-auto relative p-5 sm:rounded-lg">
