@@ -166,10 +166,6 @@ class BarangController extends Controller
             'message' => 'Barang berhasil diperbarui!',
             'redirect' => route('produk-stok.barang.index')
         ]);
-
-        $barang->update($validated);
-
-        return response()->json(['success' => true, 'message' => 'Barang berhasil diperbarui!', 'redirect' => route('produk-stok.barang.index')]);
     }
 
 
