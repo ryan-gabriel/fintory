@@ -7,7 +7,7 @@ use App\Models\Outlet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\QueryException;
-use Carbon\Carbon; // Import Carbon
+use Carbon\Carbon;
 
 class OutletController extends Controller
 {
@@ -38,13 +38,26 @@ class OutletController extends Controller
             $search = $request->input('search.value');
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('address', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%");
+                    ->orWhere('address', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
             });
         }
 
-        $totalFiltered = $query->count();
-        $data = $query->latest()->offset($request->start)->limit($request->length)->get();
+        $totalFiltered = (clone $query)->count();
+
+        $orderColumnIndex = $request->input('order.0.column', 0);
+        $orderDirection = $request->input('order.0.dir', 'asc');
+        
+        $columns = [
+            0 => 'name',
+            1 => 'address',
+            2 => 'phone'
+        ];
+        
+        $orderColumnName = $columns[$orderColumnIndex] ?? 'name';
+        $query->orderBy($orderColumnName, $orderDirection);
+
+        $data = $query->offset($request->start)->limit($request->length)->get();
 
         $jsonData = [
             "draw" => intval($request->input('draw')),
@@ -57,7 +70,6 @@ class OutletController extends Controller
             $editUrl = route('outlet.edit', $outlet->id);
             $deleteUrl = route('outlet.destroy', $outlet->id);
 
-            // Tombol aksi dengan tampilan sesuai permintaan
             $actionButtons = '
                 <div class="flex space-x-2 justify-center">
                     <a href="' . $editUrl . '" class="edit-link px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition">Edit</a>
@@ -108,20 +120,37 @@ class OutletController extends Controller
     {
         $currentLembagaId = session('current_lembaga_id');
         
-        // Eager load relasi 'balance' untuk efisiensi query
-        $query = Outlet::where('lembaga_id', $currentLembagaId)->with('balance');
+        // Query dasar dengan JOIN ke tabel outletbalance
+        $query = Outlet::where('outlet.lembaga_id', $currentLembagaId)
+                       ->join('outletbalance', 'outlet.id', '=', 'outletbalance.outlet_id');
 
         if ($request->filled('search.value')) {
             $search = $request->input('search.value');
-            $query->where('name', 'like', "%{$search}%")
-                  ->orWhere('address', 'like', "%{$search}%");
+            $query->where(function ($q) use ($search) {
+                $q->where('outlet.name', 'like', "%{$search}%");
+            });
         }
         
-        // Sorting berdasarkan nama outlet
-        $query->orderBy('name', 'asc');
+        $totalFiltered = (clone $query)->count();
 
-        $totalFiltered = $query->count();
-        $data = $query->offset($request->start)->limit($request->length)->get();
+        // Logika sorting dinamis untuk semua kolom
+        $orderColumnIndex = $request->input('order.0.column', 0);
+        $orderDirection = $request->input('order.0.dir', 'asc');
+        
+        $columns = [
+            0 => 'outlet.name',
+            1 => 'outletbalance.saldo',
+            2 => 'outletbalance.last_updated'
+        ];
+        
+        $orderColumnName = $columns[$orderColumnIndex] ?? 'outlet.name';
+        $query->orderBy($orderColumnName, $orderDirection);
+
+        // Pilih kolom secara eksplisit untuk menghindari ambiguitas
+        $data = $query->select('outlet.*', 'outletbalance.saldo', 'outletbalance.last_updated')
+                      ->offset($request->start)
+                      ->limit($request->length)
+                      ->get();
 
         $jsonData = [
             "draw" => intval($request->input('draw')),
@@ -132,14 +161,15 @@ class OutletController extends Controller
 
         foreach ($data as $outlet) {
             $jsonData['data'][] = [
-                $outlet->name, // Kolom 0: Nama Outlet
-                'Rp ' . number_format($outlet->balance->saldo, 0, ',', '.'), // Kolom 1: Saldo
-                Carbon::parse($outlet->balance->last_updated)->format('d F Y, H:i') // Kolom 2: Terakhir Diperbarui
+                $outlet->name,
+                'Rp ' . number_format($outlet->saldo ?? 0, 0, ',', '.'),
+                $outlet->last_updated ? Carbon::parse($outlet->last_updated)->format('d F Y, H:i') : 'N/A'
             ];
         }
 
         return response()->json($jsonData);
-    }    
+    }   
+    
     /**
      * Menampilkan form untuk membuat outlet baru.
      */
@@ -259,7 +289,6 @@ class OutletController extends Controller
             || $outlet->employees()->exists()
             || $outlet->cashLedgers()->exists();
 
-        // Jika ada relasi dan belum dikonfirmasi untuk force delete
         if ($hasRelasi && !$force) {
             return response()->json([
                 'requiresConfirmation' => true,
@@ -268,7 +297,6 @@ class OutletController extends Controller
         }
 
         try {
-            // Jika force, hapus relasi dulu (opsional)
             if ($force) {
                 $outlet->products()->delete();
                 $outlet->sales()->delete();
@@ -292,5 +320,4 @@ class OutletController extends Controller
             ], 500);
         }
     }
-
 }

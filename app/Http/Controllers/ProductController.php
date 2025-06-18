@@ -29,10 +29,6 @@ class ProductController extends Controller
 
     public function getData(Request $request)
     {
-        // Gunakan 'with' untuk eager loading agar query lebih efisien
-
-        $query = Product::with(['barang', 'kategori', 'outlet']);
-        
         $lembaga_id = session('current_lembaga_id');
 
         $query = Product::with(['barang', 'kategori', 'outlet'])
@@ -61,34 +57,42 @@ class ProductController extends Controller
         }
 
         // Ambil kolom dan arah pengurutan dari request, gunakan default jika tidak ada
-        $orderCol = $request->input('order.0.column');
+        $orderColIndex = $request->input('order.0.column');
         $orderDir = $request->input('order.0.dir', 'asc');
 
         // Map kolom index ke nama kolom database
         $columns = [
-            0 => 'barang_id',
-            1 => 'kategori_id',
-            2 => 'outlet_id',
+            0 => 'barang.nama',
+            1 => 'kategori.nama',
+            2 => 'outlet.name',
             3 => 'harga_jual',
             4 => 'stok',
         ];
-        $orderCol = isset($columns[$orderCol]) ? $columns[$orderCol] : 'id';
+        $orderColName = $columns[$orderColIndex] ?? 'product.id';
 
-        if ($orderCol === 'outlet_id') {
-            $query->join('outlet', 'outlet.id', '=', 'product.outlet_id')
+        // Lakukan join jika sorting berdasarkan nama dari tabel relasi
+        if ($orderColIndex == 0) { // NAMA BARANG
+            $query->join('barang', 'product.barang_id', '=', 'barang.kode_barang')
+                  ->orderBy('barang.nama', $orderDir)
+                  ->select('product.*'); 
+        } elseif ($orderColIndex == 1) { // KATEGORI
+            $query->join('kategori', 'product.kategori_id', '=', 'kategori.id')
+                  ->orderBy('kategori.nama', $orderDir)
+                  ->select('product.*');
+        } elseif ($orderColIndex == 2) { // OUTLET
+            $query->join('outlet', 'product.outlet_id', '=', 'outlet.id')
                 ->orderBy('outlet.name', $orderDir)
-                ->select('product.*'); // ensure product.* is selected after join
+                ->select('product.*');
         } else {
-            $query->orderBy($orderCol, $orderDir);
+            $query->orderBy($orderColName, $orderDir);
         }
 
-
-        $totalFiltered = $query->count();
-        $data = $query->latest()->offset($request->start)->limit($request->length)->get();
+        $totalFiltered = (clone $query)->count();
+        $data = $query->offset($request->start)->limit($request->length)->get();
 
         $jsonData = [
             "draw" => intval($request->input('draw')),
-            "recordsTotal" => Product::count(),
+            "recordsTotal" => Product::whereHas('outlet', function($q) use ($lembaga_id) { $q->where('lembaga_id', $lembaga_id); })->count(),
             "recordsFiltered" => $totalFiltered,
             "data" => []
         ];
