@@ -96,18 +96,16 @@ class ProductController extends Controller
             $dataAction = $product->is_active ? 'non-active' : 'active';
 
             ob_start(); ?>
-                <div class="flex space-x-2">
-                    <a href="<?= $editUrl ?>" class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition edit-link">Edit</a>
+            <div class="flex space-x-2">
+                <a href="<?= $editUrl ?>"
+                    class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition edit-link">Edit</a>
 
-                    <button type="button"
-                        class="px-3 py-1 <?= $toggleColor ?> text-white rounded text-sm transition toggle-status-product-btn"
-                        data-id="<?= $product->id ?>"
-                        data-url="<?= $toggleStatusUrl ?>"
-                        data-action=<?= $dataAction ?>
-                        >
-                        <?= $toggleLabel ?>
-                    </button>
-                </div>
+                <button type="button"
+                    class="px-3 py-1 <?= $toggleColor ?> text-white rounded text-sm transition toggle-status-product-btn"
+                    data-id="<?= $product->id ?>" data-url="<?= $toggleStatusUrl ?>" data-action=<?= $dataAction ?>>
+                    <?= $toggleLabel ?>
+                </button>
+            </div>
             <?php
             $actionButtons = ob_get_clean();
 
@@ -198,7 +196,8 @@ class ProductController extends Controller
                     $selisih = abs($stok_baru - $stok_lama);
                     $tipe_mutasi = ($stok_baru > $stok_lama) ? 'in' : 'out';
 
-                    StockMutation::create([
+                    // Siapkan data untuk dimasukkan ke stockmutation
+                    $data_mutasi = [
                         'product_id' => $produk->id,
                         'outlet_id' => $produk->outlet_id,
                         'quantity' => $selisih,
@@ -206,17 +205,22 @@ class ProductController extends Controller
                         'reference_type' => 'adjustment',
                         'reference_id' => null,
                         'created_at' => now(),
-                    ]);
+                    ];
+
+                    // Simpan mutasi stok
+                    StockMutation::create($data_mutasi);
+
+                    
+
                 }
             });
 
-            // ▼▼▼ GANTI BAGIAN INI ▼▼▼
             return response()->json([
                 'success' => true,
                 'message' => 'Produk berhasil diperbarui!',
                 'redirect' => route('produk-stok.produk.index')
             ]);
-            // ▲▲▲ AKHIR PERUBAHAN ▲▲▲
+
 
         } catch (\Exception $e) {
             Log::error('Gagal update produk: ' . $e->getMessage());
