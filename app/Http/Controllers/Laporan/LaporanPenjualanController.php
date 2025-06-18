@@ -52,7 +52,7 @@ class LaporanPenjualanController extends Controller
                 $query->where('lembaga_id', $lembaga_id);
             });
         
-        $activeOutletId = session('active_outlet_id');
+        $activeOutletId = session('selected_outlet_id');
         if ($activeOutletId && $activeOutletId !== 'all') {
             $query->where('outlet_id', $activeOutletId);
         }

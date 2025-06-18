@@ -57,7 +57,7 @@ class SaleController extends Controller
         });
 
         // 2. Gunakan nama session yang konsisten
-        $activeOutletId = session('active_outlet_id');
+        $activeOutletId = session('selected_outlet_id');
         if ($activeOutletId && $activeOutletId !== 'all') {
             $query->where('sale.outlet_id', $activeOutletId);
         }
