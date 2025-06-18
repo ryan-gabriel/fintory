@@ -18,18 +18,15 @@ class CicilanController extends Controller
      */
     public function index(Request $request)
     {
-        // Data ini akan diteruskan ke view, baik untuk load halaman penuh maupun AJAX
         $viewData = [
             'title' => 'Daftar Hutang & Cicilan',
             'lembaga' => Lembaga::find(session('current_lembaga_id')),
         ];
 
-        // Jika request datang dari AJAX (navigasi internal)
         if ($request->ajax()) {
             return view('keuangan.cicilan', $viewData);
         }
 
-        // Jika request biasa (load halaman penuh)
         return view('layouts.admin', [
             'slot' => view('keuangan.cicilan', $viewData),
             'title' => $viewData['title'],
@@ -39,12 +36,10 @@ class CicilanController extends Controller
 
     /**
      * Menyediakan data untuk DataTables di halaman cicilan.
-     * Logika diubah total untuk mengambil data dari Hutang.
      */
     public function getData(Request $request)
     {
         try {
-            // Kolom yang bisa di-sorting dari database
             $columns = [
                 0 => 'hutang.tanggal_hutang',
                 1 => 'hutang.nama_pemberi_hutang',
@@ -56,26 +51,22 @@ class CicilanController extends Controller
             if (!$currentLembagaId) {
                 return response()->json(["draw" => intval($request->input('draw')), "recordsTotal" => 0, "recordsFiltered" => 0, "data" => []], 400);
             }
-
             $outletIds = Outlet::where('lembaga_id', $currentLembagaId)->pluck('id');
 
-            // Query dasar: Ambil SEMUA HUTANG dari outlet milik lembaga ini.
             $query = Hutang::with(['outlet', 'cicilan' => function ($q) {
-                $q->latest('tanggal_bayar'); // Ambil cicilan terakhir untuk setiap hutang
+                $q->latest('tanggal_bayar');
             }])->whereIn('outlet_id', $outletIds);
 
-            // Filter outlet yang dipilih dari session (jika ada)
             if (session()->has('selected_outlet_id')) {
                 $selectedOutletId = session('selected_outlet_id');
                 if (!empty($selectedOutletId) && $selectedOutletId !== 'all') {
                     $query->where('outlet_id', $selectedOutletId);
                 }
             }
-
+            
             $totalData = $query->clone()->count();
             $totalFiltered = $totalData;
 
-            // Filter berdasarkan pencarian
             if ($request->filled('search.value')) {
                 $search = $request->input('search.value');
                 $query->where(function ($q) use ($search) {
@@ -86,7 +77,6 @@ class CicilanController extends Controller
                 $totalFiltered = $query->clone()->count();
             }
 
-            // Filter tanggal berdasarkan tanggal_hutang
             if ($request->filled('start_date') && $request->filled('end_date')) {
                  try {
                     $startDate = Carbon::createFromFormat('d-m-Y', $request->start_date)->startOfDay();
@@ -98,19 +88,16 @@ class CicilanController extends Controller
                 }
             }
 
-            // Pengurutan data (sorting)
             $orderColumnIndex = $request->input('order.0.column', 0);
             $orderDir = $request->input('order.0.dir', 'desc');
             if (isset($columns[$orderColumnIndex])) {
                 $query->orderBy($columns[$orderColumnIndex], $orderDir);
             }
 
-            // Paginasi
             $start = $request->input('start', 0);
             $length = $request->input('length', 10);
             $hutangData = $query->skip($start)->take($length)->get();
 
-            // Format data untuk dikirim ke frontend
             $formattedData = [];
             foreach ($hutangData as $hutang) {
                 $latestCicilan = $hutang->cicilan->first();
@@ -180,6 +167,7 @@ class CicilanController extends Controller
 
     /**
      * Menyimpan data cicilan baru ke database.
+     * PERUBAHAN UTAMA ADA DI SINI.
      */
     public function store(Request $request)
     {
@@ -192,12 +180,14 @@ class CicilanController extends Controller
         ]);
 
         if ($validator->fails()) {
+            // Mengembalikan error validasi dalam format JSON
             return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
         }
 
         $hutang = Hutang::findOrFail($request->hutang_id);
 
         if (floatval($request->jumlah_bayar) > floatval($hutang->sisa_hutang)) {
+            // Mengembalikan pesan error dalam format JSON
             return response()->json(['success' => false, 'message' => 'Jumlah bayar tidak boleh melebihi sisa hutang.'], 400);
         }
 
@@ -214,6 +204,79 @@ class CicilanController extends Controller
         $hutang->sisa_hutang -= $request->jumlah_bayar;
         $hutang->save();
 
-        return response()->json(['success' => true, 'message' => 'Pembayaran cicilan berhasil ditambahkan', 'redirect' => route('keuangan.cicilan.index')]);
+        // Mengembalikan respon sukses dengan instruksi redirect dalam format JSON
+        return response()->json([
+            'success' => true, 
+            'message' => 'Pembayaran cicilan berhasil ditambahkan', 
+            'redirect' => route('keuangan.cicilan.index')
+        ]);
+    }
+
+    public function edit(Request $request, $id)
+    {
+        $cicilan = Cicilan::with('hutang')->findOrFail($id);
+        $hutangs = Hutang::all();
+        if ($request->ajax()) {
+            return view('keuangan.cicilan-edit', compact('cicilan', 'hutangs'));
+        }
+        return view('layouts.admin', [
+            'slot' => view('keuangan.cicilan-edit', compact('cicilan', 'hutangs')),
+            'title' => 'Edit Cicilan',
+            'lembaga' => Lembaga::find(session('current_lembaga_id')),
+        ]);
+    }
+    
+    public function update(Request $request, $id)
+    {
+        // ... (Kode update Anda sudah benar, menggunakan response()->json()) ...
+        $cicilan = Cicilan::findOrFail($id);
+
+        $validator = Validator::make($request->all(), [
+            'hutang_id' => 'required|exists:hutang,id',
+            'tanggal_bayar' => ['required', function ($attribute, $value, $fail) {
+                try { \Carbon\Carbon::createFromFormat('d-m-Y', $value); } catch (\Exception $e) { $fail('Format tanggal tidak valid. Gunakan format dd-mm-yyyy.'); }
+            }],
+            'jumlah_bayar' => 'required|numeric|min:1',
+            'metode_pembayaran' => 'required|string|max:255',
+            'deskripsi' => 'required|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => $validator->errors()->first(), 'errors' => $validator->errors()], 422);
+        }
+
+        $oldJumlahBayar = $cicilan->jumlah_bayar;
+        $hutang = Hutang::find($cicilan->hutang_id);
+        $tanggalBayar = Carbon::createFromFormat('d-m-Y', $request->tanggal_bayar)->format('Y-m-d');
+
+        $cicilan->fill($request->all());
+        $cicilan->tanggal_bayar = $tanggalBayar;
+        $cicilan->save();
+
+        if ($hutang && $cicilan->wasChanged('hutang_id')) {
+            $hutang->sisa_hutang += $oldJumlahBayar;
+            $hutang->save();
+            $newHutang = Hutang::find($request->hutang_id);
+            if ($newHutang) {
+                $newHutang->sisa_hutang = max(0, $newHutang->sisa_hutang - $request->jumlah_bayar);
+                $newHutang->save();
+            }
+        } elseif ($hutang) {
+            $hutang->sisa_hutang = max(0, $hutang->sisa_hutang + $oldJumlahBayar - $request->jumlah_bayar);
+            $hutang->save();
+        }
+
+        return response()->json(['success' => true, 'message' => 'Cicilan berhasil diupdate.', 'redirect' => route('keuangan.cicilan.index')]);
+    }
+    
+    public function destroy($id)
+    {
+        // ... (Kode destroy Anda sudah benar, menggunakan response()->json()) ...
+        $cicilan = Cicilan::findOrFail($id);
+        $hutang = Hutang::find($cicilan->hutang_id);
+        $hutang->sisa_hutang += $cicilan->jumlah_bayar;
+        $hutang->save();
+        $cicilan->delete();
+        return response()->json(['success' => true, 'message' => 'Cicilan berhasil dihapus.']);
     }
 }
