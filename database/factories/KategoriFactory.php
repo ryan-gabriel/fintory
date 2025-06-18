@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Kategori;
+use App\Models\Lembaga;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class KategoriFactory extends Factory
@@ -23,6 +24,7 @@ class KategoriFactory extends Factory
             // Memilih satu nama secara acak dari daftar di atas
             'nama' => $this->faker->unique()->randomElement($kategori),
             'deskripsi' => $this->faker->sentence(8),
+            'lembaga_id' => Lembaga::first()->id
         ];
     }
 }

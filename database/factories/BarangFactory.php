@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Barang;
+use App\Models\Lembaga;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class BarangFactory extends Factory
@@ -29,6 +30,7 @@ class BarangFactory extends Factory
             // Jika Anda masih ingin jaminan unik, pastikan jumlah kombinasi > jumlah data yang dibuat
             'nama' => $nama_barang,
             'deskripsi' => 'Deskripsi lengkap untuk produk ' . $nama_barang,
+            'lembaga_id' => Lembaga::first()->id
         ];
     }
 }

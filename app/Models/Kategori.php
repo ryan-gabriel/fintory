@@ -22,13 +22,15 @@ class Kategori extends Model
     protected $fillable = [
         'nama',
         'deskripsi',
+        'lembaga_id',
     ];
 
     /**
      * Relasi ke produk yang memiliki kategori ini.
      */
-    public function products()
+
+     public function lembaga()
     {
-        return $this->hasMany(Product::class, 'kategori_id');
+        return $this->belongsTo(Lembaga::class);
     }
 }

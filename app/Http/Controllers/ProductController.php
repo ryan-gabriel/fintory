@@ -133,10 +133,11 @@ class ProductController extends Controller
 
     public function create(Request $request)
     {
+        $lembaga_id = session('current_lembaga_id');
         $data = [
-            'barangs' => Barang::orderBy('nama')->get(),
-            'kategoris' => Kategori::orderBy('nama')->get(),
-            'outlets' => Outlet::where('lembaga_id', session('current_lembaga_id'))->orderBy('name')->get(),
+            'barangs' => Barang::where('lembaga_id', $lembaga_id)->orderBy('nama')->get(),
+            'kategoris' => Kategori::where('lembaga_id', $lembaga_id)->orderBy('nama')->get(),
+            'outlets' => Outlet::where('lembaga_id', $lembaga_id)->orderBy('name')->get(),
         ];
 
         if ($request->ajax()) {
@@ -166,11 +167,12 @@ class ProductController extends Controller
 
     public function edit(Request $request, Product $produk)
     {
+        $lembaga_id = session('current_lembaga_id');
         $data = [
             'produk' => $produk,
-            'barangs' => Barang::orderBy('nama')->get(),
-            'kategoris' => Kategori::orderBy('nama')->get(),
-            'outlets' => Outlet::where('lembaga_id', session('current_lembaga_id'))->orderBy('name')->get(),
+            'barangs' => Barang::where('lembaga_id', $lembaga_id)->orderBy('nama')->get(),
+            'kategoris' => Kategori::where('lembaga_id', $lembaga_id)->orderBy('nama')->get(),
+            'outlets' => Outlet::where('lembaga_id', $lembaga_id)->orderBy('name')->get(),
         ];
 
         if ($request->ajax()) {

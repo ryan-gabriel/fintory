@@ -24,19 +24,9 @@ class KategoriController extends Controller
     public function getData(Request $request)
     {
         $query = Kategori::query();
-
+        
         $lembaga_id = session('current_lembaga_id');
-
-        // ▼▼▼ LOGIKA FILTER BARU ▼▼▼
-        $query = Kategori::query();
-
-        // Terapkan filter: hanya tampilkan kategori yang terhubung ke produk
-        // di dalam outlet milik lembaga yang sedang aktif.
-        $query->whereHas('products', function ($productQuery) use ($lembaga_id) {
-            $productQuery->whereHas('outlet', function ($outletQuery) use ($lembaga_id) {
-                $outletQuery->where('lembaga_id', $lembaga_id);
-            });
-        });
+        $query = Kategori::where('lembaga_id', $lembaga_id); 
         
         if ($request->filled('search.value')) {
             $search = $request->input('search.value');
@@ -97,7 +87,9 @@ class KategoriController extends Controller
         $validated = $request->validate([
             'nama' => 'required|string|max:100|unique:kategori,nama',
             'deskripsi' => 'nullable|string',
+            
         ]);
+        $validated['lembaga_id'] = session('current_lembaga_id'); 
 
         Kategori::create($validated);
 

@@ -32,20 +32,9 @@ class BarangController extends Controller
     public function getData(Request $request)
     {
         $query = Barang::query();
-        
+
         $lembaga_id = session('current_lembaga_id');
-
-        // ▼▼▼ LOGIKA FILTER BARU ▼▼▼
-        // Memulai query ke model Barang
-        $query = Barang::query();
-
-        // Terapkan filter: hanya tampilkan barang yang terhubung ke produk
-        // di dalam outlet milik lembaga yang sedang aktif.
-        $query->whereHas('products', function ($productQuery) use ($lembaga_id) {
-            $productQuery->whereHas('outlet', function ($outletQuery) use ($lembaga_id) {
-                $outletQuery->where('lembaga_id', $lembaga_id);
-            });
-        });
+        $query = Barang::where('lembaga_id', $lembaga_id);
 
         // Filter pencarian
         if ($request->filled('search.value')) {
@@ -125,6 +114,7 @@ class BarangController extends Controller
             'nama' => 'required|string|max:100|unique:barang,nama',
             'deskripsi' => 'nullable|string',
         ]);
+        $validated['lembaga_id'] = session('current_lembaga_id'); // Tambahkan lembaga_id
 
         Barang::create($validated);
 

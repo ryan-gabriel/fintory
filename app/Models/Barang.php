@@ -41,10 +41,11 @@ class Barang extends Model
     protected $fillable = [
         'nama',
         'deskripsi',
+        'lembaga_id',
     ];
 
-    public function products()
+    public function lembaga()
     {
-        return $this->hasMany(Product::class, 'barang_id', 'kode_barang');
+        return $this->belongsTo(Lembaga::class);
     }
 }
