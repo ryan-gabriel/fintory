@@ -110,43 +110,43 @@ class MenuItemSeeder extends Seeder
             'order' => 3,
         ]);
 
-        // Outlet & Karyawan
-        $outletKaryawan = MenuItem::create([
-            'menu_name' => 'Outlet & Karyawan',
+        // Outlet
+        $outletMenu = MenuItem::create([
+            'menu_name' => 'Outlet',
             'icon' => 'fa-solid fa-shop',
             'route' => null,
             'is_parent' => true,
-            'order' => 5,
+            'order' => 4, // Diubah dari 5 menjadi 4
         ]);
 
         MenuItem::create([
             'menu_name' => 'Daftar Outlet',
             'icon' => 'fa-solid fa-store',
-            'route' => '/dashboard/outlet-karyawan', // <-- ROUTE BARU
+            'route' => '/dashboard/outlet-karyawan', 
             'is_parent' => false,
-            'parent_id' => $outletKaryawan->id,
+            'parent_id' => $outletMenu->id,
             'order' => 1,
         ]);
 
         MenuItem::create([
             'menu_name' => 'Saldo Outlet',
             'icon' => 'fa-solid fa-wallet',
-            'route' => '/dashboard/outlet-karyawan/saldo', // <-- Pastikan ini
+            'route' => '/dashboard/outlet-karyawan/saldo',
             'is_parent' => false,
-            'parent_id' => $outletKaryawan->id,
+            'parent_id' => $outletMenu->id,
             'order' => 2,
         ]);
 
-        MenuItem::create([
-            'menu_name' => 'Karyawan',
-            'icon' => 'fa-solid fa-users-line',
-            'route' => '#',
-            'is_parent' => false,
-            'parent_id' => $outletKaryawan->id,
-            'order' => 3,
-        ]);
-
-        // Laporan
+        // Menu "Karyawan" dihapus karena belum berfungsi
+        // MenuItem::create([
+        //     'menu_name' => 'Karyawan',
+        //     'icon' => 'fa-solid fa-users-line',
+        //     'route' => '#',
+        //     'is_parent' => false,
+        //     'parent_id' => $outletMenu->id,
+        //     'order' => 3,
+        // ]);
+        //         // Laporan
         $laporan = MenuItem::create([
             'menu_name' => 'Laporan',
             'icon' => 'fa-solid fa-book',

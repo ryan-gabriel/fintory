@@ -50,11 +50,11 @@ class MenuRolesSeeder extends Seeder
             'Hutang' => [$superRole->id, $adminRole->id, $keuanganRole->id, $managerRole->id],
             'Cicilan' => [$superRole->id, $adminRole->id, $keuanganRole->id, $managerRole->id],
             
-            // Outlet & Karyawan and its children - accessible by super and admin only
-            'Outlet & Karyawan' => [$superRole->id, $adminRole->id],
+            // Outlet and its children - accessible by super and admin only
+            'Outlet' => [$superRole->id, $adminRole->id], // Diubah dari 'Outlet & Karyawan'
             'Daftar Outlet' => [$superRole->id, $adminRole->id],
             'Saldo Outlet' => [$superRole->id, $adminRole->id],
-            'Karyawan' => [$superRole->id, $adminRole->id],
+            // 'Karyawan' => [$superRole->id, $adminRole->id], // Dihapus
             
             // Laporan and its children - accessible by all except employee
             'Laporan' => [$superRole->id, $adminRole->id, $keuanganRole->id, $managerRole->id, $viewerRole->id],
