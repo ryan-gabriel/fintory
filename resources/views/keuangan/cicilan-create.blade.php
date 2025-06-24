@@ -51,7 +51,7 @@
                 <div>
                     <label for="jumlah_bayar" class="block mb-2 text-gray-900 dark:text-white">Jumlah Bayar Cicilan</label>
                     <div class="flex items-center gap-2">
-                        <input type="number" id="jumlah_bayar" name="jumlah_bayar" min="1" step="1"
+                        <input type="number" id="jumlah_bayar" name="jumlah_bayar" min="1" step="any"
                             class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
                             required>
                         <button type="button" id="btn-bayar-full" class="px-3 text-nowrap py-2 text-sm bg-blue-600 text-white rounded-md">Bayar Full</button>

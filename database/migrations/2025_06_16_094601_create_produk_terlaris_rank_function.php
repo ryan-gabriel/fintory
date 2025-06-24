@@ -19,7 +19,7 @@ return new class extends Migration
                 si.product_id,
                 COALESCE(b.nama, "Produk Tidak Diketahui") AS product_name,
                 o.lembaga_id AS lembaga_id,
-                p.outlet_id AS outlet_id, -- ✅ Tambahkan outlet_id
+                p.outlet_id AS outlet_id,
                 SUM(si.quantity) AS total_qty,
                 RANK() OVER (PARTITION BY o.lembaga_id ORDER BY SUM(si.quantity) DESC) AS rank_num
             FROM saleitem si

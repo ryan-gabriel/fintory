@@ -20,7 +20,7 @@ class CicilanController extends Controller
     public function index(Request $request)
     {
         $viewData = [
-            'title' => 'Daftar Hutang & Cicilan',
+            'title' => 'Daftar Cicilan',
             'lembaga' => Lembaga::find(session('current_lembaga_id')),
         ];
 

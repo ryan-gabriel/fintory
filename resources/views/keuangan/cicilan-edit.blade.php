@@ -11,7 +11,7 @@
                 Kembali
             </a>
 
-            <h1 class="text-2xl font-semibold mb-5">Tambah Cicilan</h1>
+            <h1 class="text-2xl font-semibold mb-5">Edit Cicilan</h1>
             <form action="/dashboard/keuangan/cicilan/{{ $cicilan->id }}" method="POST" class="space-y-6" id="form-edit">
                 @csrf
                 @method('PATCH')
@@ -53,7 +53,7 @@
                 <div>
                     <label for="jumlah_bayar" class="block mb-2 text-gray-900 dark:text-white">Jumlah Bayar Cicilan</label>
                     <div class="flex items-center gap-2">
-                        <input type="number" id="jumlah_bayar" name="jumlah_bayar" min="1" step="1"
+                        <input type="number" id="jumlah_bayar" name="jumlah_bayar" min="1"
                             class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
                             required value="{{ old('jumlah_bayar', $cicilan->jumlah_bayar) }}">
                         <button type="button" id="btn-bayar-full"

@@ -192,19 +192,19 @@ class MenuItemSeeder extends Seeder
         ]);
 
         // Untuk Manajemen User & Role
-        MenuItem::create([
-            'menu_name' => 'Manajemen User & Role',
-            'icon' => 'fa-solid fa-users-gear',
-            'route' => '/dashboard/admin/user-management',
-            'is_parent' => false,
-            'parent_id' => $pengaturan->id,
-            'order' => 1,
-        ]);
+        // MenuItem::create([
+        //     'menu_name' => 'Manajemen User & Role',
+        //     'icon' => 'fa-solid fa-users-gear',
+        //     'route' => '/dashboard/admin/user-management',
+        //     'is_parent' => false,
+        //     'parent_id' => $pengaturan->id,
+        //     'order' => 1,
+        // ]);
 
         MenuItem::create([
             'menu_name' => 'Manajemen Role & Menu',
-            'icon' => 'fa-solid fa-list-ul',
-            'route' => '/dashboard/admin/menu',
+            'icon' => 'fa-solid fa-users-gear',
+            'route' => '/dashboard/admin/user-management',
             'is_parent' => false,
             'parent_id' => $pengaturan->id,
             'order' => 2,
