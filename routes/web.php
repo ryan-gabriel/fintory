@@ -14,7 +14,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LogAktivitasController;
 use App\Models\Product;
 use App\Models\Sale;
-use App\Http\Controllers\UserManagementController; // Tambahkan ini
+use App\Http\Controllers\UserManagementController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OutletController;
 use App\Http\Controllers\SaldoOutletController;
@@ -23,14 +23,36 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Note: we do NOT put `role.selected` on the "welcome" or login pages.
+// Basic authenticated routes without menu access control
+Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
+    // Dashboard - basic functionality, no menu restriction needed
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
+    // API routes for dashboard
+    Route::get('/api/sales-last-7-days', [DashboardController::class, 'getSalesLast7Days'])->name('api.sales.last7days');
+    Route::get('/api/best-seller-products', [DashboardController::class, 'bestSellerProducts'])->name('api.sales.best-seller');
 
-Route::middleware(['auth'])->prefix('dashboard')->group(function () {
-    // Redirect to the dashboard if the user is authenticated
-    Route::get('/outlet-saldo', [OutletController::class, 'showSaldoReport'])->name('outlet.saldo');
+    // Profile Management - basic user functionality
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Set outlet - basic functionality
+    Route::post('/dashboard/set-outlet', function (\Illuminate\Http\Request $request) {
+        $request->validate([
+            'selected_outlet_id' => 'required',
+        ]);
+        session(['selected_outlet_id' => $request->input('selected_outlet_id')]);
+        return response()->json(['status' => 'success']);
+    })->name('dashboard.set-outlet');
+
+    // Debugging routes
+    Route::get('/debug/session', function() {
+        dd(session()->all());
+    })->name('debug.session');
 });
 
-// But we do want it on dashboard + all child routes with menu access control.
+// Routes that require menu access control
 Route::middleware(['auth', 'verified', 'role.selected', 'menu.access'])->group(function () {
 
     // Outlet & Karyawan Management
@@ -45,31 +67,6 @@ Route::middleware(['auth', 'verified', 'role.selected', 'menu.access'])->group(f
         Route::get('/saldo', [OutletController::class, 'saldoIndex'])->name('saldo.index');
         Route::get('/saldo/data', [OutletController::class, 'getSaldoData'])->name('saldo.data');
     });
-
-    // Dashboard (now guarded by role.selected and menu.access)
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-    // Debugging route
-    Route::get('/debug/session', function() {
-        dd(session()->all());
-    })->name('debug.session');
-    
-
-    Route::get('/api/sales-last-7-days', [DashboardController::class, 'getSalesLast7Days'])->name('api.sales.last7days');
-    Route::get('/api/best-seller-products', [DashboardController::class, 'bestSellerProducts'])->name('api.sales.best-seller');
-
-    // Profile Management
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-    Route::post('/dashboard/set-outlet', function (\Illuminate\Http\Request $request) {
-        $request->validate([
-            'selected_outlet_id' => 'required',
-        ]);
-        session(['selected_outlet_id' => $request->input('selected_outlet_id')]);
-        return response()->json(['status' => 'success']);
-    })->name('dashboard.set-outlet');
 
     // Keuangan Management
     Route::prefix('dashboard/keuangan')->name('keuangan.')->group(function () {
@@ -100,75 +97,35 @@ Route::middleware(['auth', 'verified', 'role.selected', 'menu.access'])->group(f
 
     // Produk Management
     Route::prefix('dashboard/produk-stok')->name('produk-stok.')->group(function () {
-        // Rute untuk Barang
         Route::get('barang/data', [\App\Http\Controllers\BarangController::class, 'getData'])->name('barang.data');
         Route::resource('barang', \App\Http\Controllers\BarangController::class)->except(['show']);
 
-        // Rute untuk Kategori
         Route::get('kategori/data', [\App\Http\Controllers\KategoriController::class, 'getData'])->name('kategori.data');
         Route::resource('kategori', \App\Http\Controllers\KategoriController::class)->except(['show']);
 
-        // Rute untuk Produk
         Route::get('produk/data', [\App\Http\Controllers\ProductController::class, 'getData'])->name('produk.data');
         Route::resource('produk', \App\Http\Controllers\ProductController::class)->except(['show']);
         Route::post('produk/non-active', [\App\Http\Controllers\ProductController::class, 'nonActive'])->name('produk.non-active');
         Route::post('produk/active', [\App\Http\Controllers\ProductController::class, 'active'])->name('produk.active');
 
-
-        // Rute untuk Mutasi Stok
         Route::get('mutasi', [\App\Http\Controllers\StockMutationController::class, 'index'])->name('mutasi.index');
         Route::get('mutasi/data', [\App\Http\Controllers\StockMutationController::class, 'getData'])->name('mutasi.data');
     });
 
     // Penjualan Management
     Route::prefix('dashboard/penjualan')->name('penjualan.')->group(function () {
-        // Rute untuk Riwayat Penjualan
         Route::get('/data', [SaleController::class, 'getData'])->name('data');
         Route::get('/', [SaleController::class, 'index'])->name('index');
         Route::get('/create', [SaleController::class, 'create'])->name('create');
         Route::post('/', [SaleController::class, 'store'])->name('store');
         Route::get('/produk/search', [SaleController::class, 'getProductsByOutlet'])->name('produk.search');
         Route::get('/{penjualan}', [SaleController::class, 'show'])->name('show');
-
     });
 
     // Laporan Management
     Route::prefix('dashboard/laporan')->name('laporan.')->group(function () {
         Route::get('/penjualan', [\App\Http\Controllers\Laporan\LaporanPenjualanController::class, 'index'])->name('penjualan.index');
         Route::get('/penjualan/data', [\App\Http\Controllers\Laporan\LaporanPenjualanController::class, 'getData'])->name('penjualan.data');
-    });
-
-    // Admin Management
-    Route::prefix('dashboard/admin')->name('admin.')->group(function () {
-
-        // Menu Management
-        Route::resource('menu', MenuController::class);
-        Route::patch('menu/{menu}/toggle-status', [MenuController::class, 'toggleStatus'])
-            ->name('menu.toggleStatus');
-        Route::post('menu/update-order', [MenuController::class, 'updateOrder'])
-            ->name('menu.updateOrder');
-        Route::get('menu/{menu}/manage-roles', [MenuController::class, 'manageRoles'])
-            ->name('menu.manageRoles');
-        Route::patch('menu/{menu}/update-roles', [MenuController::class, 'updateRoles'])
-            ->name('menu.updateRoles');
-
-        // User Management
-        Route::prefix('user-management')->name('user-management.')->group(function () {
-            Route::get('/', [UserManagementController::class, 'index'])->name('index');
-            Route::get('/data', [UserManagementController::class, 'getData'])->name('data');
-            Route::get('/create', [UserManagementController::class, 'create'])->name('create');
-            Route::post('/', [UserManagementController::class, 'store'])->name('store');
-            Route::get('/{id}/edit', [UserManagementController::class, 'edit'])->name('edit');
-            Route::put('/{id}', [UserManagementController::class, 'update'])->name('update');
-            Route::delete('/{id}', [UserManagementController::class, 'destroy'])->name('destroy');
-            Route::post('/{id}/reset-password', [UserManagementController::class, 'resetPassword'])->name('reset-password');
-            //debug
-            Route::get('/debug', [UserManagementController::class, 'debug'])->name('debug');
-        });
-    });
-
-    // Produk Management
-    Route::prefix('dashboard/laporan')->name('laporan.')->group(function () {
 
         Route::prefix('stok')->name('stok.')->group(function () {
             Route::get('/mutasi-stok/data', [MutasiStokController::class, 'getData'])->name('mutasi-stok.data');
@@ -184,26 +141,42 @@ Route::middleware(['auth', 'verified', 'role.selected', 'menu.access'])->group(f
         Route::get('/keuangan/{id}', [LaporanKeuanganController::class, 'show'])->name('keuangan.show');
     });
     
+    // Log Aktivitas
     Route::prefix('dashboard/log-aktivitas')->name('log-aktivitas.')->group(function () {
         Route::get('/', [LogAktivitasController::class, 'index'])->name('index');
         Route::get('/data', [LogAktivitasController::class, 'getData'])->name('data');
     });
 
-    // Rute untuk Saldo Outlet
+    // Admin Management
+    Route::prefix('dashboard/admin')->name('admin.')->group(function () {
+        Route::resource('menu', MenuController::class);
+        Route::patch('menu/{menu}/toggle-status', [MenuController::class, 'toggleStatus'])->name('menu.toggleStatus');
+        Route::post('menu/update-order', [MenuController::class, 'updateOrder'])->name('menu.updateOrder');
+        Route::get('menu/{menu}/manage-roles', [MenuController::class, 'manageRoles'])->name('menu.manageRoles');
+        Route::patch('menu/{menu}/update-roles', [MenuController::class, 'updateRoles'])->name('menu.updateRoles');
+
+        Route::prefix('user-management')->name('user-management.')->group(function () {
+            Route::get('/', [UserManagementController::class, 'index'])->name('index');
+            Route::get('/data', [UserManagementController::class, 'getData'])->name('data');
+            Route::get('/create', [UserManagementController::class, 'create'])->name('create');
+            Route::post('/', [UserManagementController::class, 'store'])->name('store');
+            Route::get('/{id}/edit', [UserManagementController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [UserManagementController::class, 'update'])->name('update');
+            Route::delete('/{id}', [UserManagementController::class, 'destroy'])->name('destroy');
+            Route::post('/{id}/reset-password', [UserManagementController::class, 'resetPassword'])->name('reset-password');
+            Route::get('/debug', [UserManagementController::class, 'debug'])->name('debug');
+        });
+    });
+
+    // Saldo Outlet
     Route::get('/dashboard/saldo-outlet', [SaldoOutletController::class, 'index'])->name('saldo-outlet.index');
     Route::get('/dashboard/saldo-outlet/data', [SaldoOutletController::class, 'getData'])->name('saldo-outlet.data');
 });
 
-// These two "choose-role" routes must be reachable whenever a user is logged in
-// but has not yet selected a role. We only protect them by 'auth'.
+// Role choice routes
 Route::middleware('auth')->group(function () {
-    // Show the "choose your role & lembaga" form
-    Route::get('/choose-role', [RoleChoiceController::class, 'show'])
-        ->name('auth.choose_role');
-
-    // Handle the form submission for choosing one combination
-    Route::post('/choose-role', [RoleChoiceController::class, 'pick'])
-        ->name('auth.pick_role');
+    Route::get('/choose-role', [RoleChoiceController::class, 'show'])->name('auth.choose_role');
+    Route::post('/choose-role', [RoleChoiceController::class, 'pick'])->name('auth.pick_role');
 });
 
 require __DIR__ . '/auth.php';

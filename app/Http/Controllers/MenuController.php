@@ -82,6 +82,9 @@ class MenuController extends Controller
             $menuItem->roles()->attach($validated['roles']);
         }
 
+        // Clear menu cache
+        MenuItem::clearAllMenuCache();
+
         return redirect()->route('menu.index')
             ->with('success', 'Menu item created successfully.');
     }
@@ -147,11 +150,10 @@ class MenuController extends Controller
         $menu->update($validated);
 
         // Sync roles
-        if (isset($validated['roles'])) {
-            $menu->roles()->sync($validated['roles']);
-        } else {
-            $menu->roles()->detach();
-        }
+        $menu->roles()->sync($validated['roles'] ?? []);
+
+        // Clear menu cache
+        MenuItem::clearAllMenuCache();
 
         return redirect()->route('menu.index')
             ->with('success', 'Menu item updated successfully.');
@@ -174,6 +176,9 @@ class MenuController extends Controller
         // Detach roles before deleting
         $menu->roles()->detach();
         $menu->delete();
+
+        // Clear menu cache
+        MenuItem::clearAllMenuCache();
 
         return redirect()->route('menu.index')
             ->with('success', 'Menu item deleted successfully.');
@@ -257,6 +262,9 @@ class MenuController extends Controller
         ]);
 
         $menu->roles()->sync($validated['roles'] ?? []);
+
+        // Clear menu cache
+        MenuItem::clearAllMenuCache();
 
         return redirect()->route('menu.index')
             ->with('success', 'Menu roles updated successfully.');
