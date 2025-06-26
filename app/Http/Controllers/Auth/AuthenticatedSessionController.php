@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use App\Models\Lembaga;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -28,7 +29,8 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // Call our custom authenticated logic
+        return $this->authenticated($request, Auth::user());
     }
 
     /**
@@ -52,21 +54,20 @@ class AuthenticatedSessionController extends Controller
         $count = $combos->count();
 
         if ($count === 0) {
-            // no assignment—log them out or show “no roles assigned” page
+            // Set default session values for users without roles
+            $request->session()->put('current_lembaga_id', null);
+            $request->session()->put('current_role_id', null);
+            $request->session()->put('current_subscription_status', null);
+            $request->session()->put('current_subscription_tier', null);
+            $request->session()->put('current_subscription_is_active', false);
+            
+            // no assignment—log them out or show "no roles assigned" page
             auth()->logout();
             return redirect()->route('login')
                 ->withErrors(['You have no role assignment in any lembaga.']);
         }
-        elseif ($count === 1) {
-            // Exactly one assignment: automatically pick that
-            $pivot = $combos->first()->pivot;
-            $request->session()->put('current_lembaga_id', $pivot->lembaga_id);
-            $request->session()->put('current_role_id', $pivot->role_id);
-
-            return redirect()->route('dashboard');
-        }
         else {
-            // More than one assignment → send them to “choose your role” page
+            // Send them to "choose your role" page regardless of count
             return redirect()->route('auth.choose_role');
         }
     }

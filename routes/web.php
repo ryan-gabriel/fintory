@@ -48,6 +48,13 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
 
     // Dashboard (now guarded by role.selected)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Debugging route
+    Route::get('/debug/session', function() {
+        dd(session()->all());
+    })->name('debug.session');
+    
+
     Route::get('/api/sales-last-7-days', [DashboardController::class, 'getSalesLast7Days'])->name('api.sales.last7days');
     Route::get('/api/best-seller-products', [DashboardController::class, 'bestSellerProducts'])->name('api.sales.best-seller');
 
