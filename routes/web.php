@@ -30,8 +30,8 @@ Route::middleware(['auth'])->prefix('dashboard')->group(function () {
     Route::get('/outlet-saldo', [OutletController::class, 'showSaldoReport'])->name('outlet.saldo');
 });
 
-// But we do want it on dashboard + all child routes.
-Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
+// But we do want it on dashboard + all child routes with menu access control.
+Route::middleware(['auth', 'verified', 'role.selected', 'menu.access'])->group(function () {
 
     // Outlet & Karyawan Management
     Route::prefix('dashboard/outlet-karyawan')->name('outlet.')->group(function () {
@@ -46,7 +46,7 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
         Route::get('/saldo/data', [OutletController::class, 'getSaldoData'])->name('saldo.data');
     });
 
-    // Dashboard (now guarded by role.selected)
+    // Dashboard (now guarded by role.selected and menu.access)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Debugging route
@@ -188,6 +188,10 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
         Route::get('/', [LogAktivitasController::class, 'index'])->name('index');
         Route::get('/data', [LogAktivitasController::class, 'getData'])->name('data');
     });
+
+    // Rute untuk Saldo Outlet
+    Route::get('/dashboard/saldo-outlet', [SaldoOutletController::class, 'index'])->name('saldo-outlet.index');
+    Route::get('/dashboard/saldo-outlet/data', [SaldoOutletController::class, 'getData'])->name('saldo-outlet.data');
 });
 
 // These two "choose-role" routes must be reachable whenever a user is logged in
@@ -200,15 +204,6 @@ Route::middleware('auth')->group(function () {
     // Handle the form submission for choosing one combination
     Route::post('/choose-role', [RoleChoiceController::class, 'pick'])
         ->name('auth.pick_role');
-});
-
-Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
-    // ... (rute-rute yang sudah ada)
-
-    // Rute untuk Saldo Outlet
-    Route::get('/dashboard/saldo-outlet', [SaldoOutletController::class, 'index'])->name('saldo-outlet.index');
-    Route::get('/dashboard/saldo-outlet/data', [SaldoOutletController::class, 'getData'])->name('saldo-outlet.data');
-
 });
 
 require __DIR__ . '/auth.php';

@@ -22,6 +22,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // 2) Register your custom “role.selected” middleware with a single‐array call:
         $middleware->alias([
             'role.selected' => \App\Http\Middleware\EnsureRoleSelected::class,
+            'menu.access' => \App\Http\Middleware\CheckMenuAccess::class,
+
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
