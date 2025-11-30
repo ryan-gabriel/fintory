@@ -8,17 +8,16 @@ use Illuminate\Support\Facades\DB;
 
 class MenuItemSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Clear existing menu items safely
+        // Hapus relasi dulu
         DB::table('menu_roles')->delete();
+
+        // Hapus data menu
         MenuItem::query()->delete();
 
-        // Reset auto increment
-        DB::statement('ALTER TABLE menu_items AUTO_INCREMENT = 1');
+        // Reset ID sequence PostgreSQL
+        DB::statement("ALTER SEQUENCE menu_items_id_seq RESTART WITH 1");
 
         // Dashboard
         $dashboard = MenuItem::create([
@@ -33,7 +32,7 @@ class MenuItemSeeder extends Seeder
         $penjualan = MenuItem::create([
             'menu_name' => 'Penjualan',
             'icon' => 'fa-solid fa-magnifying-glass-chart',
-            'route' => '/dashboard/penjualan', // <-- UBAH INI
+            'route' => '/dashboard/penjualan',
             'is_parent' => false,
             'order' => 2,
         ]);
@@ -116,13 +115,13 @@ class MenuItemSeeder extends Seeder
             'icon' => 'fa-solid fa-shop',
             'route' => null,
             'is_parent' => true,
-            'order' => 4, // Diubah dari 5 menjadi 4
+            'order' => 5,
         ]);
 
         MenuItem::create([
             'menu_name' => 'Daftar Outlet',
             'icon' => 'fa-solid fa-store',
-            'route' => '/dashboard/outlet-karyawan', 
+            'route' => '/dashboard/outlet-karyawan',
             'is_parent' => false,
             'parent_id' => $outletMenu->id,
             'order' => 1,
@@ -137,16 +136,7 @@ class MenuItemSeeder extends Seeder
             'order' => 2,
         ]);
 
-        // Menu "Karyawan" dihapus karena belum berfungsi
-        // MenuItem::create([
-        //     'menu_name' => 'Karyawan',
-        //     'icon' => 'fa-solid fa-users-line',
-        //     'route' => '#',
-        //     'is_parent' => false,
-        //     'parent_id' => $outletMenu->id,
-        //     'order' => 3,
-        // ]);
-        //         // Laporan
+        // Laporan
         $laporan = MenuItem::create([
             'menu_name' => 'Laporan',
             'icon' => 'fa-solid fa-book',
@@ -191,16 +181,6 @@ class MenuItemSeeder extends Seeder
             'order' => 7,
         ]);
 
-        // Untuk Manajemen User & Role
-        // MenuItem::create([
-        //     'menu_name' => 'Manajemen User & Role',
-        //     'icon' => 'fa-solid fa-users-gear',
-        //     'route' => '/dashboard/admin/user-management',
-        //     'is_parent' => false,
-        //     'parent_id' => $pengaturan->id,
-        //     'order' => 1,
-        // ]);
-
         MenuItem::create([
             'menu_name' => 'Manajemen Role & Menu',
             'icon' => 'fa-solid fa-users-gear',
@@ -219,7 +199,7 @@ class MenuItemSeeder extends Seeder
             'order' => 3,
         ]);
 
-        // Log Aktivitas
+	// Log Aktivitas
         MenuItem::create([
             'menu_name' => 'Log Aktivitas',
             'icon' => 'fa-solid fa-timeline',

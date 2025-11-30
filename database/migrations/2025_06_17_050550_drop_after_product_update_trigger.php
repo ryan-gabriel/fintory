@@ -7,14 +7,14 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Hapus trigger yang menyebabkan duplikasi
-        DB::unprepared('DROP TRIGGER IF EXISTS `after_product_update_handle_stock_adjustment`');
+        // Hapus trigger PostgreSQL (wajib sebutkan nama tabelnya)
+        DB::unprepared('
+            DROP TRIGGER IF EXISTS after_product_update_handle_stock_adjustment ON product;
+        ');
     }
 
     public function down(): void
     {
-        // (Opsional) Jika Anda ingin bisa rollback, Anda bisa menaruh kode
-        // untuk membuat trigger lama di sini. Tapi untuk kasus ini, lebih aman menghapusnya saja.
-        // DB::unprepared('CREATE TRIGGER ...'); // Kode trigger lama
+        // Tidak membuat ulang trigger
     }
 };

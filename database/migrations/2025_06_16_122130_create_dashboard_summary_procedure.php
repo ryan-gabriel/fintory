@@ -5,72 +5,73 @@ use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        DB::unprepared('
-            DROP PROCEDURE IF EXISTS `GetDashboardSummary`
-        ');
+        DB::unprepared('DROP FUNCTION IF EXISTS GetDashboardSummary(INT, INT)');
 
-        DB::unprepared('
-            CREATE PROCEDURE `GetDashboardSummary`(
-                IN p_lembaga_id INT,
-                IN p_outlet_id INT UNSIGNED
+        DB::unprepared("
+            CREATE OR REPLACE FUNCTION GetDashboardSummary(
+                p_lembaga_id INT,
+                p_outlet_id INT
             )
+            RETURNS TABLE (
+                total_sales_today NUMERIC,
+                total_transactions_today INT,
+                active_products INT,
+                low_stock_products INT
+            )
+            LANGUAGE plpgsql
+            AS $$
             BEGIN
+                RETURN QUERY
                 SELECT
-                    -- Total Penjualan Hari Ini
-                    (
-                        SELECT IFNULL(SUM(s.total), 0)
+                    -- Total penjualan hari ini
+                    COALESCE((
+                        SELECT SUM(s.total)
                         FROM sale s
                         JOIN outlet o ON s.outlet_id = o.id
                         WHERE o.lembaga_id = p_lembaga_id
-                        AND DATE(s.sale_date) = CURDATE()
+                        AND s.sale_date::date = CURRENT_DATE
                         AND (p_outlet_id IS NULL OR s.outlet_id = p_outlet_id)
-                    ) AS total_sales_today,
+                    ), 0) AS total_sales_today,
 
-                    -- Total Transaksi Hari Ini
-                    (
+                    -- Total transaksi hari ini
+                    COALESCE((
                         SELECT COUNT(s.id)
                         FROM sale s
                         JOIN outlet o ON s.outlet_id = o.id
                         WHERE o.lembaga_id = p_lembaga_id
-                        AND DATE(s.sale_date) = CURDATE()
+                        AND s.sale_date::date = CURRENT_DATE
                         AND (p_outlet_id IS NULL OR s.outlet_id = p_outlet_id)
-                    ) AS total_transactions_today,
+                    ), 0) AS total_transactions_today,
 
-                    -- Total Produk Aktif
-                    (
+                    -- Produk aktif
+                    COALESCE((
                         SELECT COUNT(p.id)
                         FROM product p
                         JOIN outlet o ON p.outlet_id = o.id
                         WHERE o.lembaga_id = p_lembaga_id
-                        AND p.is_active = 1
+                        AND p.is_active = TRUE
                         AND (p_outlet_id IS NULL OR p.outlet_id = p_outlet_id)
-                    ) AS active_products,
+                    ), 0) AS active_products,
 
-                    -- Produk dengan Stok Rendah
-                    (
+                    -- Produk stok rendah
+                    COALESCE((
                         SELECT COUNT(p.id)
                         FROM product p
                         JOIN outlet o ON p.outlet_id = o.id
                         WHERE o.lembaga_id = p_lembaga_id
-                        AND p.is_active = 1
+                        AND p.is_active = TRUE
                         AND p.stok < 10
                         AND (p_outlet_id IS NULL OR p.outlet_id = p_outlet_id)
-                    ) AS low_stock_products;
-            END
-        ');
-
+                    ), 0) AS low_stock_products;
+            END;
+            $$;
+        ");
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        DB::unprepared('DROP PROCEDURE IF EXISTS `GetDashboardSummary`');
+        DB::unprepared('DROP FUNCTION IF EXISTS GetDashboardSummary(INT, INT)');
     }
 };

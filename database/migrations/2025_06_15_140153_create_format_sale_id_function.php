@@ -5,29 +5,26 @@ use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     * Method ini akan membuat Stored Function di database.
-     */
     public function up(): void
     {
-        DB::unprepared('DROP FUNCTION IF EXISTS `FormatSaleID`');
+        // Hapus function jika sudah ada
+        DB::unprepared('DROP FUNCTION IF EXISTS FormatSaleID(INT)');
+
+        // Buat ulang dengan syntax PostgreSQL
         DB::unprepared('
-            CREATE FUNCTION `FormatSaleID` (sale_id INT)
+            CREATE OR REPLACE FUNCTION FormatSaleID(sale_id INT)
             RETURNS VARCHAR(15)
-            DETERMINISTIC
+            LANGUAGE plpgsql
+            AS $$
             BEGIN
-                RETURN CONCAT("TRX-", LPAD(sale_id, 5, "0"));
-            END
+                RETURN \'TRX-\' || LPAD(sale_id::text, 5, \'0\');
+            END;
+            $$;
         ');
     }
 
-    /**
-     * Reverse the migrations.
-     * Method ini akan menghapus Stored Function dari database.
-     */
     public function down(): void
     {
-        DB::unprepared('DROP FUNCTION IF EXISTS `FormatSaleID`');
+        DB::unprepared('DROP FUNCTION IF EXISTS FormatSaleID(INT)');
     }
 };

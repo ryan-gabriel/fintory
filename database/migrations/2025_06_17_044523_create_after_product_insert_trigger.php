@@ -4,39 +4,49 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
 return new class extends Migration {
-    /**
-     * Run the migrations.
-     * Method ini akan membuat Trigger di database.
-     */
+
     public function up(): void
     {
-        DB::unprepared('
-            CREATE TRIGGER `after_product_insert_handle_stock`
-            AFTER INSERT ON `product`
-            FOR EACH ROW
+        // Hapus trigger & function jika sudah ada
+        DB::unprepared('DROP TRIGGER IF EXISTS after_product_insert_handle_stock ON product;');
+        DB::unprepared('DROP FUNCTION IF EXISTS after_product_insert_handle_stock();');
+
+        // Buat function PostgreSQL
+        DB::unprepared("
+            CREATE OR REPLACE FUNCTION after_product_insert_handle_stock()
+            RETURNS TRIGGER
+            LANGUAGE plpgsql
+            AS $$
             BEGIN
-                -- Hanya jalankan jika stok awal yang di-input lebih dari 0
+                -- Jalankan hanya jika stok awal > 0
                 IF NEW.stok > 0 THEN
-                    -- 1. Buat catatan di tabel stockmutation sebagai "pembelian" awal
-                    INSERT INTO `stockmutation` (
-                        `product_id`, `outlet_id`, `quantity`, `type`,
-                        `reference_type`, `reference_id`, `created_at`, `updated_at`
+                    INSERT INTO stockmutation (
+                        product_id, outlet_id, quantity, type,
+                        reference_type, reference_id, created_at, updated_at
                     )
                     VALUES (
-                        NEW.id, NEW.outlet_id, NEW.stok, "in",
-                        "purchase", NULL, NOW(), NOW()
+                        NEW.id, NEW.outlet_id, NEW.stok, 'in',
+                        'purchase', NULL, NOW(), NOW()
                     );
                 END IF;
-            END
-        ');
+
+                RETURN NEW;
+            END;
+            $$;
+        ");
+
+        // Buat trigger PostgreSQL
+        DB::unprepared("
+            CREATE TRIGGER after_product_insert_handle_stock
+            AFTER INSERT ON product
+            FOR EACH ROW
+            EXECUTE FUNCTION after_product_insert_handle_stock();
+        ");
     }
 
-    /**
-     * Reverse the migrations.
-     * Method ini akan menghapus Trigger.
-     */
     public function down(): void
     {
-        DB::unprepared('DROP TRIGGER IF EXISTS `after_product_insert_handle_stock`');
+        DB::unprepared('DROP TRIGGER IF EXISTS after_product_insert_handle_stock ON product;');
+        DB::unprepared('DROP FUNCTION IF EXISTS after_product_insert_handle_stock();');
     }
 };
