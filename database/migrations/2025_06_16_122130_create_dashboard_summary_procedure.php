@@ -37,7 +37,7 @@ return new class extends Migration
 
                     -- Total transaksi hari ini
                     COALESCE((
-                        SELECT COUNT(s.id)
+                        SELECT COUNT(s.id)::INTEGER
                         FROM sale s
                         JOIN outlet o ON s.outlet_id = o.id
                         WHERE o.lembaga_id = p_lembaga_id
@@ -47,7 +47,7 @@ return new class extends Migration
 
                     -- Produk aktif
                     COALESCE((
-                        SELECT COUNT(p.id)
+                        SELECT COUNT(p.id)::INTEGER
                         FROM product p
                         JOIN outlet o ON p.outlet_id = o.id
                         WHERE o.lembaga_id = p_lembaga_id
@@ -57,7 +57,7 @@ return new class extends Migration
 
                     -- Produk stok rendah
                     COALESCE((
-                        SELECT COUNT(p.id)
+                        SELECT COUNT(p.id)::INTEGER
                         FROM product p
                         JOIN outlet o ON p.outlet_id = o.id
                         WHERE o.lembaga_id = p_lembaga_id

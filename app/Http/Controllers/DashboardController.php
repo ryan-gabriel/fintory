@@ -35,9 +35,14 @@ class DashboardController extends Controller
 
         // === Stored Procedure Summary (Cached) ===
         $dashboardData = Cache::remember($summaryCacheKey, $cacheDuration, function () use ($lembagaId, $resolvedOutletId) {
-            $summary = DB::select('CALL GetDashboardSummary(?, ?)', [$lembagaId, $resolvedOutletId]);
+            $summary = DB::select('SELECT * FROM getDashboardSummary(?, ?)', [
+                $lembagaId,
+                $resolvedOutletId
+            ]);
+
             return $summary[0] ?? null;
         });
+
 
         // === Total Penjualan 7 Hari Terakhir (Cached) ===
         $totalSalesLast7Days = Cache::remember($totalSales7DaysCacheKey, $cacheDuration, function () use ($lembagaId, $resolvedOutletId) {

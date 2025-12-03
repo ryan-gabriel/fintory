@@ -28,7 +28,7 @@ class CheckMenuAccess
         }
 
         // Get current route name
-        $currentRoute = $request->route()->getName();
+        $currentRoute = '/' . $request->path();
         
         // Create cache key for this role's accessible routes
         $cacheKey = "menu_access_role_{$currentRoleId}";
@@ -59,30 +59,33 @@ class CheckMenuAccess
      */
     private function checkRouteAccess(string $currentRoute, array $accessibleRoutes): bool
     {
+
         foreach ($accessibleRoutes as $menuRoute) {
-            // Handle exact match
+            // Exact match
             if ($menuRoute === $currentRoute) {
                 return true;
             }
-            
-            // Handle routes with wildcards or parameters
+
+            // Parameterized route
             if (strpos($menuRoute, '{') !== false) {
-                // Convert route pattern to regex
                 $pattern = str_replace(['{', '}'], ['[^/]+', ''], $menuRoute);
                 $pattern = '#^' . str_replace('/', '\/', $pattern) . '$#';
+
                 if (preg_match($pattern, $currentRoute)) {
                     return true;
                 }
             }
-            
-            // Handle route prefixes (for grouped routes)
+
+            // Prefix match
             if (strpos($currentRoute, $menuRoute) === 0) {
                 return true;
             }
+
         }
-        
+
         return false;
     }
+
 
     /**
      * Clear cache for specific role (useful when menu items are updated)
