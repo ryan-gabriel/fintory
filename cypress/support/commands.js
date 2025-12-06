@@ -23,3 +23,17 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+
+Cypress.Commands.add("loginAsSuper", (email, password) => {
+    cy.visit("http://127.0.0.1:8000/login");
+    cy.get("#email").type(email);
+    cy.get("#password").type(password);
+    cy.get('button[type="submit"]').click();
+    cy.url({ timeout: 10000 }).should("include", "/choose-role");
+    cy.get('input[type="radio"]')
+        .filter(":visible")
+        .first()
+        .check({ force: true });
+    cy.get("form").submit();
+    cy.url({ timeout: 10000 }).should("include", "/dashboard");
+});
