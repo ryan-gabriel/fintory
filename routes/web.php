@@ -20,7 +20,7 @@ use App\Http\Controllers\OutletController;
 use App\Http\Controllers\SaldoOutletController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('welcome', ['user' => auth()->user()]);
 });
 
 // Basic authenticated routes without menu access control

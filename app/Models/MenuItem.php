@@ -88,7 +88,6 @@ class MenuItem extends Model
     public static function getMenuHierarchyByRole($roleId)
     {
         $cacheKey = "menu_hierarchy_role_{$roleId}";
-        
         return Cache::remember($cacheKey, self::CACHE_TTL, function () use ($roleId) {
             return self::active()
                 ->accessibleByRole($roleId)
