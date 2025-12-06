@@ -37,6 +37,8 @@
     </div>
 
     @livewireScripts
+    @stack('app_scripts')
 </body>
+
 
 </html>
