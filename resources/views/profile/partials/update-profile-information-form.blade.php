@@ -1,8 +1,7 @@
 @php
     $defaultAvatar = asset('images/avatar.png');
-    $profileImage = $user->profile_picture
-        ? asset('storage/' . $user->profile_picture)
-        : $defaultAvatar;
+    $profileImage = $user->profile_picture ? $user->profile_picture : asset('images/avatar.png');
+
 @endphp
 
 <section>
@@ -33,7 +32,8 @@
         <!-- Upload New Profile Picture -->
         <div>
             <x-input-label for="profile_picture" :value="__('Upload New Profile Picture')" />
-            <input type="file" name="profile_picture" id="profile_picture" accept="image/*" class="mt-1 block w-full text-sm text-gray-500
+            <input type="file" name="profile_picture" id="profile_picture" accept="image/*"
+                class="mt-1 block w-full text-sm text-gray-500
                        file:mr-4 file:py-2 file:px-4
                        file:rounded-full file:border-0
                        file:text-sm file:font-semibold
@@ -53,7 +53,8 @@
 
         <div>
             <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)" required autocomplete="username" />
+            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full" :value="old('email', $user->email)"
+                required autocomplete="username" />
             <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
             @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && !$user->hasVerifiedEmail())

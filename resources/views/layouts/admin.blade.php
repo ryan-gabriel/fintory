@@ -58,7 +58,7 @@
                                         aria-expanded="false" data-dropdown-toggle="dropdown-user">
                                         <span class="sr-only">Open user menu</span>
                                         <img class="w-8 h-8 rounded-full"
-                                            src="{{ $lembaga->logo_path ? asset('storage/' . $lembaga->logo_path) : asset('images/avatar.png') }}"
+                                            src="{{ $lembaga->logo_path ?? asset('images/avatar.png') }}"
                                             alt="lembaga logo">
                                     </button>
                                 </div>

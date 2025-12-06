@@ -8,9 +8,9 @@ use App\Models\Lembaga;
 use App\Models\Role;
 use App\Models\SubscriptionStatus;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Carbon\Carbon;
 
@@ -44,7 +44,7 @@ class PostRegistrationController extends Controller
         $user = Auth::user();
 
         try {
-            // Create the lembaga
+            // ✅ DATA LEMBAGA
             $lembagaData = [
                 'name' => $request->validated()['name'],
                 'industry' => $request->validated()['industry'] ?? null,
@@ -53,47 +53,74 @@ class PostRegistrationController extends Controller
                 'address' => $request->validated()['address'] ?? null,
             ];
 
-            // Handle logo upload
+            // ✅ UPLOAD LOGO KE SUPABASE
             if ($request->hasFile('logo')) {
+
                 $file = $request->file('logo');
-                $filename = 'lembaga_' . uniqid() . '.' . $file->extension();
+                $filename = 'lembaga_' . Str::uuid() . '.' . $file->getClientOriginalExtension();
+                $fileContent = file_get_contents($file->getRealPath());
 
-                // store on 'public' disk explicitly
-                $path = $file->storeAs('lembaga-logos', $filename, 'public');
+                $uploadUrl =
+                    env('SUPABASE_PROJECT_URL') .
+                    '/storage/v1/object/' .
+                    env('SUPABASE_LEMBAGA_BUCKET') .
+                    '/' .
+                    $filename;
 
-                $lembagaData['logo_path'] = $path; // don't need str_replace anymore
-            } 
+                $response = Http::withHeaders([
+                    'apikey' => env('SUPABASE_SERVICE_ROLE_KEY'),
+                    'Authorization' => 'Bearer ' . env('SUPABASE_SERVICE_ROLE_KEY'),
+                    'Content-Type' => $file->getMimeType(),
+                ])
+                ->withBody($fileContent, $file->getMimeType())
+                ->put($uploadUrl);
 
+                if ($response->failed()) {
+                    return back()->withErrors([
+                        'logo' => 'Upload logo ke Supabase gagal!'
+                    ]);
+                }
+
+                // ✅ SIMPAN URL PUBLIC LOGO
+                $lembagaData['logo_path'] =
+                    env('SUPABASE_PROJECT_URL') .
+                    '/storage/v1/object/public/' .
+                    env('SUPABASE_LEMBAGA_BUCKET') .
+                    '/' .
+                    $filename;
+            }
+
+            // ✅ SIMPAN LEMBAGA
             $lembaga = Lembaga::create($lembagaData);
 
-            // Get or create 'admin' role
+            // ✅ ROLE ADMIN
             $adminRole = Role::firstOrCreate(
-                ['role_name' => 'admin'],
+                ['role_name' => 'super'],
                 [
-                    'role_name' => 'admin',
+                    'role_name' => 'super',
                     'display_name' => 'Administrator',
                     'description' => 'Full access administrator'
                 ]
             );
 
-            // Assign user as admin in this lembaga
+            // ✅ ATTACH USER KE LEMBAGA
             $user->lembagaRoles()->attach($adminRole->id, [
                 'lembaga_id' => $lembaga->id,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
 
-            // Create trial subscription
+            // ✅ TRIAL SUBSCRIPTION
             SubscriptionStatus::create([
                 'lembaga_id' => $lembaga->id,
                 'status' => 'trial',
                 'tier' => 'free',
                 'start_date' => Carbon::today(),
-                'end_date' => Carbon::today()->addDays(14), // 14-day trial
+                'end_date' => Carbon::today()->addDays(14),
                 'is_active' => true,
             ]);
 
-            // Set session for current role and lembaga
+            // ✅ SESSION
             session([
                 'current_lembaga_id' => $lembaga->id,
                 'current_role_id' => $adminRole->id,
@@ -101,7 +128,7 @@ class PostRegistrationController extends Controller
 
             return redirect()
                 ->route('dashboard')
-                ->with('success', 'Lembaga berhasil dibuat! Anda mendapat trial 30 hari gratis.');
+                ->with('success', 'Lembaga berhasil dibuat! Anda mendapat trial 14 hari gratis.');
 
         } catch (\Exception $e) {
             return back()
