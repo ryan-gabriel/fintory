@@ -17,42 +17,55 @@ class SaleFactory extends Factory
     public function definition(): array
     {
         return [
-            // Pilih outlet secara acak
             'outlet_id' => Outlet::inRandomOrder()->first()->id,
             'customer_name' => $this->faker->name(),
             'sale_date' => $this->faker->dateTimeBetween('-1 year', 'now'),
-            'total' => 0, // Total akan di-update nanti setelah item dibuat
-            'created_by' => User::first()->id, // Asumsikan user pertama adalah kasir
+            'total' => 0,
+            'created_by' => User::first()->id,
         ];
     }
 
     public function configure()
     {
         return $this->afterCreating(function (Sale $sale) {
-            // Setelah record 'sale' utama dibuat, kita buat item-itemnya
-            
-            $itemsToCreate = rand(1, 4); // Setiap transaksi akan memiliki 1-4 item
+
+            // 🎯 TARGET TOTAL TRANSAKSI
+            $targetTotal = rand(300_000, 600_000);
+
             $grandTotal = 0;
 
-            // Ambil produk yang stoknya cukup dari outlet yang sama dengan transaksi
+            // Ambil produk dari outlet yang sama
             $products = Product::where('outlet_id', $sale->outlet_id)
-                ->where('stok', '>=', 10)
+                ->where('stok', '>=', 5)
                 ->inRandomOrder()
-                ->take($itemsToCreate)
                 ->get();
 
-            if($products->isEmpty()) {
-                // Jika tidak ada produk yang bisa dijual, hapus transaksi yang baru dibuat
+            if ($products->isEmpty()) {
                 $sale->delete();
                 return;
             }
 
             foreach ($products as $product) {
-                $quantity = rand(1, 5); // Kuantitas per produk
+                if ($grandTotal >= $targetTotal) {
+                    break;
+                }
+
+                $remaining = $targetTotal - $grandTotal;
+
+                // Hitung quantity agar mendekati target
+                $maxQtyByPrice = floor($remaining / $product->harga_jual);
+                $maxQtyByStock = min($product->stok, 5);
+
+                $quantity = max(1, min($maxQtyByPrice, $maxQtyByStock));
+
+                if ($quantity <= 0) {
+                    continue;
+                }
+
                 $subtotal = $product->harga_jual * $quantity;
                 $grandTotal += $subtotal;
 
-                // 1. Buat SaleItem
+                // 1️⃣ SaleItem
                 SaleItem::create([
                     'sale_id' => $sale->id,
                     'product_id' => $product->id,
@@ -61,10 +74,10 @@ class SaleFactory extends Factory
                     'subtotal' => $subtotal,
                 ]);
 
-                // 2. Kurangi stok
+                // 2️⃣ Kurangi stok
                 $product->decrement('stok', $quantity);
 
-                // 3. Buat catatan mutasi stok
+                // 3️⃣ Stock mutation
                 StockMutation::create([
                     'product_id' => $product->id,
                     'outlet_id' => $sale->outlet_id,
@@ -77,7 +90,13 @@ class SaleFactory extends Factory
                 ]);
             }
 
-            // 4. Update total harga di record 'sale'
+            // 🛡️ SAFETY: kalau masih kurang, jangan simpan
+            if ($grandTotal < 300_000) {
+                $sale->delete();
+                return;
+            }
+
+            // 4️⃣ Update total
             $sale->update(['total' => $grandTotal]);
         });
     }

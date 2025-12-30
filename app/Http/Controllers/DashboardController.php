@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Lembaga;
 use App\Models\Sale;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class DashboardController extends Controller
 {
@@ -61,6 +64,8 @@ class DashboardController extends Controller
             return Lembaga::find($lembagaId);
         });
 
+        
+
         // --- Akhir Caching ---
 
         $viewData = [
@@ -70,6 +75,8 @@ class DashboardController extends Controller
             'lowProductTotal' => $dashboardData->low_stock_products ?? 0,
             'totalSalesLast7Days' => $totalSalesLast7Days,
         ];
+
+        
 
         if ($request->ajax()) {
             return view('dashboard', $viewData);
@@ -81,22 +88,106 @@ class DashboardController extends Controller
             'lembaga' => $lembaga,
         ]);
     }
-
+    
+    // example response:
+    // [
+        // "store_id" => "1"
+        // "weekly_forecast_total" => 2350939.0
+        // "daily_forecast" => array:3 [▼
+        //     0 => array:3 [▼
+        //     "date" => "2026-01-01"
+        //     "day" => "Thursday"
+        //     "prediction" => 331529.0
+        //     ]
+        //     1 => array:3 [▼
+        //     "date" => "2026-01-02"
+        //     "day" => "Friday"
+        //     "prediction" => 231135.0
+        //     ]
+        //     2 => array:3 [▼
+        //     "date" => "2026-01-03"
+        //     "day" => "Saturday"
+        //     "prediction" => 344586.0
+        //     ]
+        // ]
+        // ]
+    // ]
     public function getSalesLast7Days()
     {
         $lembagaId = session('current_lembaga_id');
         if (!$lembagaId) {
-            return response()->json(['error' => 'Lembaga tidak ditemukan dalam session.'], 400);
+            return response()->json([
+                'error' => 'Lembaga tidak ditemukan dalam session.'
+            ], 400);
         }
 
         $selectedOutletId = session('selected_outlet_id', 'all');
-        $resolvedOutletId = $selectedOutletId === 'all' ? null : (int) $selectedOutletId;
+        $resolvedOutletId = $selectedOutletId === 'all'
+            ? null
+            : (int) $selectedOutletId;
 
-        // Kunci cache yang unik untuk chart
+        /* ===========================
+        1. TRANSACTION HISTORY (AI)
+        =========================== */
+        $transactions = DB::table('sale')
+            ->join('outlet', 'sale.outlet_id', '=', 'outlet.id')
+            ->where('outlet.lembaga_id', $lembagaId)
+            ->selectRaw('
+                sale.sale_date::date as date,
+                SUM(sale.total) as total_sales
+            ')
+            ->groupBy('sale.sale_date')
+            ->orderBy('sale.sale_date')
+            ->get()
+            ->map(fn ($row) => [
+                'date' => Carbon::parse($row->date)->format('Y-m-d'),
+                'total_sales' => (float) $row->total_sales,
+            ])
+            ->values()
+            ->toArray();
+
+        /* ===========================
+        2. CALL AI SERVICE
+        =========================== */
+        $tomorrow = Carbon::now()->addDay()->format('Y-m-d');
+
+        $predictionResult = [
+            'weekly_forecast_total' => 0,
+            'daily_forecast' => [],
+        ];
+
+        try {
+            $response = Http::timeout(15)->post(
+                'https://ryangs-uas-ai.hf.space/predict',
+                [
+                    'store_id' => (string) $lembagaId,
+                    'request_date' => $tomorrow,
+                    'transaction_history' => $transactions,
+                ]
+            );
+
+            if ($response->successful()) {
+                $predictionResult = $response->json();
+            } else {
+                Log::warning('AI API failed', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                ]);
+            }
+        } catch (\Throwable $e) {
+            Log::error('AI API exception', [
+                'message' => $e->getMessage(),
+            ]);
+        }
+
+        /* ===========================
+        3. SALES LAST 7 DAYS (CACHE)
+        =========================== */
         $cacheKey = "dashboard:chart_sales_7_days:lembaga_{$lembagaId}:outlet_{$resolvedOutletId}";
         $cacheDuration = now()->addHour();
 
         $chartData = Cache::remember($cacheKey, $cacheDuration, function () use ($lembagaId, $resolvedOutletId) {
+
             $salesLast7Days = Sale::select(
                 DB::raw('DATE(sale_date) as date'),
                 DB::raw('SUM(total) as total')
@@ -109,26 +200,39 @@ class DashboardController extends Controller
                 })
                 ->where('sale_date', '>=', now()->subDays(6)->startOfDay())
                 ->groupBy(DB::raw('DATE(sale_date)'))
-                ->orderBy('date', 'ASC')
                 ->get()
                 ->keyBy('date');
 
             $data = [];
             for ($i = 6; $i >= 0; $i--) {
-                $carbonDate = now()->subDays($i);
-                $dateKey = $carbonDate->toDateString();
-                $formattedDate = $carbonDate->format('d M');
+                $date = now()->subDays($i);
 
                 $data[] = [
-                    'date' => $formattedDate,
-                    'total' => isset($salesLast7Days[$dateKey]) ? (float) $salesLast7Days[$dateKey]->total : 0,
+                    'date' => $date->format('d M'),
+                    'total' => isset($salesLast7Days[$date->toDateString()])
+                        ? (float) $salesLast7Days[$date->toDateString()]->total
+                        : 0,
                 ];
             }
+
             return $data;
         });
 
-        return response()->json($chartData);
+        /* ===========================
+        4. FINAL RESPONSE
+        =========================== */
+        return response()->json([
+            'sales' => [
+                'last_7_days' => $chartData,
+                'transaction_history' => $transactions,
+            ],
+            'prediction' => [
+                'weekly_forecast_total' => $predictionResult['weekly_forecast_total'] ?? 0,
+                'daily_forecast' => $predictionResult['daily_forecast'] ?? [],
+            ],
+        ]);
     }
+
 
     public function bestSellerProducts()
     {

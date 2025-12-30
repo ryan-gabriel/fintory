@@ -336,13 +336,16 @@ export const Utils = {
 
                     if (typeof response === "object" && response.redirect) {
                         window.location.href = response.redirect;
-                    } else if (typeof response === "object" && response.message) {
+                    } else if (
+                        typeof response === "object" &&
+                        response.message
+                    ) {
                         Swal.fire({
                             icon: "success",
                             title: "Berhasil",
                             text: response.message,
                             timer: 2000,
-                            showConfirmButton: false
+                            showConfirmButton: false,
                         });
                         form.reset();
                     } else if (typeof response === "string") {
@@ -356,7 +359,9 @@ export const Utils = {
                     Swal.fire({
                         icon: "error",
                         title: "Gagal",
-                        text: "Terjadi kesalahan: " + (error.message || "Unknown error"),
+                        text:
+                            "Terjadi kesalahan: " +
+                            (error.message || "Unknown error"),
                     });
                 }
             });
@@ -424,13 +429,14 @@ export const Utils = {
                         const response = await fetch(form.action, {
                             method: "POST",
                             headers: {
-                                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
+                                "X-CSRF-TOKEN": document.querySelector(
+                                    'meta[name="csrf-token"]'
+                                ).content,
                                 Accept: "application/json",
                                 "X-Requested-With": "XMLHttpRequest",
                             },
                             body: new FormData(form),
                         });
-
 
                         const result = await response.json();
 
@@ -445,7 +451,7 @@ export const Utils = {
                                 title: "Berhasil",
                                 text: result.message,
                                 timer: 2000,
-                                showConfirmButton: false
+                                showConfirmButton: false,
                             });
                         }
                     } catch (error) {
@@ -456,7 +462,9 @@ export const Utils = {
                         Swal.fire({
                             icon: "error",
                             title: "Gagal",
-                            text: "Terjadi kesalahan: " + (error.message || "Unknown error"),
+                            text:
+                                "Terjadi kesalahan: " +
+                                (error.message || "Unknown error"),
                         });
                     }
                 });
@@ -480,7 +488,7 @@ export const Utils = {
 
             return sisaHutang;
         }
-        
+
         function updateTanggalHutangDisplay() {
             const selectedOption = $("#hutang option:selected");
             const tanggalHutang = selectedOption.data("tanggal-hutang"); // format: yyyy-mm-dd
@@ -495,11 +503,10 @@ export const Utils = {
             }
         }
 
-
         function updateMinDateForDatepicker() {
             const selectedOption = $("#hutang option:selected");
             const rawTanggal = selectedOption.data("tanggal-hutang");
-            console.log(rawTanggal)
+            console.log(rawTanggal);
             if (rawTanggal) {
                 const [year, month, day] = rawTanggal.split("-");
                 const formattedDate = `${day}-${month}-${year}`; // format: dd-mm-yyyy
@@ -512,11 +519,10 @@ export const Utils = {
             }
         }
 
-
         let sisaHutangSaatIni = updateSisaHutangDisplay();
         updateTanggalHutangDisplay();
         updateMinDateForDatepicker();
-        
+
         // Saat dropdown hutang diubah
         $("#hutang").on("change", function () {
             sisaHutangSaatIni = updateSisaHutangDisplay();
@@ -551,14 +557,70 @@ export const Utils = {
         });
     },
 
-
     initSalesChart() {
         fetch("/api/sales-last-7-days")
             .then((response) => response.json())
             .then((data) => {
-                const dates = data.map((item) => item.date);
-                const totals = data.map((item) => item.total);
+                /* =======================
+        1. ACTUAL SALES
+        ======================= */
+                const actualDates = data.sales.last_7_days.map(
+                    (item) => item.date
+                );
+                console.log(data)
 
+                const actualTotals = data.sales.last_7_days.map(
+                    (item) => item.total
+                );
+
+                /* =======================
+        2. PREDICTION SALES
+        ======================= */
+                const predictionDates = data.prediction.daily_forecast.map(
+                    (item) =>
+                        new Date(item.date).toLocaleDateString("en-GB", {
+                            day: "2-digit",
+                            month: "short",
+                        })
+                );
+
+                const predictionTotals = data.prediction.daily_forecast.map(
+                    (item) => item.prediction
+                );
+
+                /* =======================
+        3. MERGE CATEGORIES
+        ======================= */
+                const categories = [...actualDates, ...predictionDates];
+
+                /* =======================
+        4. PREPARE TWO SERIES (dengan overlap untuk menyambung)
+        ======================= */
+                // Series 1: Actual data + titik terakhir untuk menyambung
+                const actualSeriesData = actualTotals.map((val, idx) => val);
+                // Tambah null untuk sisa kategori prediction
+                for (let i = 0; i < predictionTotals.length; i++) {
+                    actualSeriesData.push(null);
+                }
+
+                // Series 2: Prediction data + titik pertama dari actual untuk menyambung
+                const predictionSeriesData = [];
+                // Tambah null untuk kategori actual (kecuali titik terakhir)
+                for (let i = 0; i < actualTotals.length - 1; i++) {
+                    predictionSeriesData.push(null);
+                }
+                // Ambil titik terakhir dari actual untuk menyambungkan
+                predictionSeriesData.push(
+                    actualTotals[actualTotals.length - 1]
+                );
+                // Tambahkan semua prediction data
+                predictionTotals.forEach((val) =>
+                    predictionSeriesData.push(val)
+                );
+
+                /* =======================
+        5. APEX OPTIONS
+        ======================= */
                 const options = {
                     chart: {
                         height: "100%",
@@ -566,44 +628,112 @@ export const Utils = {
                         type: "area",
                         fontFamily: "Inter, sans-serif",
                         toolbar: { show: false },
-                        dropShadow: { enabled: false },
                     },
-                    tooltip: {
-                        enabled: true,
-                        x: { show: true },
+
+                    series: [
+                        {
+                            name: "Actual Sales",
+                            data: actualSeriesData,
+                        },
+                        {
+                            name: "Predicted Sales",
+                            data: predictionSeriesData,
+                        },
+                    ],
+
+                    colors: ["#1A56DB", "#FDBA8C"], // Biru untuk actual, Orange untuk prediction
+
+                    stroke: {
+                        curve: "smooth",
+                        width: [4, 4],
+                        dashArray: [0, 6], // Solid untuk actual, dashed untuk prediction
                     },
+
                     fill: {
                         type: "gradient",
                         gradient: {
-                            opacityFrom: 0.55,
-                            opacityTo: 0,
-                            shade: "#1C64F2",
-                            gradientToColors: ["#1C64F2"],
+                            opacityFrom: 0.45,
+                            opacityTo: 0.05,
                         },
                     },
-                    dataLabels: { enabled: false },
-                    stroke: { width: 6 },
-                    grid: {
-                        show: false,
-                        strokeDashArray: 4,
-                        padding: { left: 2, right: 2, top: 0 },
-                    },
-                    series: [
-                        {
-                            name: "Sales",
-                            data: totals,
-                            color: "#1A56DB",
+
+                    legend: {
+                        show: true,
+                        position: "top",
+                        horizontalAlign: "left",
+                        fontSize: "14px",
+                        markers: {
+                            width: 10,
+                            height: 10,
                         },
-                    ],
+                    },
+
+                    tooltip: {
+                        shared: true,
+                        intersect: false,
+                        custom: function ({
+                            series,
+                            seriesIndex,
+                            dataPointIndex,
+                            w,
+                        }) {
+                            const actualLength = actualTotals.length;
+                            const category = categories[dataPointIndex];
+
+                            const actualValue = series[0][dataPointIndex];
+                            const predictedValue = series[1][dataPointIndex];
+
+                            let html = `<div class="apexcharts-tooltip-custom" style="padding: 8px 12px; background: white; border: 1px solid #e5e7eb;">
+                                        <div style="font-weight: 600; margin-bottom: 4px;">${category}</div>`;
+
+                            // Jika di area actual (sebelum titik penghubung)
+                            if (dataPointIndex < actualLength - 1) {
+                                html += `<div style="display: flex; align-items: center; gap: 6px;">
+                                        <span style="width: 10px; height: 10px; background: #1A56DB; border-radius: 50%;"></span>
+                                        <span>Actual Sales: ${new Intl.NumberFormat(
+                                            "id-ID"
+                                        ).format(actualValue)}</span>
+                                    </div>`;
+                            }
+                            // Jika di titik penghubung (titik terakhir actual = titik pertama prediction)
+                            else if (dataPointIndex === actualLength - 1) {
+                                html += `<div style="display: flex; align-items: center; gap: 6px;">
+                                        <span style="width: 10px; height: 10px; background: #1A56DB; border-radius: 50%;"></span>
+                                        <span>Actual Sales: ${new Intl.NumberFormat(
+                                            "id-ID"
+                                        ).format(actualValue)}</span>
+                                    </div>`;
+                            }
+                            // Jika di area prediction
+                            else {
+                                html += `<div style="display: flex; align-items: center; gap: 6px;">
+                                        <span style="width: 10px; height: 10px; background: #FDBA8C; border-radius: 50%;"></span>
+                                        <span>Predicted Sales: ${new Intl.NumberFormat(
+                                            "id-ID"
+                                        ).format(predictedValue)}</span>
+                                    </div>`;
+                            }
+
+                            html += `</div>`;
+                            return html;
+                        },
+                    },
+
                     xaxis: {
-                        categories: dates,
-                        labels: { show: true },
-                        axisBorder: { show: false },
-                        axisTicks: { show: true },
+                        categories,
                     },
-                    yaxis: { show: true },
+
+                    yaxis: {
+                        labels: {
+                            formatter: (val) =>
+                                new Intl.NumberFormat("id-ID").format(val),
+                        },
+                    },
                 };
 
+                /* =======================
+        6. RENDER CHART
+        ======================= */
                 const el = document.getElementById("area-chart");
                 if (el && typeof ApexCharts !== "undefined") {
                     const chart = new ApexCharts(el, options);
@@ -714,35 +844,39 @@ export const Utils = {
 
     resetPassword(userId) {
         Swal.fire({
-            title: 'Anda yakin?',
+            title: "Anda yakin?",
             text: 'Password user ini akan direset ke "12345".',
-            icon: 'warning',
+            icon: "warning",
             showCancelButton: true,
-            confirmButtonText: 'Ya, reset!',
-            cancelButtonText: 'Batal'
+            confirmButtonText: "Ya, reset!",
+            cancelButtonText: "Batal",
         }).then((result) => {
             if (result.isConfirmed) {
-                $.post(`/dashboard/admin/user-management/${userId}/reset-password`, {
-                    _token: '{{ csrf_token() }}'
-                }, function (response) {
-                    if (response.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil',
-                            text: response.message
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Gagal',
-                            text: 'Terjadi kesalahan: ' + response.message
-                        });
+                $.post(
+                    `/dashboard/admin/user-management/${userId}/reset-password`,
+                    {
+                        _token: "{{ csrf_token() }}",
+                    },
+                    function (response) {
+                        if (response.success) {
+                            Swal.fire({
+                                icon: "success",
+                                title: "Berhasil",
+                                text: response.message,
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Gagal",
+                                text: "Terjadi kesalahan: " + response.message,
+                            });
+                        }
                     }
-                }).fail(function () {
+                ).fail(function () {
                     Swal.fire({
-                        icon: 'error',
-                        title: 'Gagal',
-                        text: 'Terjadi kesalahan saat reset password.'
+                        icon: "error",
+                        title: "Gagal",
+                        text: "Terjadi kesalahan saat reset password.",
                     });
                 });
             }
@@ -751,46 +885,45 @@ export const Utils = {
 
     deleteUser(userId) {
         Swal.fire({
-            title: 'Anda yakin?',
-            text: 'User ini akan dihapus dari lembaga.',
-            icon: 'warning',
+            title: "Anda yakin?",
+            text: "User ini akan dihapus dari lembaga.",
+            icon: "warning",
             showCancelButton: true,
-            confirmButtonText: 'Ya, hapus!',
-            cancelButtonText: 'Batal'
+            confirmButtonText: "Ya, hapus!",
+            cancelButtonText: "Batal",
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
                     url: `/dashboard/admin/user-management/${userId}`,
-                    type: 'DELETE',
+                    type: "DELETE",
                     data: {
-                        _token: '{{ csrf_token() }}'
+                        _token: "{{ csrf_token() }}",
                     },
                     success: function (response) {
                         if (response.success) {
                             Swal.fire({
-                                icon: 'success',
-                                title: 'Berhasil',
-                                text: response.message
+                                icon: "success",
+                                title: "Berhasil",
+                                text: response.message,
                             });
-                            $('#data-table').DataTable().ajax.reload();
+                            $("#data-table").DataTable().ajax.reload();
                         } else {
                             Swal.fire({
-                                icon: 'error',
-                                title: 'Gagal',
-                                text: 'Terjadi kesalahan: ' + response.message
+                                icon: "error",
+                                title: "Gagal",
+                                text: "Terjadi kesalahan: " + response.message,
                             });
                         }
                     },
                     error: function () {
                         Swal.fire({
-                            icon: 'error',
-                            title: 'Gagal',
-                            text: 'Terjadi kesalahan saat menghapus user.'
+                            icon: "error",
+                            title: "Gagal",
+                            text: "Terjadi kesalahan saat menghapus user.",
                         });
-                    }
+                    },
                 });
             }
         });
-    }
-
+    },
 };

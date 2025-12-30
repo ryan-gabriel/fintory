@@ -6,30 +6,64 @@ use App\Models\Barang;
 use App\Models\Kategori;
 use App\Models\Product;
 use App\Models\Sale;
+use App\Models\Outlet;
+use App\Models\Lembaga;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Carbon;
 
 class ProdukPenjualanSeeder extends Seeder
 {
     public function run(): void
     {
-        // Pastikan Kategori dan Outlet sudah ada. Kita bisa membuatnya di sini jika kosong.
-        if (Kategori::count() == 0) {
+        $this->command->info('🚀 Mulai seeding data penjualan...');
+
+        /**
+         * 1️⃣ Pastikan kategori ada
+         */
+        if (Kategori::count() === 0) {
             Kategori::factory()->count(10)->create();
-            $this->command->info('10 Kategori dummy dibuat.');
+            $this->command->info('✔ 10 kategori dibuat');
         }
 
-        // 1. Buat 40 master barang
-        // Barang::truncate();
+        /**
+         * 2️⃣ Barang & Produk
+         */
         Barang::factory()->count(40)->create();
+        $this->command->info('✔ 40 barang dibuat');
 
-        $this->command->info('40 Barang dummy yang realistis berhasil dibuat.');
-
-        // 2. Buat 100 produk yang tersebar di outlet-outlet
         Product::factory()->count(100)->create();
-        $this->command->info('100 Produk dummy berhasil dibuat.');
+        $this->command->info('✔ 100 produk dibuat');
 
-        // 3. Buat 250 transaksi penjualan
-        Sale::factory()->count(250)->create();
-        $this->command->info('250 Transaksi Penjualan dummy berhasil dibuat.');
+        /**
+         * 3️⃣ SALE WAJIB 7 HARI TERAKHIR (PER LEMBAGA)
+         */
+        $lembagas = Lembaga::with('outlets')->get();
+
+        foreach ($lembagas as $lembaga) {
+            // Ambil 1 outlet saja
+            $outlet = $lembaga->outlets->random();
+
+            $this->command->info("📌 Lembaga {$lembaga->id} → Outlet {$outlet->id}");
+
+            // 7 hari ke belakang
+            for ($day = 0; $day < 7; $day++) {
+                $date = Carbon::now()->subDays($day);
+
+                Sale::factory()
+                    ->count(rand(1, 3)) // 1–3 transaksi per hari
+                    ->state([
+                        'outlet_id' => $outlet->id,
+                        'sale_date' => $date,
+                        'created_at' => $date,
+                        'updated_at' => $date,
+                    ])
+                    ->create();
+            }
+        }
+
+        Sale::factory()->count(150)->create();
+        $this->command->info('✔ 150 transaksi tambahan dibuat');
+
+        $this->command->info('✅ Seeder penjualan SELESAI & VALID');
     }
 }
